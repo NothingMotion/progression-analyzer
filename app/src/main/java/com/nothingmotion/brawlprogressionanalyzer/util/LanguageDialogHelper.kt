@@ -38,6 +38,7 @@ object LanguageDialogHelper {
         
         val dialog = MaterialAlertDialogBuilder(activity)
             .setTitle(R.string.language_selection_dialog_title)
+            .setIcon(R.drawable.ic_language)
             .setMessage(R.string.language_selection_dialog_message)
             .setView(binding.root)
             .setCancelable(false)

@@ -13,8 +13,7 @@
         android:supportsRtl="true"
         android:enableOnBackInvokedCallback="true"
         android:theme="@style/Theme.BrawlProgressionAnalyzer"
-        tools:targetApi="tiramisu">
-        
+        tools:targetApi="tiramisu">        
         <!-- Splash Activity for Android 11 and below -->
         <activity
             android:name=".SplashActivity"

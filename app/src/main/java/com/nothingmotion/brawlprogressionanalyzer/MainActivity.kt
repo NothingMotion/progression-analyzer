@@ -83,6 +83,7 @@ class MainActivity : AppCompatActivity() {
         preferencesManager.language?.let { savedLanguage ->
             applyLanguage(savedLanguage)
         }
+
         if (preferencesManager.language == null){
             LanguageDialogHelper.showLanguageSelectionDialog(this,preferencesManager)
         }
