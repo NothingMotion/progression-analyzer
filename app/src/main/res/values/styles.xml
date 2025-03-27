@@ -5,10 +5,47 @@
         <item name="android:textColor">?attr/colorOnPrimary</item>
         <item name="android:textSize">20sp</item>
         <item name="android:paddingBottom">8dp</item>
+        <item name="android:fontFamily">@font/lilitaone_regular</item>
+        <item name="fontFamily">@font/lilitaone_regular</item>
     </style>
 
     <style name="TextAppearance.App.CollapsingToolbar.Expanded" parent="TextAppearance.Material3.TitleLarge">
         <item name="android:textColor">@android:color/transparent</item>
         <item name="android:textSize">0sp</item>
+        <item name="android:fontFamily">@font/lilitaone_regular</item>
+        <item name="fontFamily">@font/lilitaone_regular</item>
+    </style>
+
+    <!-- Base text styles -->
+    <style name="TextAppearance.App.English" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:fontFamily">@font/lilitaone_regular</item>
+        <item name="fontFamily">@font/lilitaone_regular</item>
+    </style>
+
+    <style name="TextAppearance.App.Persian" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:fontFamily">@font/lalezar_regular</item>
+        <item name="fontFamily">@font/lalezar_regular</item>
+    </style>
+
+    <!-- Heading styles -->
+    <style name="TextAppearance.App.Heading.English" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:fontFamily">@font/lilitaone_regular</item>
+        <item name="fontFamily">@font/lilitaone_regular</item>
+    </style>
+
+    <style name="TextAppearance.App.Heading.Persian" parent="TextAppearance.MaterialComponents.Headline6">
+        <item name="android:fontFamily">@font/lalezar_regular</item>
+        <item name="fontFamily">@font/lalezar_regular</item>
+    </style>
+
+    <!-- Button styles -->
+    <style name="Widget.App.Button.English" parent="Widget.MaterialComponents.Button">
+        <item name="android:fontFamily">@font/lilitaone_regular</item>
+        <item name="fontFamily">@font/lilitaone_regular</item>
+    </style>
+
+    <style name="Widget.App.Button.Persian" parent="Widget.MaterialComponents.Button">
+        <item name="android:fontFamily">@font/lalezar_regular</item>
+        <item name="fontFamily">@font/lalezar_regular</item>
     </style>
 </resources> 

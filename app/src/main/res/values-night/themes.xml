@@ -1,7 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.BrawlProgressionAnalyzer" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    <style name="Theme.BrawlProgressionAnalyzer" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/purple_200</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_200</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        
+        <!-- Default font family -->
+        <item name="android:fontFamily">@font/lilitaone_regular</item>
+        <item name="fontFamily">@font/lilitaone_regular</item>
+        
+        <!-- Text appearance styles -->
+        <item name="textAppearanceHeadline1">@style/TextAppearance.App.Heading.English</item>
+        <item name="textAppearanceHeadline2">@style/TextAppearance.App.Heading.English</item>
+        <item name="textAppearanceHeadline3">@style/TextAppearance.App.Heading.English</item>
+        <item name="textAppearanceHeadline4">@style/TextAppearance.App.Heading.English</item>
+        <item name="textAppearanceHeadline5">@style/TextAppearance.App.Heading.English</item>
+        <item name="textAppearanceHeadline6">@style/TextAppearance.App.Heading.English</item>
+        <item name="textAppearanceSubtitle1">@style/TextAppearance.App.English</item>
+        <item name="textAppearanceSubtitle2">@style/TextAppearance.App.English</item>
+        <item name="textAppearanceBody1">@style/TextAppearance.App.English</item>
+        <item name="textAppearanceBody2">@style/TextAppearance.App.English</item>
+        <item name="textAppearanceButton">@style/TextAppearance.App.English</item>
+        <item name="textAppearanceCaption">@style/TextAppearance.App.English</item>
+        <item name="textAppearanceOverline">@style/TextAppearance.App.English</item>
+        
+        <!-- Button default style -->
+        <item name="materialButtonStyle">@style/Widget.App.Button.English</item>
     </style>
 </resources>

@@ -25,6 +25,7 @@ object LocaleHelper {
         
         val localeList = LocaleListCompat.forLanguageTags(locale)
         AppCompatDelegate.setApplicationLocales(localeList)
+//        AppCompatDelegate
     }
     
     /**
