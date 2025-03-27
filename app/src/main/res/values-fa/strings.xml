@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">تحلیلگر پیشرفت بروال</string>
+    <string name="title_accounts">حساب‌ها</string>
+    <string name="title_new_account">افزودن حساب</string>
+    <string name="title_settings">تنظیمات</string>
+
+    <!-- Account List -->
+    <string name="trophies">جام‌ها</string>
+    <string name="brawlers">قهرمانان</string>
+    <string name="level_format">سطح %d</string>
+    <string name="brawler_count_format">%d قهرمان</string>
+    <string name="maxed_brawlers_format">%1$d/%2$d تکمیل شده</string>
+    <string name="last_updated_format">آخرین به‌روزرسانی: %s</string>
+
+    <!-- Account Details -->
+    <string name="account_details">جزئیات حساب</string>
+    <string name="edit_account">ویرایش حساب</string>
+    <string name="delete_account">حذف حساب</string>
+    <string name="share_account">اشتراک‌گذاری حساب</string>
+    <string name="player_stats">آمار بازیکن</string>
+    <string name="maxed_brawlers">قهرمانان تکمیل شده</string>
+    <string name="progression">پیشرفت</string>
+    <string name="progression_history">تاریخچه پیشرفت</string>
+    <string name="no_progression_history">تاریخچه پیشرفت موجود نیست</string>
+    <string name="track_progression">پیگیری پیشرفت</string>
+    <string name="maxed_percentage_format">%d%% تکمیل شده</string>
+    <string name="hello_blank_fragment">سلام فرگمنت خالی</string>
+
+    <!-- Edit Tag Dialog -->
+    <string name="edit_tag_title">ویرایش تگ حساب</string>
+    <string name="tag_hint">تگ حساب</string>
+    <string name="tag_helper_text">تگ بازیکن را وارد کنید (مثال: #2YQ9VRLJ)</string>
+    <string name="tag_validation_message">تگ‌های بازیکن Brawl Stars شامل # و 8-9 کاراکتر الفبایی-عددی هستند</string>
+    <string name="tag_updated">تگ حساب به‌روزرسانی شد</string>
+    <string name="tag_empty_error">تگ نمی‌تواند خالی باشد</string>
+    <string name="tag_invalid_format">فرمت تگ نامعتبر است. باید مانند #2YQ9VRLJ باشد</string>
+    <string name="save">ذخیره</string>
+    <string name="cancel">لغو</string>
+    
+    <!-- Account Sharing -->
+    <string name="share">اشتراک‌گذاری</string>
+    <string name="copy_to_clipboard">کپی</string>
+    <string name="share_account_message">این اطلاعات حساب به اشتراک گذاشته شود؟</string>
+    <string name="copied_to_clipboard">اطلاعات حساب در کلیپ‌بورد کپی شد</string>
+    <string name="account_not_loaded">اطلاعات حساب هنوز بارگیری نشده است</string>
+    
+    <!-- Action Bar -->
+    <string name="wiki">ویکی</string>
+    <string name="about_us">درباره ما</string>
+    <string name="telegram">تلگرام</string>
+    <string name="settings">تنظیمات</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings">زبان</string>
+    <string name="language_selection">انتخاب زبان</string>
+    <string name="english">انگلیسی</string>
+    <string name="persian">فارسی</string>
+    <string name="language_english">انگلیسی</string>
+    <string name="language_persian">فارسی</string>
+    <string name="language_selection_dialog_title">زبان خود را انتخاب کنید</string>
+    <string name="language_selection_dialog_message">زبان مورد نظر خود را برای برنامه انتخاب کنید</string>
+    <string name="confirm">تأیید</string>
+
+    <!--    Application Setting-->
+    <string name="app_settings">تنظیمات برنامه</string>
+    <string name="dark_mode">حالت تاریک</string>
+</resources> 

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- Swipe action colors -->
+    <color name="edit_background">#2196F3</color>
+    <color name="delete_background">#F44336</color>
+    
+    <!-- Primary colors -->
+    <color name="purple_200">#BB86FC</color>
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="teal_200">#03DAC5</color>
+    <color name="teal_700">#018786</color>
+    
+    <!-- Chart colors -->
+    <color name="chart_line">#6200EE</color>
+    <color name="chart_line_fill">#446200EE</color>
+    <color name="chart_point">#3700B3</color>
+    <color name="chart_bar_1">#018786</color>
+    <color name="chart_bar_1_gradient">#0099CC</color>
+    <color name="chart_bar_2">#6200EE</color>
+    <color name="chart_bar_2_gradient">#9D36EB</color>
+    <color name="chart_grid">#E0E0E0</color>
+    <color name="chart_label">#757575</color>
+    <color name="table_row_even">#F5F5F5</color>
+</resources>

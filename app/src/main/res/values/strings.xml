@@ -1,0 +1,99 @@
+<resources>
+    <string name="app_name">Brawl Progression Analyzer</string>
+    <string name="title_accounts">Accounts</string>
+    <string name="title_new_account">Add Account</string>
+    <string name="title_settings">Settings</string>
+
+    <!-- Account List -->
+    <string name="trophies">Trophies</string>
+    <string name="highest_trophies">Highest:</string>
+    <string name="brawlers">Brawlers</string>
+    <string name="level_format">Level %d</string>
+    <string name="brawler_count_format">%d Brawlers</string>
+    <string name="maxed_brawlers_format">%1$d/%2$d Maxed</string>
+    <string name="last_updated_format">Last Updated: %s</string>
+
+    <!-- Account Details -->
+    <string name="account_details">Account Details</string>
+    <string name="edit_account">Edit Account</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="share_account">Share Account</string>
+    <string name="player_stats">Player Stats</string>
+    <string name="maxed_brawlers">Maxed Brawlers</string>
+    <string name="progression">Progression</string>
+    <string name="progression_history">Progression History</string>
+    <string name="no_progression_history">No progression history available</string>
+    <string name="track_progression">Track Progression</string>
+    <string name="maxed_percentage_format">%d%% Maxed</string>
+    <string name="how_to_max_out">How to max out?</string>
+    <string name="see_future_progress">See Future Progress</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Edit Tag Dialog -->
+    <string name="edit_tag_title">Edit Account Tag</string>
+    <string name="tag_hint">Account Tag</string>
+    <string name="tag_helper_text">Enter player tag (e.g., #2YQ9VRLJ)</string>
+    <string name="tag_validation_message">Brawl Stars player tags consist of a # followed by 8-9 alphanumeric characters</string>
+    <string name="tag_updated">Account tag updated</string>
+    <string name="tag_empty_error">Tag cannot be empty</string>
+    <string name="tag_invalid_format">Invalid tag format. Should be like #2YQ9VRLJ</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    
+    <!-- Account Sharing -->
+    <string name="share">Share</string>
+    <string name="copy_to_clipboard">Copy</string>
+    <string name="share_account_message">Share this account information?</string>
+    <string name="copied_to_clipboard">Account info copied to clipboard</string>
+    <string name="account_not_loaded">Account data not yet loaded</string>
+    
+    <!-- Action Bar -->
+    <string name="wiki">Wiki</string>
+    <string name="about_us">About Us</string>
+    <string name="telegram">Telegram</string>
+    <string name="settings">Settings</string>
+    
+    <!-- Language Settings -->
+    <string name="language_settings">Language</string>
+    <string name="language_selection">Select Language</string>
+    <string name="english">English</string>
+    <string name="persian">Persian</string>
+    <string name="language_english">English</string>
+    <string name="language_persian">Persian</string>
+    <string name="language_selection_dialog_title">Select Your Language</string>
+    <string name="language_selection_dialog_message">Choose the language you prefer for the app</string>
+    <string name="confirm">Confirm</string>
+
+
+    <!--    Application Setting-->
+    <string name="app_settings">App Settings</string>
+    <string name="dark_mode">Dark Mode</string>
+
+    <!-- Chart Titles -->
+    <string name="trophy_history">Trophy History</string>
+    <string name="brawler_count">Brawler Count</string>
+    <string name="credits_gained">Credits Gained</string>
+    <string name="coins_gained">Coins Gained</string>
+    <string name="power_points_gained">Power Points Gained</string>
+    
+    <!-- Progress Summary -->
+    <string name="progress_summary">Progress Summary</string>
+    <string name="trophies_gained">Trophies Gained</string>
+    <string name="brawlers_gained">Brawlers Gained</string>
+    
+    <!-- Future Progress -->
+    <string name="future_progress">Future Progress</string>
+    <string name="resources_needed">Resources Needed to Max Out</string>
+    <string name="future_resources">Future Resources</string>
+    <string name="next_months">Next %d Month</string>
+    <string name="select_timeframe">Select Timeframe</string>
+    <string name="total_powerpoints_needed">Total Power Points Needed</string>
+    <string name="total_coins_needed">Total Coins Needed</string>
+    <string name="powerpoints_per_month">Power Points Per Month</string>
+    <string name="coins_per_month">Coins Per Month</string>
+    <string name="month_1">1 Month</string>
+    <string name="month_3">3 Months</string>
+    <string name="month_6">6 Months</string>
+    <string name="month_12">12 Months</string>
+</resources>

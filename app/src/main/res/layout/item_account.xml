@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/account_avatar"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="?attr/colorPrimaryContainer"
+            android:scaleType="centerCrop"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Medium"
+            tools:src="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/account_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/account_avatar"
+            app:layout_constraintTop_toTopOf="@id/account_avatar"
+            tools:text="ProGamer123" />
+
+        <TextView
+            android:id="@+id/account_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorPrimary"
+            app:layout_constraintStart_toEndOf="@id/account_avatar"
+            app:layout_constraintTop_toBottomOf="@id/account_name"
+            tools:text="#2YQ9VRLJ" />
+
+        <TextView
+            android:id="@+id/account_level"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/account_name"
+            tools:text="Level 234" />
+
+        <com.google.android.material.divider.MaterialDivider
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/account_avatar" />
+
+        <TextView
+            android:id="@+id/account_trophies_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/trophies"
+            android:textAppearance="?attr/textAppearanceLabelMedium"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider" />
+
+        <TextView
+            android:id="@+id/account_trophies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/account_trophies_label"
+            app:layout_constraintTop_toBottomOf="@id/account_trophies_label"
+            tools:text="25430" />
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/trophy_mini_chart"
+            android:layout_width="194dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toStartOf="@id/account_brawlers_label"
+            app:layout_constraintStart_toEndOf="@id/account_trophies"
+            app:layout_constraintTop_toBottomOf="@id/account_trophies_label" />
+
+        <TextView
+            android:id="@+id/account_brawlers_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/brawlers"
+            android:textAppearance="?attr/textAppearanceLabelMedium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider" />
+
+        <TextView
+            android:id="@+id/account_brawler_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            app:layout_constraintEnd_toEndOf="@id/account_brawlers_label"
+            app:layout_constraintTop_toBottomOf="@id/account_brawlers_label"
+            tools:text="62 Brawlers" />
+
+        <TextView
+            android:id="@+id/account_maxed_brawlers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            app:layout_constraintEnd_toEndOf="@id/account_brawlers_label"
+            app:layout_constraintTop_toBottomOf="@id/account_brawler_count"
+            tools:text="45/62 Maxed" />
+
+        <TextView
+            android:id="@+id/account_last_updated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?android:attr/textColorSecondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/account_maxed_brawlers"
+            tools:text="Last updated: Jan 1, 2023" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView> 

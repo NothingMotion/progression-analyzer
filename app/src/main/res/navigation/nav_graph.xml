@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/navigation_accounts">
+
+    <action
+        android:id="@+id/action_global_to_account_detail"
+        app:destination="@id/navigation_account_detail"
+        app:enterAnim="@anim/slide_in_right"
+        app:exitAnim="@anim/slide_out_left"
+        app:popEnterAnim="@anim/slide_in_left"
+        app:popExitAnim="@anim/slide_out_right" />
+
+    <fragment
+        android:id="@+id/navigation_accounts"
+        android:name="com.nothingmotion.brawlprogressionanalyzer.ui.accounts.AccountsFragment"
+        android:label="Accounts">
+        <action
+            android:id="@+id/action_accounts_to_new_account"
+            app:destination="@id/navigation_new_account"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:launchSingleTop="true"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_accounts_to_settings"
+            app:destination="@id/navigation_settings"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_new_account"
+        android:name="com.nothingmotion.brawlprogressionanalyzer.ui.newaccount.NewAccountFragment"
+        android:label="New Account">
+        <action
+            android:id="@+id/action_new_account_to_accounts"
+            app:destination="@id/navigation_accounts"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:launchSingleTop="true"
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/slide_out_left" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="com.nothingmotion.brawlprogressionanalyzer.ui.settings.SettingsFragment"
+        android:label="Settings" />
+
+    <fragment
+        android:id="@+id/navigation_account_detail"
+        android:name="com.nothingmotion.brawlprogressionanalyzer.ui.accounts.AccountDetailFragment"
+        android:label="Account Details">
+        <argument
+            android:name="accountId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_account_detail_to_accounts"
+            app:destination="@id/navigation_accounts" />
+        <action
+            android:id="@+id/action_account_detail_to_future_progress"
+            app:destination="@id/navigation_future_progress"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_future_progress"
+        android:name="com.nothingmotion.brawlprogressionanalyzer.ui.accounts.FutureProgressFragment"
+        android:label="Future Progress">
+        <argument
+            android:name="accountId"
+            app:argType="string" />
+    </fragment>
+
+</navigation> 

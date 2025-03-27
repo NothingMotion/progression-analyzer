@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_accounts"
+        android:icon="@drawable/ic_accounts"
+        android:title="@string/title_accounts" />
+
+    <item
+        android:id="@+id/navigation_new_account"
+        android:icon="@drawable/ic_add_account"
+        android:title="@string/title_new_account" />
+
+    <item
+        android:id="@+id/navigation_settings"
+        android:icon="@drawable/ic_settings"
+        android:title="@string/title_settings" />
+</menu> 

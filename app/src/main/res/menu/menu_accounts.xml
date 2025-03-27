@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    
+    <item
+        android:id="@+id/action_wiki"
+        android:icon="@drawable/ic_wiki"
+        android:title="@string/wiki"
+         />
+        
+    <item
+        android:id="@+id/action_about_us"
+        android:icon="@drawable/ic_about"
+        android:title="@string/about_us"
+         />
+        
+    <item
+        android:id="@+id/action_telegram"
+        android:icon="@drawable/ic_telegram"
+        android:title="@string/telegram"
+        />
+        
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_settings"
+        android:title="@string/settings"
+        />
+</menu> 

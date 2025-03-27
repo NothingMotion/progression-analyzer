@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <item name="enter_anim">@anim/slide_in_right</item>
+    <item name="exit_anim">@anim/slide_out_left</item>
+    <item name="pop_enter_anim">@anim/slide_in_left</item>
+    <item name="pop_exit_anim">@anim/slide_out_right</item>
+</set> 
