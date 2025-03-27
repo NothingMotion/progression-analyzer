@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,7 +33,7 @@ class AccountsViewModel @Inject constructor(
     // Sorting preference
     private val _sortOrder = MutableStateFlow(SortOrder.TROPHIES_DESC)
     val sortOrder: StateFlow<SortOrder> = _sortOrder
-    
+
     init {
         // Load sort order from preferences if we wanted to
         // loadSortOrderPreference()

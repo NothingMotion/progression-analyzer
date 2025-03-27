@@ -7,6 +7,8 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.nothingmotion.brawlprogressionanalyzer.model.Language
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,6 +49,7 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
     var language: Language?
         get() {
             val languageValue = standardPrefs.getString(LANGUAGE_KEY, null)
+            _isPickedLanguage.value = languageValue != null
             return languageValue?.let { Language.valueOf(it) }
         }
         set(value) = standardPrefs.edit().putString(LANGUAGE_KEY, value?.name).apply()
@@ -68,5 +71,7 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
         // Secure preference keys
         private const val KEY_API_KEY = "api_key"
 
+        private val _isPickedLanguage  = MutableStateFlow<Boolean> (false)
+        val isPickedLanguage get() = PreferencesManager._isPickedLanguage.asStateFlow()
     }
 }

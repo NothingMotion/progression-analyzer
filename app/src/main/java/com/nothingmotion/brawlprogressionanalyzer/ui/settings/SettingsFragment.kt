@@ -2,6 +2,7 @@ package com.nothingmotion.brawlprogressionanalyzer.ui.settings
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -10,6 +11,8 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.nothingmotion.brawlprogressionanalyzer.MainActivity
 import com.nothingmotion.brawlprogressionanalyzer.R
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.databinding.FragmentSettingsBinding
@@ -77,6 +80,14 @@ class SettingsFragment : Fragment() {
             isChecked = preferencesManager.notificationsEnabled
             setOnCheckedChangeListener { _, isChecked ->
                 preferencesManager.notificationsEnabled = isChecked
+            }
+        }
+        binding.showTutorial.setOnClickListener {
+            // Get the MainActivity instance and call its showTutorial method
+            findNavController().navigate(R.id.navigation_accounts)
+            (activity as? MainActivity)?.let { mainActivity ->
+                mainActivity.showTutorial()
+                Toast.makeText(requireContext(), getString(R.string.tutorial_started), Toast.LENGTH_SHORT).show()
             }
         }
         
@@ -158,6 +169,8 @@ class SettingsFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+
 
     companion object {
         fun newInstance() = SettingsFragment()

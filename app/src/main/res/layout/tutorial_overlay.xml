@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/tutorial_root"
+    android:fitsSystemWindows="true">
+
+    <!-- Using our custom SpotlightView for the overlay with hole effect -->
+    <com.nothingmotion.brawlprogressionanalyzer.tutorial.SpotlightView
+        android:id="@+id/spotlight"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Simple message dialog without background -->
+    <LinearLayout
+        android:id="@+id/tutorial_message_card"
+        android:layout_width="wrap_content"
+        android:layout_height="702dp"
+        android:background="@android:color/transparent"
+        android:gravity="center"
+        android:maxWidth="300dp"
+        android:minWidth="180dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tutorial_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:lineSpacingExtra="4dp"
+            android:minHeight="45dp"
+            android:shadowColor="#80000000"
+            android:shadowDx="1"
+            android:shadowDy="1"
+            android:shadowRadius="4"
+            android:text="Tutorial text goes here"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_skip"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="Skip"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                app:rippleColor="#80FFFFFF" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_next"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="Next"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                app:rippleColor="#80FFFFFF" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout> 

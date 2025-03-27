@@ -101,6 +101,14 @@
                         android:layout_height="wrap_content"
                         android:inputType="none" />
                 </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/show_tutorial"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Show Tutorial"
+                    android:textSize="12sp"
+                    android:layout_marginTop="12dp"
+                    style="@style/Widget.Material3.Button.TextButton"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

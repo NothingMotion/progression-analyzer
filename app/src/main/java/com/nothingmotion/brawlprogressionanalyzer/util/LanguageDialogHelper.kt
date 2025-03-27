@@ -3,11 +3,13 @@ package com.nothingmotion.brawlprogressionanalyzer.util
 import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nothingmotion.brawlprogressionanalyzer.R
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.databinding.DialogLanguageSelectionBinding
 import com.nothingmotion.brawlprogressionanalyzer.model.Language
+import com.nothingmotion.brawlprogressionanalyzer.ui.accounts.AccountsViewModel
 
 /**
  * Helper class to manage language selection dialogs and locale changes

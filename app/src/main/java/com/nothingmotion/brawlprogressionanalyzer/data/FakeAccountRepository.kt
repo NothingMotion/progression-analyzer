@@ -7,6 +7,7 @@ import com.nothingmotion.brawlprogressionanalyzer.model.Gear
 import com.nothingmotion.brawlprogressionanalyzer.model.Player
 import com.nothingmotion.brawlprogressionanalyzer.model.Progress
 import com.nothingmotion.brawlprogressionanalyzer.model.StarPower
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -128,6 +129,7 @@ class FakeAccountRepository @Inject constructor() {
         )
 
         accounts.add(newbieAccount)
+
         return accounts
     }
 

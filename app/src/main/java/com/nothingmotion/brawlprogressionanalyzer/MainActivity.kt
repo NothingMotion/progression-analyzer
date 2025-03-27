@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.AnticipateInterpolator
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -22,6 +23,7 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.core.view.updatePadding
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.lifecycleScope
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.model.Language
 import com.nothingmotion.brawlprogressionanalyzer.util.LanguageDialogHelper
@@ -30,6 +32,10 @@ import com.nothingmotion.brawlprogressionanalyzer.util.ThemeUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.nothingmotion.brawlprogressionanalyzer.databinding.ActivityMainBinding
+import com.nothingmotion.brawlprogressionanalyzer.tutorial.TutorialManager
+import com.nothingmotion.brawlprogressionanalyzer.ui.accounts.AccountsViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -85,7 +91,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (preferencesManager.language == null){
-            LanguageDialogHelper.showLanguageSelectionDialog(this,preferencesManager)
+
+                LanguageDialogHelper.showLanguageSelectionDialog(this@MainActivity,preferencesManager)
         }
         enableEdgeToEdge()
         
@@ -121,6 +128,19 @@ class MainActivity : AppCompatActivity() {
             
             windowInsets
         }
+
+        setupNavigation()
+        
+        // Show tutorial if it's the first time
+        if (TutorialManager.shouldShowTutorial(this)) {
+            lifecycleScope.launch {
+
+                PreferencesManager.isPickedLanguage.collectLatest {isPicked->
+                    if(isPicked)
+                        showTutorial()
+                }
+            }
+        }
     }
 
     private fun setupApp() {
@@ -137,5 +157,41 @@ class MainActivity : AppCompatActivity() {
 
     private fun applyLanguage(language: Language) {
         LocaleHelper.setLocale(language)
+    }
+
+    private fun setupNavigation() {
+        // Implementation of setupNavigation method
+    }
+
+
+    fun showTutorial() {
+        val tutorialSteps = listOf(
+            TutorialManager.TutorialStep(
+                R.id.bottom_navigation,
+                "Navigate through different sections using the bottom navigation bar",
+                16
+            ),
+            TutorialManager.TutorialStep(
+                R.id.fab_add_account,
+                "Tap here to add a new Brawl Stars account",
+                16
+            ),
+            TutorialManager.TutorialStep(
+                R.id.bottom_navigation,
+                "View all your accounts and their progress here",
+                24
+            ),
+            TutorialManager.TutorialStep(R.id.appBarLayout,"Click here to see wiki and other options",16),
+            TutorialManager.TutorialStep(
+                R.id.navigation_settings,
+                "Access settings to customize the app, change language, and theme",
+                16
+            )
+        )
+
+        TutorialManager(this).initTutorial(tutorialSteps) {
+            // Tutorial completed
+            TutorialManager.markTutorialAsShown(this)
+        }
     }
 }
