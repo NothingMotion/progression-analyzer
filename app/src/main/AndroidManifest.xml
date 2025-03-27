@@ -14,15 +14,23 @@
         android:enableOnBackInvokedCallback="true"
         android:theme="@style/Theme.BrawlProgressionAnalyzer"
         tools:targetApi="tiramisu">
+        
+        <!-- Splash Activity for Android 11 and below -->
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:name=".SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.App.Starting.Legacy">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Main Activity with Android 12+ splash screen -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:theme="@style/Theme.App.Starting" />
     </application>
 
 </manifest>

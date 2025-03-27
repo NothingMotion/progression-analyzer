@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.BrawlProgressionAnalyzer" parent="Theme.Material3.DayNight.NoActionBar">
@@ -6,6 +7,31 @@
         <item name="fontFamily">@font/lilitaone_regular</item>
 
 
+    </style>
+
+    <!-- Splash Screen Theme -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- Set the splash screen background color -->
+        <item name="windowSplashScreenBackground">@color/purple_500</item>
+        
+        <!-- Use windowSplashScreenAnimatedIcon to add either a drawable or an animated drawable -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        
+        <!-- Set the theme of the Activity that follows your splash screen -->
+        <item name="postSplashScreenTheme">@style/Theme.BrawlProgressionAnalyzer</item>
+
+        <!-- Splash screen animation duration -->
+        <item name="windowSplashScreenAnimationDuration">300</item>
+    </style>
+
+    <!-- Legacy Splash Screen Theme (Android 11 and below) -->
+    <style name="Theme.App.Starting.Legacy" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="android:windowBackground">@color/purple_500</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowDisablePreview">false</item>
     </style>
 
     <style name="Theme.BrawlProgressionAnalyzer" parent="Theme.Material3.DayNight.NoActionBar">
