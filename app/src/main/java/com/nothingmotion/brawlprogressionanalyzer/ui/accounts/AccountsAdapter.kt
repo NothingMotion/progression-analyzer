@@ -2,6 +2,7 @@ package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
 
 import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
@@ -20,11 +21,16 @@ import com.nothingmotion.brawlprogressionanalyzer.util.DateUtils
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.view.animation.AnimationUtils
+import android.view.animation.DecelerateInterpolator
 
 class AccountsAdapter(
     private val onItemClicked: (Account) -> Unit,
     private val onItemLongClicked: (Account) -> Boolean = { false }
 ) : ListAdapter<Account, AccountsAdapter.ViewHolder>(AccountDiffCallback()) {
+
+    private var lastAnimatedPosition = -1
+    private var animationsEnabled = true
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemAccountBinding.inflate(
@@ -36,7 +42,53 @@ class AccountsAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val account = getItem(position)
+        holder.bind(account)
+        
+        // Run enter animation if this position hasn't been animated yet
+        if (animationsEnabled && position > lastAnimatedPosition) {
+            animateItem(holder.itemView, position)
+            lastAnimatedPosition = position
+        }
+    }
+
+    private fun animateItem(view: View, position: Int) {
+        // Initial state - pushed down and slightly scaled
+        view.translationY = 50f
+        view.alpha = 0f
+        view.scaleX = 0.9f
+        view.scaleY = 0.9f
+        
+        // Calculate delay based on position (staggered animation)
+        val delay = (position * 75L).coerceAtMost(500L)
+        
+        // Animate to final state
+        view.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setInterpolator(DecelerateInterpolator())
+            .setDuration(300)
+            .setStartDelay(delay)
+            .start()
+    }
+    
+    // Call this when adapter is attached to recycler view
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        animationsEnabled = true
+    }
+    
+    // Call this to reset animation state (e.g., when data set changes completely)
+    fun resetAnimationState() {
+        lastAnimatedPosition = -1
+        animationsEnabled = true
+    }
+    
+    // Disable animations (e.g., for configuration changes)
+    fun disableAnimations() {
+        animationsEnabled = false
     }
 
     class ViewHolder(

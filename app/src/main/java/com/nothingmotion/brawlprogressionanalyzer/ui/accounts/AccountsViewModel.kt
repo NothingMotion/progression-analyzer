@@ -6,12 +6,10 @@ import com.nothingmotion.brawlprogressionanalyzer.data.FakeAccountRepository
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.model.Account
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import java.util.Date
@@ -22,14 +20,18 @@ class AccountsViewModel @Inject constructor(
     private val preferencesManager: PreferencesManager
 ) : ViewModel() {
 
-    // Exposed accounts as StateFlow from repository
-    val accounts: StateFlow<List<Account>> = accountRepository.accounts
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
-    
+//    // Exposed accounts as StateFlow from repository
+//    val accounts: StateFlow<List<Account>> = accountRepository.accounts
+//        .stateIn(
+//            scope = viewModelScope,
+//            started = SharingStarted.WhileSubscribed(5000),
+//            initialValue = emptyList()
+//        )
+        
+    // Unified accounts state that includes loading, error, and data
+    private val _accountsState = MutableStateFlow(AccountsState(isLoading = true))
+    val accountsState = _accountsState.asStateFlow()
+
     // Sorting preference
     private val _sortOrder = MutableStateFlow(SortOrder.TROPHIES_DESC)
     val sortOrder: StateFlow<SortOrder> = _sortOrder
@@ -37,6 +39,34 @@ class AccountsViewModel @Inject constructor(
     init {
         // Load sort order from preferences if we wanted to
         // loadSortOrderPreference()
+        
+        // Initial load of accounts
+        refreshAccounts()
+    }
+    
+    /**
+     * Refresh accounts from the repository
+     */
+    fun refreshAccounts() {
+        viewModelScope.launch {
+            try {
+                // Set loading state
+                _accountsState.update { it.copy(isLoading = true, error = null) }
+                
+                // Load accounts from repository
+                val accountsList = accountRepository.refreshAccounts()
+                
+                // Update state with loaded accounts
+                _accountsState.update { 
+                    it.copy(accounts = accountsList, isLoading = false, error = null)
+                }
+            } catch (e: Exception) {
+                // Update state with error
+                _accountsState.update { 
+                    it.copy(isLoading = false, error = e.message ?: "Failed to load accounts") 
+                }
+            }
+        }
     }
     
     /**
@@ -44,7 +74,15 @@ class AccountsViewModel @Inject constructor(
      */
     fun addAccount(account: Account) {
         viewModelScope.launch {
-            accountRepository.addAccount(account)
+            try {
+                accountRepository.addAccount(account)
+                // After adding, refresh the list
+                refreshAccounts()
+            } catch (e: Exception) {
+                _accountsState.update { 
+                    it.copy(error = "Failed to add account: ${e.message}") 
+                }
+            }
         }
     }
     
@@ -53,7 +91,14 @@ class AccountsViewModel @Inject constructor(
      */
     fun deleteAccount(accountId: String) {
         viewModelScope.launch {
-            accountRepository.deleteAccount(accountId)
+            try {
+                accountRepository.deleteAccount(accountId)
+                // After deleting, we don't need to refresh manually if the repository emits updates
+            } catch (e: Exception) {
+                _accountsState.update { 
+                    it.copy(error = "Failed to delete account: ${e.message}") 
+                }
+            }
         }
     }
     
@@ -62,16 +107,22 @@ class AccountsViewModel @Inject constructor(
      */
     fun updateAccountTag(accountId: String, newTag: String) {
         viewModelScope.launch {
-            val account = accountRepository.getAccount(accountId)
-            account?.let {
-                val updatedPlayer = it.account.copy(
-                    tag = newTag
-                )
-                val updatedAccount = it.copy(
-                    account = updatedPlayer,
-                    updatedAt = Date()
-                )
-                accountRepository.updateAccount(updatedAccount)
+            try {
+                val account = accountRepository.getAccount(accountId)
+                account?.let {
+                    val updatedPlayer = it.account.copy(
+                        tag = newTag
+                    )
+                    val updatedAccount = it.copy(
+                        account = updatedPlayer,
+                        updatedAt = Date()
+                    )
+                    accountRepository.updateAccount(updatedAccount)
+                }
+            } catch (e: Exception) {
+                _accountsState.update { 
+                    it.copy(error = "Failed to update account: ${e.message}") 
+                }
             }
         }
     }

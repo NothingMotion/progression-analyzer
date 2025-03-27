@@ -97,4 +97,12 @@
     <string name="month_6">6 Months</string>
     <string name="month_12">12 Months</string>
     <string name="tutorial_started">Tutorial started</string>
+    
+    <!-- Error States -->
+    <string name="error_title">Something went wrong</string>
+    <string name="error_loading_accounts">Failed to load accounts. Please check your connection and try again.</string>
+    <string name="retry">Retry</string>
+    
+    <!-- Loading States -->
+    <string name="loading_accounts">Loading your accounts…</string>
 </resources>

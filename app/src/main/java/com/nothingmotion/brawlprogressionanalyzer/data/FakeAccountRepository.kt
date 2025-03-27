@@ -33,12 +33,35 @@ class FakeAccountRepository @Inject constructor() {
     suspend fun getAccount(id: String): Account? {
         return _accounts.value.find { it.account.id == id }
     }
+    
+    /**
+     * Refresh accounts from the data source
+     * This simulates a network call with artificial delay
+     */
+    suspend fun refreshAccounts(): List<Account> {
+        // Simulate network delay
+        delay(5000)
+        
+        // 10% chance of error for testing error handling
+        if (Random.nextInt(0, 10) == 0) {
+            throw Exception("Network error: Failed to connect to server")
+        }
+        
+        val accounts = generateFakeAccounts()
+        _accounts.value = accounts
+        return accounts
+    }
+    
+    suspend fun getAllAccounts(): List<Account>{
+        delay(2000)
+        return generateFakeAccounts()
+    }
 
     /**
      * Add a new account to the repository
      */
     suspend fun addAccount(account: Account) {
-        _accounts.value = _accounts.value + account
+        _accounts.value += account
     }
 
     /**

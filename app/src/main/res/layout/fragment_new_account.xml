@@ -20,6 +20,7 @@
             app:counterMaxLength="18"
             app:prefixText="#"
             app:helperText="Player tag is on your profile"
+            app:errorEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
