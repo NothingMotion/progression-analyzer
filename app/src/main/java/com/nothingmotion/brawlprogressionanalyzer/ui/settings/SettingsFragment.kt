@@ -20,8 +20,10 @@ import com.nothingmotion.brawlprogressionanalyzer.model.Language
 import com.nothingmotion.brawlprogressionanalyzer.util.LocaleHelper
 import com.nothingmotion.brawlprogressionanalyzer.util.ThemeUtils
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import java.util.Locale
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -62,7 +64,12 @@ class SettingsFragment : Fragment() {
                 preferencesManager.darkMode = isChecked
                 val defaultTheme = if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
                                         else AppCompatDelegate.MODE_NIGHT_NO
-                activity?.let { themeUtils.applyThemeWithAnimation(it) }
+                lifecycleScope.launch(Dispatchers.Default){
+                    withContext(Dispatchers.Main){
+
+                        activity?.let { themeUtils.applyThemeWithAnimation(it) }
+                    }
+                }
             }
         }
 
@@ -139,13 +146,13 @@ class SettingsFragment : Fragment() {
                     // Apply the new locale
                     updateLocale(selectedLanguage)
                     
-                    // Use a smooth recreation to apply changes
-                    activity?.let { it ->
-                        // Add a slight delay to ensure UI is updated properly
-                        view?.postDelayed({
-                            it.recreate()
-                        }, 150)
-                    }
+//                    // Use a smooth recreation to apply changes
+//                    activity?.let { it ->
+//                        // Add a slight delay to ensure UI is updated properly
+//                        view?.postDelayed({
+//                            it.recreate()
+//                        }, 150)
+//                    }
                 }
             }
         }
@@ -161,7 +168,13 @@ class SettingsFragment : Fragment() {
     }
     
     private fun updateLocale(language: Language) {
-        LocaleHelper.setLocale(language)
+        lifecycleScope.launch (Dispatchers.Default){
+
+            withContext(Dispatchers.Main){
+
+                LocaleHelper.setLocale(language,false,100)
+            }
+        }
     }
 
     override fun onDestroyView() {
