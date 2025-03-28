@@ -7,6 +7,7 @@ import android.content.Context
 import android.graphics.Rect
 import android.graphics.RectF
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -59,10 +60,94 @@ class TutorialManager(private val activity: Activity) {
         // Hide message card initially
         binding.tutorialMessageCard.alpha = 0f
         
+        // Block touch events on the entire overlay to prevent interaction with underlying views
+        binding.root.setOnTouchListener { _, event ->
+            // Only allow touch events on the tutorial buttons
+            val touchX = event.x
+            val touchY = event.y
+            
+            // Check if touch is on the tutorial buttons
+            val isTouchOnButton = isTouchOnTutorialControls(touchX, touchY)
+            
+            // Consume all touch events except those on the buttons
+            !isTouchOnButton
+        }
+        
+        // Set the root view to intercept all touch events
+        binding.root.isClickable = true
+        binding.root.isFocusable = true
+        binding.root.setOnClickListener { /* Consume all clicks on the overlay */ }
+        
+        // Make sure the spotlight view also prevents touches from reaching through
+        binding.spotlight.isClickable = true
+        binding.spotlight.isFocusable = true
+        binding.spotlight.setOnTouchListener { _, _ -> true }  // Consume all touch events
+
+        // Add interceptors to all child views
+        addInterceptTouchToAllChildren(binding.root)
+        
         // Start first step after layout
         binding.root.post {
             showStep(0)
         }
+    }
+    
+    /**
+     * Recursively adds touch interceptors to all child views to prevent touch events
+     * from reaching through to underlying views
+     */
+    private fun addInterceptTouchToAllChildren(viewGroup: View) {
+        if (viewGroup is ViewGroup) {
+            // Set touch interceptor for the ViewGroup itself
+            viewGroup.isClickable = true
+            viewGroup.isFocusable = true
+            
+            // For each child in the ViewGroup
+            for (i in 0 until viewGroup.childCount) {
+                val child = viewGroup.getChildAt(i)
+                
+                // Skip buttons and message views to ensure they remain interactive
+                if (child == binding.btnNext || child == binding.btnSkip || 
+                    child == binding.tutorialMessageCard) {
+                    continue
+                }
+                
+                // Set touch interceptor for this child
+                child.isClickable = true
+                child.isFocusable = true
+                
+                // If the child is another ViewGroup, recursively add to its children
+                if (child is ViewGroup) {
+                    addInterceptTouchToAllChildren(child)
+                } else {
+                    child.setOnTouchListener { _, _ -> true } // Consume all touch events
+                }
+            }
+        }
+    }
+    
+    private fun isTouchOnTutorialControls(x: Float, y: Float): Boolean {
+        // Check if touch is on the next button
+        val nextButtonRect = Rect()
+        binding.btnNext.getGlobalVisibleRect(nextButtonRect)
+        
+        // Check if touch is on the skip button
+        val skipButtonRect = Rect()
+        binding.btnSkip.getGlobalVisibleRect(skipButtonRect)
+        
+        // Check if touch is on the message card
+        val messageCardRect = Rect()
+        binding.tutorialMessageCard.getGlobalVisibleRect(messageCardRect)
+        
+        // Convert x, y to global coordinates
+        val location = IntArray(2)
+        binding.root.getLocationOnScreen(location)
+        val globalX = x + location[0]
+        val globalY = y + location[1]
+        
+        return nextButtonRect.contains(globalX.toInt(), globalY.toInt()) ||
+               skipButtonRect.contains(globalX.toInt(), globalY.toInt()) ||
+               messageCardRect.contains(globalX.toInt(), globalY.toInt())
     }
     
     private fun showStep(stepIndex: Int) {
