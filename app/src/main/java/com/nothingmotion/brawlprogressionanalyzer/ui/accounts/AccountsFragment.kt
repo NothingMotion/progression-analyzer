@@ -44,6 +44,7 @@ import java.util.*
 import android.view.animation.Animation
 import android.view.animation.OvershootInterpolator
 import android.content.res.Configuration
+import android.util.Log
 
 @AndroidEntryPoint
 class AccountsFragment : Fragment() {
@@ -484,6 +485,7 @@ class AccountsFragment : Fragment() {
     }
     
     private fun showErrorState(error: String) {
+        Log.d("AccountsFragment","error occured")
         // Fade out loading and content
         val fadeOutDuration = 200L
         
@@ -519,10 +521,10 @@ class AccountsFragment : Fragment() {
                 binding.emptyStateGroup.visibility = View.GONE
                 
                 // Show and animate error view
-                binding.errorStateGroup?.apply {
-                    alpha = 0f
+                binding.errorStateGroup.apply {
+                    alpha = 1f
                     visibility = View.VISIBLE
-                    
+
                     // Add subtle entrance animation for error state
                     binding.errorIcon?.apply {
                         translationY = -50f
@@ -534,7 +536,7 @@ class AccountsFragment : Fragment() {
                             .setInterpolator(OvershootInterpolator(1.2f))
                             .start()
                     }
-                    
+
                     binding.errorTitle?.apply {
                         translationY = -30f
                         alpha = 0f
@@ -545,7 +547,7 @@ class AccountsFragment : Fragment() {
                             .setDuration(400)
                             .start()
                     }
-                    
+
                     binding.errorMessageText?.apply {
                         text = error
                         translationY = -20f
@@ -557,7 +559,7 @@ class AccountsFragment : Fragment() {
                             .setDuration(400)
                             .start()
                     }
-                    
+
                     binding.retryButton?.apply {
                         scaleX = 0.8f
                         scaleY = 0.8f
@@ -580,7 +582,7 @@ class AccountsFragment : Fragment() {
                         error,
                         Snackbar.LENGTH_LONG
                     ).setAction("Retry") {
-                        viewModel.refreshAccounts()
+                        viewModel.loadAccounts()
                     }.show()
                 }
             }
