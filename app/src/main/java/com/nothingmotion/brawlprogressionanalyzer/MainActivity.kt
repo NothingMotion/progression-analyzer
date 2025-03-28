@@ -1,6 +1,7 @@
 package com.nothingmotion.brawlprogressionanalyzer
 
 import android.animation.ObjectAnimator
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnticipateInterpolator
@@ -46,45 +47,44 @@ class MainActivity : AppCompatActivity() {
     
     @Inject
     lateinit var themeUtils: ThemeUtils
-    
+
     @Inject
     lateinit var preferencesManager: PreferencesManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Handle the splash screen transition
+
         val splashScreen = installSplashScreen()
-        
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // Handle the splash screen transition
+            // Keep the splash screen visible until our app is ready
+            splashScreen.setKeepOnScreenCondition { !isReady }
 
-        // Keep the splash screen visible until our app is ready
-        splashScreen.setKeepOnScreenCondition { !isReady }
+            // Set up the splash screen exit animation
+            splashScreen.setOnExitAnimationListener { splashScreenView ->
+                // Create your custom animation here
+                val slideUp = ObjectAnimator.ofFloat(
+                    splashScreenView.view,
+                    View.TRANSLATION_Y,
+                    0f,
+                    -splashScreenView.view.height.toFloat()
+                ).apply {
+                    interpolator = AnticipateInterpolator()
+                    duration = 500L
+                }
 
-        // Set up the splash screen exit animation
-        splashScreen.setOnExitAnimationListener { splashScreenView ->
-            // Create your custom animation here
-            val slideUp = ObjectAnimator.ofFloat(
-                splashScreenView.view,
-                View.TRANSLATION_Y,
-                0f,
-                -splashScreenView.view.height.toFloat()
-            ).apply {
-                interpolator = AnticipateInterpolator()
-                duration = 500L
+                // Start the animation and remove the splash screen once it's done
+                slideUp.doOnEnd { splashScreenView.remove() }
+                slideUp.start()
             }
-
-            // Start the animation and remove the splash screen once it's done
-            slideUp.doOnEnd { splashScreenView.remove() }
-            slideUp.start()
         }
-
         // Simulate some loading work
         setupApp()
 
         // Apply theme from preferences before setting content view
-        themeUtils.applyTheme()
-        
+        themeUtils.applyThemeWithAnimation(this)
         // Apply saved language first if available
         preferencesManager.language?.let { savedLanguage ->
             applyLanguage(savedLanguage)
@@ -122,10 +122,10 @@ class MainActivity : AppCompatActivity() {
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             // Apply padding only to the top
             view.updatePadding(top = insets.top)
-            
+
             // Apply padding to the bottom navigation
             bottomNavigation.updatePadding(bottom = insets.bottom)
-            
+
             windowInsets
         }
 
