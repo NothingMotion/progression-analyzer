@@ -72,7 +72,14 @@ class AccountsFragment : Fragment() {
         setupToolbar()
         setupRecyclerView()
         setupAddButton()
+        setUpRetryButton()
         observeAccounts()
+    }
+
+    private fun setUpRetryButton() {
+        binding.retryButton.setOnClickListener {
+            viewModel.loadAccounts()
+        }
     }
 
     override fun onResume() {
