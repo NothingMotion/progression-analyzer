@@ -4,9 +4,11 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Handler
+import android.os.LocaleList
 import android.os.Looper
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import androidx.core.os.postDelayed
 import com.nothingmotion.brawlprogressionanalyzer.model.Language
 import java.util.Locale
 
@@ -14,24 +16,40 @@ import java.util.Locale
  * Helper class for handling locale-related functionality
  */
 object LocaleHelper {
+    // Track the most recently applied locale to prevent redundant changes
+    private var lastAppliedLanguage: Language? = null
 
     /**
      * Updates the application locale based on the selected language
      * @param language The language to set
      */
-    fun setLocale(language: Language) {
+    fun setLocale(language: Language,isImmediate:Boolean = true, delay: Long = 1000) {
+        // Skip if we're already using this language
+        if (language == lastAppliedLanguage) return
+        
+        // Remember this language to avoid redundant changes
+        lastAppliedLanguage = language
+        
         val locale = when (language) {
             Language.ENGLISH -> "en"
             Language.PERSIAN -> "fa"
         }
 
         val localeList = LocaleListCompat.forLanguageTags(locale)
-        Handler(Looper.getMainLooper()).post{kotlinx.coroutines.Runnable {
-            AppCompatDelegate.setApplicationLocales(localeList)
+        
+        // Use a simple post without any additional handlers or delays
+        // This ensures the change happens on the main thread but won't queue up multiple changes
+        if(isImmediate){
+            Handler(Looper.getMainLooper()).post{
+                AppCompatDelegate.setApplicationLocales(localeList)
+            }
+        }else {
 
-        }}
-//        AppCompatDelegate
+            Handler(Looper.getMainLooper()).postDelayed ( kotlinx.coroutines.Runnable { AppCompatDelegate.setApplicationLocales(localeList) },delay)
+        }
     }
+    
+
 
     /**
      * Check if the current locale is RTL (Right-to-Left)
@@ -65,5 +83,14 @@ object LocaleHelper {
      */
     fun getLanguageName(languageCode: String): String {
         return Locale(languageCode).displayLanguage
+    }
+    
+
+    fun getLocale(language: Language): String {
+        val locale = when (language) {
+            Language.ENGLISH -> "en"
+            Language.PERSIAN -> "fa"
+        }
+        return locale;
     }
 }
