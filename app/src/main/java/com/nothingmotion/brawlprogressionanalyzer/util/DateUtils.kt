@@ -11,20 +11,23 @@ import java.time.format.DateTimeFormatter
 class DateUtils {
     companion object {
         // Standard date formats
-        private const val DEFAULT_FORMAT = "yyyy-MM-dd HH:mm:ss"
-        private const val SIMPLE_DATE_FORMAT = "yyyy-MM-dd"
+        const val DEFAULT_FORMAT = "yyyy-MM-dd HH:mm:ss"
+        const val SIMPLE_DATE_FORMAT = "yyyy-MM-dd"
 
         // Persian (Jalali) calendar formats
-        private const val PERSIAN_FORMAT = "yyyy/MM/dd"
-        private const val PERSIAN_FULL_FORMAT = "yyyy/MM/dd HH:mm:ss"
+        const val PERSIAN_FORMAT = "Y/m/d"
+        const val PERSIAN_FULL_FORMAT = "Y/m/d H:i:s"
 
+
+
+        private val jalaliDateUtils = JalaliDateUtils
         /**
          * Converts a Date to a formatted string using default format
          * @param date The date to format
          * @return Formatted date string
          */
-        fun toFormatted(date: Date): String {
-            val sdf = SimpleDateFormat(DEFAULT_FORMAT, Locale.getDefault())
+        fun toFormatted(date: Date,format: String = DEFAULT_FORMAT): String {
+            val sdf = SimpleDateFormat(format, Locale.getDefault())
             return sdf.format(date)
         }
 
@@ -47,12 +50,47 @@ class DateUtils {
         /**
          * Converts a Date to a Persian (Jalali) formatted string
          * @param date The date to convert
+         * @param format The format to use (defaults to PERSIAN_FORMAT)
          * @return Formatted Persian date string
          */
-        fun toPersianFormatted(date: Date): String {
-           return ""
+        fun toPersianFormatted(date: Date, format: String = PERSIAN_FORMAT,convertToPersian: Boolean = true): String {
+            return jalaliDateUtils.dateToJalali(date,format,convertToPersian)
         }
 
+        /**
+         * Converts Gregorian date to Jalali (Persian) date
+         * @param gregorianYear Gregorian year
+         * @param gregorianMonth Gregorian month (1-12)
+         * @param gregorianDay Gregorian day
+         * @return Array of [year, month, day] in Jalali calendar
+         */
+        fun toJalali(gregorianYear: Int, gregorianMonth: Int, gregorianDay: Int): IntArray {
+           return jalaliDateUtils.gregorianToJalali(gregorianYear,gregorianMonth,gregorianDay)
+        }
+
+        /**
+         * Converts Jalali (Persian) date to Gregorian date
+         * @param jalaliYear Jalali year
+         * @param jalaliMonth Jalali month (1-12)
+         * @param jalaliDay Jalali day
+         * @return Array of [year, month, day] in Gregorian calendar
+         */
+        fun toGregorian(jalaliYear: Int, jalaliMonth: Int, jalaliDay: Int): IntArray {
+           return jalaliDateUtils.jalaliToGregorian(jalaliYear,jalaliMonth,jalaliDay)
+        }
+
+        /**
+         * Checks if a given Jalali year is a leap year
+         * @param year Jalali year
+         * @return True if the year is a leap year, false otherwise
+         */
+        fun isJalaliLeapYear(year: Int): Boolean {
+         return jalaliDateUtils.isJalaliLeapYear(year)
+        }
+
+        /**
+         * Converts Gregorian date to Julian day number
+         */
 
         /**
          * Additional utility methods for flexible date handling
@@ -80,4 +118,5 @@ class DateUtils {
             return sdf.parse(dateString) ?: Date()
         }
     }
+    
 }
