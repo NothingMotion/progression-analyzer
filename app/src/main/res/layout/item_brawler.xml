@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <!-- Brawler Icon -->
+        <ImageView
+            android:id="@+id/brawler_icon"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:contentDescription="@string/brawler_icon_description"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@color/ability_background" />
+
+        <!-- Brawler Name -->
+        <TextView
+            android:id="@+id/brawler_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+            app:layout_constraintEnd_toStartOf="@+id/power_rank_container"
+            app:layout_constraintStart_toEndOf="@+id/brawler_icon"
+            app:layout_constraintTop_toTopOf="@+id/brawler_icon"
+            tools:text="El Primo" />
+
+        <!-- Trophies -->
+        <TextView
+            android:id="@+id/brawler_trophies_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/trophies"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="?attr/colorOutline"
+            app:layout_constraintStart_toStartOf="@+id/brawler_name"
+            app:layout_constraintTop_toBottomOf="@+id/brawler_name" />
+
+        <TextView
+            android:id="@+id/brawler_trophies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            app:layout_constraintBottom_toBottomOf="@+id/brawler_trophies_label"
+            app:layout_constraintStart_toEndOf="@+id/brawler_trophies_label"
+            app:layout_constraintTop_toTopOf="@+id/brawler_trophies_label"
+            tools:text="750" />
+
+        <!-- Highest Trophies -->
+        <TextView
+            android:id="@+id/brawler_highest_trophies_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/highest"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+            android:textColor="?attr/colorOutline"
+            app:layout_constraintStart_toStartOf="@+id/brawler_trophies_label"
+            app:layout_constraintTop_toBottomOf="@+id/brawler_trophies_label" />
+
+        <TextView
+            android:id="@+id/brawler_highest_trophies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            app:layout_constraintBottom_toBottomOf="@+id/brawler_highest_trophies_label"
+            app:layout_constraintStart_toEndOf="@+id/brawler_highest_trophies_label"
+            app:layout_constraintTop_toTopOf="@+id/brawler_highest_trophies_label"
+            tools:text="850" />
+
+        <!-- Power and Rank Container (Side by Side) -->
+        <LinearLayout
+            android:id="@+id/power_rank_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!-- Power Level -->
+            <LinearLayout
+                android:id="@+id/brawler_power_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_power_background"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:layout_marginEnd="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/power"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                    android:textColor="@color/white" />
+
+                <TextView
+                    android:id="@+id/brawler_power"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:textColor="@color/white"
+                    tools:text="11" />
+            </LinearLayout>
+
+            <!-- Rank -->
+            <LinearLayout
+                android:id="@+id/brawler_rank_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_rank_background"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rank"
+                    android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                    android:textColor="@color/white" />
+
+                <TextView
+                    android:id="@+id/brawler_rank"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
+                    android:textColor="@color/white"
+                    tools:text="25" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Abilities Container -->
+        <LinearLayout
+            android:id="@+id/abilities_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/brawler_name"
+            app:layout_constraintTop_toBottomOf="@+id/brawler_highest_trophies_label">
+
+            <!-- Star Powers -->
+            <HorizontalScrollView
+                android:id="@+id/star_powers_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:layout_marginEnd="8dp">
+
+                <LinearLayout
+                    android:id="@+id/star_powers_icons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <!-- Gadgets -->
+            <HorizontalScrollView
+                android:id="@+id/gadgets_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:layout_marginEnd="8dp">
+
+                <LinearLayout
+                    android:id="@+id/gadgets_icons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <!-- Gears -->
+            <HorizontalScrollView
+                android:id="@+id/gears_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/gears_icons"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView> 

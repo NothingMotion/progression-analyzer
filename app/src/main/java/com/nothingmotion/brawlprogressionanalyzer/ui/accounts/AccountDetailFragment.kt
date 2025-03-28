@@ -1,5 +1,8 @@
 package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -9,6 +12,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -19,6 +23,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.Legend
@@ -63,6 +68,8 @@ class AccountDetailFragment : Fragment() {
     private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
 
     private lateinit var account : Account
+    private lateinit var brawlerAdapter: BrawlerAdapter
+    
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -77,7 +84,9 @@ class AccountDetailFragment : Fragment() {
         
         setupToolbar()
         setupAppBarScrollBehavior()
-        
+        setupBrawlersList()
+        setupRaritiesAccordion()
+        setupResourcesAccordion()
         // Get accountId from arguments
         arguments?.getString("accountId")?.let { accountId ->
             observeAccount(accountId)
@@ -145,6 +154,86 @@ class AccountDetailFragment : Fragment() {
         })
     }
     
+    private fun setupBrawlersList() {
+        brawlerAdapter = BrawlerAdapter()
+        binding.brawlersRecyclerView.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = brawlerAdapter
+            isNestedScrollingEnabled = true
+            setHasFixedSize(true)
+            
+            // Set RecyclerView to handle its own scrolling
+            isFocusable = false
+            overScrollMode = View.OVER_SCROLL_NEVER
+        }
+        
+        // Set up listener to scroll to the top when list is updated
+        brawlerAdapter.setOnListUpdatedListener(object : BrawlerAdapter.OnListUpdatedListener {
+            override fun onListUpdated() {
+                binding.brawlersRecyclerView.scrollToPosition(0)
+            }
+        })
+        
+        // Setup search and sort functionality
+        setupBrawlerSearch()
+        setupBrawlerSort()
+    }
+    
+    private fun setupBrawlerSearch() {
+        // Use a debounce for search to prevent rapid filtering on every keystroke
+        var searchJob: kotlinx.coroutines.Job? = null
+        
+        binding.searchBrawlersInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Cancel previous job if it exists
+                searchJob?.cancel()
+                
+                // Create a new job with 300ms delay to prevent rapid filtering
+                searchJob = viewLifecycleOwner.lifecycleScope.launch {
+                    kotlinx.coroutines.delay(300) // 300ms debounce
+                    brawlerAdapter.filterByName(s.toString())
+                    
+                    // Check if we have no results to display the empty state
+                    binding.noBrawlersFound.visibility = if (brawlerAdapter.hasNoResults()) {
+                        View.VISIBLE
+                    } else {
+                        View.GONE
+                    }
+                }
+            }
+            
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+    }
+    
+    private fun setupBrawlerSort() {
+        // Set initial selection
+        binding.chipTrophies.isChecked = true
+        
+        // Handle chip selection for sorting
+        binding.sortChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
+            if (checkedIds.isNotEmpty()) {
+                when (checkedIds[0]) {
+                    R.id.chip_trophies -> brawlerAdapter.sortBy(BrawlerAdapter.SortType.TROPHIES)
+                    R.id.chip_power -> brawlerAdapter.sortBy(BrawlerAdapter.SortType.POWER)
+                    R.id.chip_rank -> brawlerAdapter.sortBy(BrawlerAdapter.SortType.RANK)
+                    R.id.chip_name -> brawlerAdapter.sortBy(BrawlerAdapter.SortType.NAME)
+                }
+                
+                // Reset search input when sorting
+                binding.searchBrawlersInput.setText("")
+                
+                // Use smooth scrolling for a better UX when sort button is clicked
+                binding.brawlersRecyclerView.smoothScrollToPosition(0)
+                
+                // Hide no results view
+                binding.noBrawlersFound.visibility = View.GONE
+            }
+        }
+    }
+    
     private fun observeAccount(accountId: String) {
         // Load account details
         viewModel.getAccount(accountId)
@@ -210,9 +299,22 @@ class AccountDetailFragment : Fragment() {
                 dateFormat.format(account.updatedAt)
             )
             
+            // Pass account history to adapter for trophy history charts
+            brawlerAdapter.setAccountHistory(account.history)
+            
+            // Update brawlers list
+            brawlerAdapter.submitSortedList(account.account.brawlers)
+            
+            // Ensure no results view is hidden on initial load
+            noBrawlersFound.visibility = View.GONE
+            
             // Progression history charts
             setupProgressionCharts(account)
             setupProgressSummary(account)
+            
+            // Update resources accordion with current progress
+            updateResourcesValues(account.currentProgress)
+            
             // Set toolbar title only when collapsed, handled by AppBarLayout.OnOffsetChangedListener
         }
     }
@@ -1011,6 +1113,222 @@ class AccountDetailFragment : Fragment() {
             val action = AccountDetailFragmentDirections.actionAccountDetailToFutureProgress(accountId)
             findNavController().navigate(action)
         }
+    }
+    
+    private fun setupRaritiesAccordion() {
+        val raritiesHeader = binding.raritiesHeader
+        val raritiesContent = binding.raritiesContent
+        val expandIcon = binding.raritiesExpandIcon
+        
+        // Set initial state
+        raritiesContent.visibility = View.GONE
+        expandIcon.setImageResource(R.drawable.ic_expand_more)
+        
+        // Set click listener for the header
+        raritiesHeader.setOnClickListener {
+            // Toggle visibility with animation
+            if (raritiesContent.visibility == View.VISIBLE) {
+                // Collapse with animation
+                val initialHeight = raritiesContent.height
+                
+                // Animation to collapse from current height to 0
+                val collapseAnimation = ValueAnimator.ofInt(initialHeight, 0).apply {
+                    duration = 300
+                    interpolator = AccelerateDecelerateInterpolator()
+                    addUpdateListener { valueAnimator ->
+                        val value = valueAnimator.animatedValue as Int
+                        val layoutParams = raritiesContent.layoutParams
+                        layoutParams.height = value
+                        raritiesContent.layoutParams = layoutParams
+                    }
+                    addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animator: Animator) {
+                            raritiesContent.visibility = View.GONE
+                            raritiesContent.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                        }
+                    })
+                }
+                
+                // Animate icon rotation
+                val rotateAnimation = ValueAnimator.ofFloat(180f, 0f).apply {
+                    duration = 300
+                    interpolator = AccelerateDecelerateInterpolator()
+                    addUpdateListener { valueAnimator ->
+                        val value = valueAnimator.animatedValue as Float
+                        expandIcon.rotation = value
+                    }
+                    addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animator: Animator) {
+                            expandIcon.setImageResource(R.drawable.ic_expand_more)
+                        }
+                    })
+                }
+                
+                collapseAnimation.start()
+                rotateAnimation.start()
+            } else {
+                // Expand with animation
+                // First make it visible but with 0 height
+                raritiesContent.visibility = View.VISIBLE
+                raritiesContent.measure(
+                    View.MeasureSpec.makeMeasureSpec(raritiesContent.width, View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+                )
+                val targetHeight = raritiesContent.measuredHeight
+                
+                // Start with 0 height
+                raritiesContent.layoutParams.height = 0
+                
+                // Animation to expand from 0 to target height
+                val expandAnimation = ValueAnimator.ofInt(0, targetHeight).apply {
+                    duration = 300
+                    interpolator = AccelerateDecelerateInterpolator()
+                    addUpdateListener { valueAnimator ->
+                        val value = valueAnimator.animatedValue as Int
+                        val layoutParams = raritiesContent.layoutParams
+                        layoutParams.height = value
+                        raritiesContent.layoutParams = layoutParams
+                    }
+                    addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animator: Animator) {
+                            raritiesContent.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                        }
+                    })
+                }
+                
+                // Animate icon rotation
+                val rotateAnimation = ValueAnimator.ofFloat(0f, 180f).apply {
+                    duration = 300
+                    interpolator = AccelerateDecelerateInterpolator()
+                    addUpdateListener { valueAnimator ->
+                        val value = valueAnimator.animatedValue as Float
+                        expandIcon.rotation = value
+                    }
+                    addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animator: Animator) {
+                            expandIcon.setImageResource(R.drawable.ic_expand_less)
+                        }
+                    })
+                }
+                
+                expandAnimation.start()
+                rotateAnimation.start()
+            }
+        }
+        
+
+    }
+    
+    private fun setupResourcesAccordion() {
+        val resourcesHeader = binding.resourcesHeader
+        val resourcesContent = binding.resourcesContent
+        val expandIcon = binding.resourcesExpandIcon
+        
+        // Set initial state
+        resourcesContent.visibility = View.GONE
+        expandIcon.setImageResource(R.drawable.ic_expand_more)
+        
+        // Set click listener for the header
+        resourcesHeader.setOnClickListener {
+            // Toggle visibility with animation
+            if (resourcesContent.visibility == View.VISIBLE) {
+                // Collapse with animation
+                val initialHeight = resourcesContent.height
+                
+                // Animation to collapse from current height to 0
+                val collapseAnimation = ValueAnimator.ofInt(initialHeight, 0).apply {
+                    duration = 300
+                    interpolator = AccelerateDecelerateInterpolator()
+                    addUpdateListener { valueAnimator ->
+                        val value = valueAnimator.animatedValue as Int
+                        val layoutParams = resourcesContent.layoutParams
+                        layoutParams.height = value
+                        resourcesContent.layoutParams = layoutParams
+                    }
+                    addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animator: Animator) {
+                            resourcesContent.visibility = View.GONE
+                            resourcesContent.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                        }
+                    })
+                }
+                
+                // Animate icon rotation
+                val rotateAnimation = ValueAnimator.ofFloat(180f, 0f).apply {
+                    duration = 300
+                    interpolator = AccelerateDecelerateInterpolator()
+                    addUpdateListener { valueAnimator ->
+                        val value = valueAnimator.animatedValue as Float
+                        expandIcon.rotation = value
+                    }
+                    addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animator: Animator) {
+                            expandIcon.setImageResource(R.drawable.ic_expand_more)
+                        }
+                    })
+                }
+                
+                collapseAnimation.start()
+                rotateAnimation.start()
+            } else {
+                // Expand with animation
+                // First make it visible but with 0 height
+                resourcesContent.visibility = View.VISIBLE
+                resourcesContent.measure(
+                    View.MeasureSpec.makeMeasureSpec(resourcesContent.width, View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+                )
+                val targetHeight = resourcesContent.measuredHeight
+                
+                // Start with 0 height
+                resourcesContent.layoutParams.height = 0
+                
+                // Animation to expand from 0 to target height
+                val expandAnimation = ValueAnimator.ofInt(0, targetHeight).apply {
+                    duration = 300
+                    interpolator = AccelerateDecelerateInterpolator()
+                    addUpdateListener { valueAnimator ->
+                        val value = valueAnimator.animatedValue as Int
+                        val layoutParams = resourcesContent.layoutParams
+                        layoutParams.height = value
+                        resourcesContent.layoutParams = layoutParams
+                    }
+                    addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animator: Animator) {
+                            resourcesContent.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                        }
+                    })
+                }
+                
+                // Animate icon rotation
+                val rotateAnimation = ValueAnimator.ofFloat(0f, 180f).apply {
+                    duration = 300
+                    interpolator = AccelerateDecelerateInterpolator()
+                    addUpdateListener { valueAnimator ->
+                        val value = valueAnimator.animatedValue as Float
+                        expandIcon.rotation = value
+                    }
+                    addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animator: Animator) {
+                            expandIcon.setImageResource(R.drawable.ic_expand_less)
+                        }
+                    })
+                }
+                
+                expandAnimation.start()
+                rotateAnimation.start()
+            }
+        }
+    }
+    
+    private fun updateResourcesValues(progress: Progress) {
+        // Update resource values from the current progress
+        binding.creditsCount.text = progress.credits.toString()
+        binding.coinsCount.text = numberFormat.format(progress.coins)
+        binding.powerPointsCount.text = numberFormat.format(progress.powerPoints)
+        binding.gadgetsCount.text = progress.gadgets.toString()
+        binding.starPowersCount.text = progress.starPowers.toString()
+        binding.gearsCount.text = progress.gears.toString()
     }
     
     override fun onDestroyView() {
