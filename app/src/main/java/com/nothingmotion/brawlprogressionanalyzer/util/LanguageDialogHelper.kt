@@ -53,7 +53,7 @@ object LanguageDialogHelper {
                 
                 // Save selection and update locale
                 preferencesManager.language = selectedLanguage
-                LocaleHelper.setLocale(selectedLanguage)
+                LocaleHelper.setLocale(selectedLanguage,)
                 
                 // Recreate activity to apply changes
                 activity.recreate()
