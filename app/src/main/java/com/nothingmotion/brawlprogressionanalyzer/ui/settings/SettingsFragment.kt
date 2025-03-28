@@ -60,10 +60,9 @@ class SettingsFragment : Fragment() {
             isChecked = preferencesManager.darkMode
             setOnCheckedChangeListener { _, isChecked ->
                 preferencesManager.darkMode = isChecked
-                AppCompatDelegate.setDefaultNightMode(
-                    if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
-                    else AppCompatDelegate.MODE_NIGHT_NO
-                )
+                val defaultTheme = if (isChecked) AppCompatDelegate.MODE_NIGHT_YES
+                                        else AppCompatDelegate.MODE_NIGHT_NO
+                activity?.let { themeUtils.applyThemeWithAnimation(it) }
             }
         }
 
