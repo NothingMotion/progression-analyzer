@@ -1,18 +1,23 @@
 package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nothingmotion.brawlprogressionanalyzer.data.FakeAccountRepository
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.model.Account
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import java.util.Date
+import java.util.stream.Collectors
+import kotlin.random.Random
 
 @HiltViewModel
 class AccountsViewModel @Inject constructor(
@@ -41,9 +46,32 @@ class AccountsViewModel @Inject constructor(
         // loadSortOrderPreference()
         
         // Initial load of accounts
-        refreshAccounts()
+//        refreshAccounts()
+        loadAccounts()
     }
     
+     fun loadAccounts(){
+        viewModelScope.launch {
+            try {
+                accountRepository.accounts.collectLatest {accounts->
+                    // %50 to throw error
+                    if (Random.nextInt(0, 5) == 0) {
+                        throw Exception("Failed")
+//                        _accountsState.update{it.copy(isLoading = false, error = "Failed to load accounts")}
+
+                    }
+                    _accountsState.update { it.copy(isLoading = true,error= null) }
+                    delay(2000)
+                    _accountsState.update { it.copy(accounts = accounts,isLoading= false, error = null) }
+                }
+            }catch (e: Exception){
+                Log.d("AccountsViewModel","error while fetching accounts ${e.message}")
+                _accountsState.update {
+                    it.copy(isLoading = false, error = e.message ?: "Failed to load accounts")
+                }
+            }
+        }
+    }
     /**
      * Refresh accounts from the repository
      */
@@ -54,11 +82,11 @@ class AccountsViewModel @Inject constructor(
                 _accountsState.update { it.copy(isLoading = true, error = null) }
                 
                 // Load accounts from repository
-                val accountsList = accountRepository.refreshAccounts()
+                accountRepository.refreshAccounts()
                 
                 // Update state with loaded accounts
                 _accountsState.update { 
-                    it.copy(accounts = accountsList, isLoading = false, error = null)
+                    it.copy(accounts = it.accounts, isLoading = false, error = null)
                 }
             } catch (e: Exception) {
                 // Update state with error
@@ -68,7 +96,14 @@ class AccountsViewModel @Inject constructor(
             }
         }
     }
-    
+    fun getAccount(tag: String): Account? {
+        var account: Account? = null
+        viewModelScope.launch {
+
+            account = accountRepository.getAccount(tag)
+        }
+        return account;
+    }
     /**
      * Add a new account
      */
@@ -93,6 +128,7 @@ class AccountsViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 accountRepository.deleteAccount(accountId)
+                _accountsState.value.accounts = _accountsState.value.accounts.filter { it.account.tag !=  accountId}
                 // After deleting, we don't need to refresh manually if the repository emits updates
             } catch (e: Exception) {
                 _accountsState.update { 
