@@ -5,9 +5,9 @@
     <string name="title_settings">Settings</string>
 
     <!-- Account List -->
-    <string name="trophies">Trophies</string>
+    <string name="trophies">Trophies:</string>
     <string name="highest_trophies">Highest:</string>
-    <string name="brawlers">Brawlers</string>
+    <string name="brawlers">Brawlers:</string>
     <string name="level_format">Level %d</string>
     <string name="brawler_count_format">%d Brawlers</string>
     <string name="maxed_brawlers_format">%1$d/%2$d Maxed</string>
@@ -19,7 +19,7 @@
     <string name="delete_account">Delete Account</string>
     <string name="share_account">Share Account</string>
     <string name="player_stats">Player Stats</string>
-    <string name="maxed_brawlers">Maxed Brawlers</string>
+    <string name="maxed_brawlers">Maxed Brawlers:</string>
     <string name="progression">Progression</string>
     <string name="progression_history">Progression History</string>
     <string name="no_progression_history">No progression history available</string>
@@ -62,7 +62,7 @@
     <string name="language_english">English</string>
     <string name="language_persian">فارسی</string>
     <string name="language_selection_dialog_title">Select Your Language</string>
-    <string name="language_selection_dialog_message">Choose the language you prefer for the app</string>
+    <string name="language_selection_dialog_message">Choose the language you prefer for the app\nYou can change it later</string>
     <string name="confirm">Confirm</string>
 
 
@@ -116,4 +116,36 @@
     <string name="account_added_success">Account %s added successfully!</string>
     <string name="account_exists_error">Account with this tag already exists</string>
     <string name="network_error">Network error: Failed to load data</string>
+
+    <!-- Brawler Details -->
+    <string name="brawler_list">Brawlers</string>
+    <string name="brawler_icon_description">Brawler icon</string>
+    <string name="power">Power</string>
+    <string name="rank">Rank</string>
+    <string name="highest">Highest</string>
+    <string name="star_powers">Star Powers:</string>
+    <string name="gadgets">Gadgets:</string>
+    <string name="gears">Gears:</string>
+    <string name="ability_icon_description">Ability icon</string>
+    <string name="search_brawlers">Search brawlers</string>
+    <string name="name">Name</string>
+    <string name="no_brawlers_found">No brawlers found</string>
+    <string name="no_trophy_history">No trophy history available for this brawler</string>
+
+    <!-- Brawler Rarities -->
+    <string name="rarities">Rarities</string>
+    <string name="rarities_click_to_open">Rarities (click to open)</string>
+    <string name="resources_click_to_open">Resources (click to open)</string>
+    <string name="rarity_common">Common</string>
+    <string name="rarity_rare">Rare</string>
+    <string name="rarity_super_rare">Super Rare</string>
+    <string name="rarity_epic">Epic</string>
+    <string name="rarity_mythic">Mythic</string>
+    <string name="rarity_legendary">Legendary</string>
+    
+    <!-- Player Resources -->
+    <string name="resources">Resources</string>
+    <string name="credits">Credits</string>
+    <string name="coins">Coins</string>
+    <string name="power_points">PPoints</string>
 </resources>

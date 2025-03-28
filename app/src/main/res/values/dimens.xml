@@ -7,4 +7,8 @@
     <!-- Toolbar dimensions -->
     <dimen name="toolbar_bottom_margin">12dp</dimen>
     <dimen name="toolbar_title_bottom_padding">12dp</dimen>
+    
+    <!-- Brawler dimensions -->
+    <dimen name="ability_icon_size">32dp</dimen>
+    <dimen name="ability_icon_margin">8dp</dimen>
 </resources> 

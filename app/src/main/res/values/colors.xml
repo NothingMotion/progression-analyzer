@@ -25,4 +25,9 @@
     <color name="chart_grid">#E0E0E0</color>
     <color name="chart_label">#757575</color>
     <color name="table_row_even">#F5F5F5</color>
+    
+    <!-- Brawler detail colors -->
+    <color name="power_level_background">#00BFA5</color>
+    <color name="rank_background">#FF6D00</color>
+    <color name="ability_background">#E0E0E0</color>
 </resources>
