@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
         themeUtils.applyThemeWithAnimation(this)
         // Apply saved language first if available
         preferencesManager.language?.let { savedLanguage ->
-            applyLanguage(savedLanguage)
+//            applyLanguage(savedLanguage)
         }
 
         if (preferencesManager.language == null){
