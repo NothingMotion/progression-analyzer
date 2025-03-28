@@ -105,4 +105,15 @@
     
     <!-- Loading States -->
     <string name="loading_accounts">Loading your accounts…</string>
+
+    <!-- Account Adding -->
+    <string name="add_account">Add Account</string>
+    <string name="add_account_description">Enter your Brawl Stars player tag to add your account</string>
+    <string name="player_tag_hint">Player Tag</string>
+    <string name="tag_help_link">Need help finding your tag?</string>
+    <string name="tag_help_dialog_title">Finding Your Tag</string>
+    <string name="tag_help_dialog_message">To find your tag:\n1. Open Brawl Stars\n2. Go to your profile\n3. Your tag is shown underneath your name (starts with #)</string>
+    <string name="account_added_success">Account %s added successfully!</string>
+    <string name="account_exists_error">Account with this tag already exists</string>
+    <string name="network_error">Network error: Failed to load data</string>
 </resources>
