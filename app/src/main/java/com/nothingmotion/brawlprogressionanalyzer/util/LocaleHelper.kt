@@ -3,6 +3,8 @@ package com.nothingmotion.brawlprogressionanalyzer.util
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import com.nothingmotion.brawlprogressionanalyzer.model.Language
@@ -22,12 +24,15 @@ object LocaleHelper {
             Language.ENGLISH -> "en"
             Language.PERSIAN -> "fa"
         }
-        
+
         val localeList = LocaleListCompat.forLanguageTags(locale)
-        AppCompatDelegate.setApplicationLocales(localeList)
+        Handler(Looper.getMainLooper()).post{kotlinx.coroutines.Runnable {
+            AppCompatDelegate.setApplicationLocales(localeList)
+
+        }}
 //        AppCompatDelegate
     }
-    
+
     /**
      * Check if the current locale is RTL (Right-to-Left)
      * @param context The context to check
@@ -37,7 +42,7 @@ object LocaleHelper {
         val config = context.resources.configuration
         return config.layoutDirection == Configuration.SCREENLAYOUT_LAYOUTDIR_RTL
     }
-    
+
     /**
      * Get the current locale from the configuration
      * @param context The context
@@ -52,7 +57,7 @@ object LocaleHelper {
             config.locale
         }
     }
-    
+
     /**
      * Get the language name for a given locale code
      * @param languageCode The language code (e.g., "en", "fa")
@@ -61,4 +66,4 @@ object LocaleHelper {
     fun getLanguageName(languageCode: String): String {
         return Locale(languageCode).displayLanguage
     }
-} 
+}
