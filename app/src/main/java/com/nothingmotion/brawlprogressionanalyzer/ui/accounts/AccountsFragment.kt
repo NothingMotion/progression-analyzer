@@ -45,6 +45,8 @@ import android.view.animation.Animation
 import android.view.animation.OvershootInterpolator
 import android.content.res.Configuration
 import android.util.Log
+import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AccountsFragment : Fragment() {
@@ -53,7 +55,8 @@ class AccountsFragment : Fragment() {
     
     private val viewModel: AccountsViewModel by viewModels()
     private lateinit var accountsAdapter: AccountsAdapter
-
+    @Inject
+    lateinit var preferencesManager : PreferencesManager
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -157,7 +160,8 @@ class AccountsFragment : Fragment() {
             onItemLongClicked = { account ->
                 showShareDialog(account)
                 true
-            }
+            },
+            preferencesManager
         )
         
         binding.accountsRecyclerView.apply {

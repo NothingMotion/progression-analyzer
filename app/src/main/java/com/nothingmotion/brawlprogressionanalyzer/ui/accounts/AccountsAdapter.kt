@@ -23,10 +23,13 @@ import java.util.Date
 import java.util.Locale
 import android.view.animation.AnimationUtils
 import android.view.animation.DecelerateInterpolator
+import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
+import com.nothingmotion.brawlprogressionanalyzer.model.Language
 
 class AccountsAdapter(
     private val onItemClicked: (Account) -> Unit,
-    private val onItemLongClicked: (Account) -> Boolean = { false }
+    private val onItemLongClicked: (Account) -> Boolean = { false },
+    private val preferencesManager: PreferencesManager
 ) : ListAdapter<Account, AccountsAdapter.ViewHolder>(AccountDiffCallback()) {
 
     private var lastAnimatedPosition = -1
@@ -38,7 +41,7 @@ class AccountsAdapter(
             parent,
             false
         )
-        return ViewHolder(binding, onItemClicked, onItemLongClicked)
+        return ViewHolder(binding, onItemClicked, onItemLongClicked, preferencesManager)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -94,7 +97,8 @@ class AccountsAdapter(
     class ViewHolder(
         private val binding: ItemAccountBinding,
         private val onItemClicked: (Account) -> Unit,
-        private val onItemLongClicked: (Account) -> Boolean
+        private val onItemLongClicked: (Account) -> Boolean,
+        private val preferencesManager: PreferencesManager
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(account: Account) {
@@ -120,11 +124,18 @@ class AccountsAdapter(
                 )
                 
                 // Format last updated date
-                val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
                 val lastUpdated = account.updatedAt
+                var formattedDate : String = ""
+                preferencesManager.language?.let{lang->
+                    formattedDate = when(lang){
+                        Language.ENGLISH -> DateUtils.formatDate(lastUpdated)
+                        Language.PERSIAN -> DateUtils.toPersianFormatted(lastUpdated)
+                        else -> DateUtils.formatDate(lastUpdated)
+                    }
+                }
                 accountLastUpdated.text = binding.root.context.getString(
                     R.string.last_updated_format,
-                    dateFormat.format(lastUpdated)
+                    formattedDate
                 )
                 
                 // Setup mini trophy chart
