@@ -270,7 +270,12 @@ class JalaliDateUtils {
          * @return true if it's a leap year, false otherwise
          */
         fun isJalaliLeapYear(year: Int): Boolean {
-            return (((year % 33) % 4 - 1) == ((year % 33) * 0.05).toInt())
+            // Persian leap years follow a specific pattern in a 33-year cycle
+            // Years 1, 5, 9, 13, 17, 21, 25, 29 in each 33-year cycle are leap years
+            val yearInCycle = year % 33
+            return yearInCycle == 1 || yearInCycle == 5 || yearInCycle == 9 || 
+                   yearInCycle == 13 || yearInCycle == 17 || yearInCycle == 22 ||
+                   yearInCycle == 26 || yearInCycle == 30
         }
         
         /**
