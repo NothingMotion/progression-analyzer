@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="AccordionView Examples"
+            android:textAppearance="?attr/textAppearanceHeadline6" />
+
+        <!-- Example 1: Basic AccordionView with default styling -->
+        <com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView
+            android:id="@+id/default_accordion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:title="Default Accordion"
+            app:expanded="false"
+            app:animationDuration="300"
+            app:accordionCardElevation="2dp"
+            app:accordionCardCornerRadius="8dp"
+            app:accordionMarginHorizontal="8dp"
+            app:accordionMarginVertical="4dp"
+            app:accordionPadding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="This accordion uses the default styling" />
+
+        </com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView>
+
+        <!-- Example 2: Custom styled accordion with higher elevation and larger header padding -->
+        <com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView
+            android:id="@+id/elevated_accordion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:title="Accordion with Large Padding"
+            app:expanded="false"
+            app:accordionCardElevation="8dp"
+            app:accordionCardCornerRadius="16dp"
+            app:accordionMarginHorizontal="16dp"
+            app:accordionMarginVertical="8dp"
+            app:accordionPadding="24dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="This accordion has a larger header padding (24dp)" />
+
+        </com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView>
+
+        <!-- Example 3: Flat accordion with no elevation -->
+        <com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView
+            android:id="@+id/flat_accordion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:title="Flat Accordion"
+            app:expanded="true"
+            app:accordionCardElevation="0dp"
+            app:accordionCardCornerRadius="4dp"
+            app:accordionMarginHorizontal="4dp"
+            app:accordionMarginVertical="2dp"
+            app:accordionPadding="2dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="This accordion has no elevation for a flat design" />
+
+        </com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView>
+
+        <!-- Example 4: Custom title text style -->
+        <com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView
+            android:id="@+id/styled_text_accordion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:title="XML Title Styling"
+            app:expanded="false"
+            app:accordionCardElevation="4dp"
+            app:accordionCardCornerRadius="8dp"
+            app:accordionMarginHorizontal="8dp"
+            app:accordionMarginVertical="4dp"
+            app:accordionPadding="16dp"
+            app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+            app:titleTextColor="@color/design_default_color_primary">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="This accordion uses XML attributes to style the title text" />
+
+        </com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView>
+
+        <!-- Example 5: Programmatically customized -->
+        <com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView
+            android:id="@+id/programmatic_accordion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Real-world example with custom styling -->
+        <com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView
+            android:id="@+id/resources_accordion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:title="@string/resources_needed"
+            app:expanded="true"
+            app:accordionCardElevation="4dp"
+            app:accordionCardCornerRadius="12dp"
+            app:accordionMarginHorizontal="12dp"
+            app:accordionMarginVertical="6dp">
+
+            <!-- Sample content similar to your app -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/total_coins_needed" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="150,000" 
+                    android:textStyle="bold"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/total_powerpoints_needed" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="85,200"
+                    android:textStyle="bold"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+        </com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView>
+
+    </LinearLayout>
+</ScrollView> 
