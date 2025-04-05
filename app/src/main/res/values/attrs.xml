@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AccordionView">
+        <attr name="title" format="string" />
+        <attr name="titleTextColor" format="color|reference" />
+        <attr name="titleTextAppearance" format="reference" />
+        <attr name="expanded" format="boolean" />
+        <attr name="animationDuration" format="integer" />
+        <attr name="accordionCardElevation" format="dimension" />
+        <attr name="accordionCardCornerRadius" format="dimension" />
+        <attr name="accordionMarginHorizontal" format="dimension" />
+        <attr name="accordionMarginVertical" format="dimension" />
+        <attr name="accordionPadding" format="dimension"/>
+        <attr name="headerBackground" format="color|reference" />
+        <attr name="contentBackground" format="color|reference" />
+    </declare-styleable>
+</resources> 
