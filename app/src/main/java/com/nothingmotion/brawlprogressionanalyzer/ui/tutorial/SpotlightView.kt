@@ -1,4 +1,4 @@
-package com.nothingmotion.brawlprogressionanalyzer.tutorial
+package com.nothingmotion.brawlprogressionanalyzer.ui.tutorial
 
 import android.animation.ValueAnimator
 import android.content.Context
