@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnticipateInterpolator
+import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -25,15 +26,17 @@ import androidx.core.view.updatePadding
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.model.Language
+import com.nothingmotion.brawlprogressionanalyzer.util.AssetUtils
 import com.nothingmotion.brawlprogressionanalyzer.util.LanguageDialogHelper
 import com.nothingmotion.brawlprogressionanalyzer.util.LocaleHelper
 import com.nothingmotion.brawlprogressionanalyzer.util.ThemeUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.nothingmotion.brawlprogressionanalyzer.databinding.ActivityMainBinding
-import com.nothingmotion.brawlprogressionanalyzer.tutorial.TutorialManager
+import com.nothingmotion.brawlprogressionanalyzer.ui.tutorial.TutorialManager
 import com.nothingmotion.brawlprogressionanalyzer.ui.accounts.AccountsViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -57,6 +60,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             // Handle the splash screen transition
             // Keep the splash screen visible until our app is ready
@@ -103,7 +107,6 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
-        
 //        // Listen for navigation changes and ensure language is consistently applied
 //        navController.addOnDestinationChangedListener { _, _, _ ->
 //            // Reapply language settings when destination changes
@@ -111,7 +114,7 @@ class MainActivity : AppCompatActivity() {
 //                applyLanguage(savedLanguage)
 //            }
 //        }
-        
+
         // Set up bottom navigation with smooth transitions
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         bottomNavigation.setupWithNavController(navController)
@@ -130,7 +133,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         setupNavigation()
-        
+        navController.navigate(R.id.accordionViewUsageExampleFragment)
+
         // Show tutorial if it's the first time
         if (TutorialManager.shouldShowTutorial(this)) {
             lifecycleScope.launch {
@@ -141,6 +145,9 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+        
+        // Example of loading an image from assets (uncomment when you have images in assets)
+        // loadImageFromAssets()
     }
 
     private fun setupApp() {
@@ -192,6 +199,51 @@ class MainActivity : AppCompatActivity() {
         TutorialManager(this).initTutorial(tutorialSteps) {
             // Tutorial completed
             TutorialManager.markTutorialAsShown(this)
+        }
+    }
+    
+    /**
+     * Example function to demonstrate loading an image from assets
+     * This can be used in any activity or fragment to load assets
+     */
+    private fun loadImageFromAssets() {
+        // Example: load an image called "example.png" from assets folder
+        // Make sure you have this image in your assets folder
+        lifecycleScope.launch {
+            // You can use either the sync or async method depending on your needs
+            // Synchronous loading (not recommended for large images on main thread)
+            // val bitmap = AssetUtils.loadImageFromAssets(this@MainActivity, "example.png")
+            
+            // Asynchronous loading (preferred for most cases)
+            val bitmap = AssetUtils.loadImageAsync(this@MainActivity, "example.png")
+            
+            // Use the bitmap in an ImageView or other component
+            bitmap?.let {
+                // Example: If you have an ImageView in your layout with id "imageFromAssets"
+                // findViewById<ImageView>(R.id.imageFromAssets).setImageBitmap(it)
+                
+                // Or with view binding if available
+                // binding.imageFromAssets.setImageBitmap(it)
+            }
+        }
+    }
+    
+    /**
+     * Lists all files in the specified assets directory and handles them
+     */
+    private fun listAssetImages(directory: String = "") {
+        val assetFiles = AssetUtils.listAssetFiles(this, directory)
+        
+        // Do something with the list of files
+        for (file in assetFiles) {
+            // Process each file as needed
+            // For example, you might want to load all images in a directory
+            if (file.endsWith(".png") || file.endsWith(".jpg") || file.endsWith(".jpeg")) {
+                // This is an image file
+                val imagePath = if (directory.isEmpty()) file else "$directory/$file"
+                // Load and use the image
+                // AssetUtils.loadImageFromAssets(this, imagePath)
+            }
         }
     }
 }
