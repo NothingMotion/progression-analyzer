@@ -2,6 +2,7 @@ package com.nothingmotion.brawlprogressionanalyzer.ui.components
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
@@ -162,7 +163,7 @@ class AccordionView @JvmOverloads constructor(
 
                 }
                 if (headerTextAppearance != 0) {
-                    titleTextView.setTextAppearance(context, headerTextAppearance)
+                    setTitleTextAppearance(headerTextAppearance)
                 }
 
                 if(headerTextColor != 0) {
@@ -383,6 +384,9 @@ class AccordionView @JvmOverloads constructor(
      * @param resId The resource ID of the text appearance style
      */
     fun setTitleTextAppearance(resId: Int) {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            titleTextView.setTextAppearance(resId)
+        }
         titleTextView.setTextAppearance(context, resId)
     }
     
