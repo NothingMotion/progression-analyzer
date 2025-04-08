@@ -148,4 +148,13 @@
     <string name="credits">Credits</string>
     <string name="coins">Coins</string>
     <string name="power_points">PPoints</string>
+    <string name="currently_maxed_out">68/80</string>
+    <string name="total_credits_needed">Total Credits Needed</string>
+
+    <!-- UI Components -->
+    <string name="expand_collapse">Expand or collapse</string>
+    <string name="select_player_type">Select Player type</string>
+    <string name="f2p_player">F2P</string>
+    <string name="p2w_player">P2W (Pass Plus)</string>
+    <string name="credits_per_month">Credits Per Month</string>
 </resources>
