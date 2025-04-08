@@ -1,4 +1,4 @@
-package com.nothingmotion.brawlprogressionanalyzer.data
+package com.nothingmotion.brawlprogressionanalyzer.data.repository
 
 import com.nothingmotion.brawlprogressionanalyzer.model.Account
 import com.nothingmotion.brawlprogressionanalyzer.model.Brawler
