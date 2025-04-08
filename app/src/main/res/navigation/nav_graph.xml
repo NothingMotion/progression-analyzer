@@ -81,5 +81,9 @@
             android:name="accountId"
             app:argType="string" />
     </fragment>
+    <fragment
+        android:id="@+id/accordionViewUsageExampleFragment"
+        android:name="com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionViewUsageExampleFragment"
+        android:label="AccordionViewUsageExampleFragment" />
 
 </navigation> 
