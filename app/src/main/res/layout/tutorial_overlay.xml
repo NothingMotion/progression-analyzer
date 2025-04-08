@@ -7,7 +7,7 @@
     android:fitsSystemWindows="true">
 
     <!-- Using our custom SpotlightView for the overlay with hole effect -->
-    <com.nothingmotion.brawlprogressionanalyzer.tutorial.SpotlightView
+    <com.nothingmotion.brawlprogressionanalyzer.ui.tutorial.SpotlightView
         android:id="@+id/spotlight"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
