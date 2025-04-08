@@ -5,19 +5,10 @@
       <entry key="AccountsFragmentTest">
         <State />
       </entry>
-      <entry key="ExampleInstrumentedTest">
-        <State />
-      </entry>
-      <entry key="NavigationTest">
-        <State />
-      </entry>
       <entry key="NewAccountFragmentTest">
         <State />
       </entry>
       <entry key="app">
-        <State />
-      </entry>
-      <entry key="useAppContext()">
         <State />
       </entry>
     </value>

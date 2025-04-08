@@ -1,0 +1,15 @@
+warning: in the working copy of 'app/src/main/java/com/nothingmotion/brawlprogressionanalyzer/MainActivity.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/src/main/java/com/nothingmotion/brawlprogressionanalyzer/ui/accounts/AccountsFragment.kt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'app/src/main/res/values/strings.xml', LF will be replaced by CRLF the next time Git touches it
+ .idea/deploymentTargetDropDown.xml                 |  15 [32m+[m[31m-[m
+ .../brawlprogressionanalyzer/MainActivity.kt       |  52 [32m+++[m[31m---[m
+ .../ui/accounts/AccountsFragment.kt                |  16 [32m+[m[31m-[m
+ .../ui/accounts/AccountsState.kt                   |   2 [32m+[m[31m-[m
+ .../ui/accounts/AccountsViewModel.kt               |  44 [32m++++[m[31m-[m
+ .../ui/newaccount/NewAccountFragment.kt            | 202 [32m+++++++++++++++++++[m[31m--[m
+ .../ui/settings/SettingsFragment.kt                |   7 [32m+[m[31m-[m
+ .../brawlprogressionanalyzer/util/LocaleHelper.kt  |  17 [32m+[m[31m-[m
+ .../brawlprogressionanalyzer/util/ThemeUtils.kt    | 147 [32m++++++++++++++[m[31m-[m
+ app/src/main/res/layout/fragment_new_account.xml   |  86 [32m++++++++[m[31m-[m
+ app/src/main/res/values/strings.xml                |  11 [32m++[m
+ 11 files changed, 507 insertions(+), 92 deletions(-)
