@@ -48,6 +48,7 @@ import com.nothingmotion.brawlprogressionanalyzer.databinding.DialogEditTagBindi
 import com.nothingmotion.brawlprogressionanalyzer.model.Account
 import com.nothingmotion.brawlprogressionanalyzer.model.Player
 import com.nothingmotion.brawlprogressionanalyzer.model.Progress
+import com.nothingmotion.brawlprogressionanalyzer.util.AccountUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -258,15 +259,15 @@ class AccountDetailFragment : Fragment() {
             accountLevel.text = getString(R.string.level_format, account.account.level)
             
             // Stats card
-            accountTrophies.text = numberFormat.format(account.account.trophies)
-            accountHighestTrophies.text = numberFormat.format(account.account.highestTrophies)
+            accountTrophies.text = AccountUtils.formatNumber(account.account.trophies)
+            accountHighestTrophies.text = AccountUtils.formatNumber(account.account.highestTrophies)
             
             // Calculate brawler counts from the brawlers list
             val brawlerCount = account.account.brawlers.size
             accountBrawlers.text = brawlerCount.toString()
             
             // Count maxed brawlers (power level 11)
-            val maxedBrawlers = account.account.brawlers.count { it.power >= 11 }
+            val maxedBrawlers = AccountUtils.calculateMaxedBrawlers(account)
             accountMaxedBrawlers.text = maxedBrawlers.toString()
             
             // Check if all brawlers are maxed and show the how to max out text if not
@@ -281,11 +282,7 @@ class AccountDetailFragment : Fragment() {
             }
             
             // Progress
-            val progressPercentage = if (brawlerCount > 0) {
-                (maxedBrawlers.toFloat() / brawlerCount.toFloat()) * 100
-            } else {
-                0f
-            }
+            val progressPercentage = AccountUtils.calculateMaxedPercentage(account)
             
             maxedProgress.progress = progressPercentage.toInt()
             progressionPercentage.text = getString(
@@ -378,27 +375,21 @@ class AccountDetailFragment : Fragment() {
         // Clear any existing data
         chart.clear()
         
-        // Get history data + current state for trophy history
-        val historyData = account.history.orEmpty().sortedBy { it.createdAt.time }
+        // Get history data labels and values
+        val xLabels = AccountUtils.getHistoryDateLabels(account)
+        val values = AccountUtils.getTrophyHistoryValues(account)
         
         // Create entries for trophy history
         val entries = mutableListOf<Entry>()
-        val xLabels = mutableListOf<String>()
-        val dateFormat = SimpleDateFormat("MMM yy", Locale.getDefault())
         
-        // Add historical data points
-        historyData.forEachIndexed { index, player ->
-            entries.add(Entry(index.toFloat(), player.trophies.toFloat()))
-            xLabels.add(dateFormat.format(Date(player.createdAt.time)))
+        // Add data points
+        values.forEachIndexed { index, value ->
+            entries.add(Entry(index.toFloat(), value))
         }
         
-        // Add current data point
-        entries.add(Entry(historyData.size.toFloat(), account.account.trophies.toFloat()))
-        xLabels.add(dateFormat.format(account.updatedAt))
-        
         // Find min and max values for better Y axis scaling
-        val minTrophies = entries.minByOrNull { it.y }?.y ?: 0f
-        val maxTrophies = entries.maxByOrNull { it.y }?.y ?: account.account.trophies.toFloat()
+        val minTrophies = values.minOrNull() ?: 0f
+        val maxTrophies = values.maxOrNull() ?: account.account.trophies.toFloat()
         val yAxisRange = maxTrophies - minTrophies
         val yAxisMin = maxOf(0f, minTrophies - (yAxisRange * 0.1f)) // 10% padding below
         val yAxisMax = maxTrophies + (yAxisRange * 0.1f) // 10% padding above
@@ -419,7 +410,7 @@ class AccountDetailFragment : Fragment() {
             valueTextColor = ContextCompat.getColor(requireContext(), R.color.chart_label)
             valueFormatter = object : ValueFormatter() {
                 override fun getFormattedValue(value: Float): String {
-                    return NumberFormat.getIntegerInstance().format(value.toLong())
+                    return AccountUtils.formatNumber(value.toInt())
                 }
             }
             
@@ -449,27 +440,21 @@ class AccountDetailFragment : Fragment() {
         // Clear any existing data
         chart.clear()
         
-        // Get history + current data
-        val historyData = account.history.orEmpty().sortedBy { it.createdAt.time }
+        // Get history data labels and values
+        val xLabels = AccountUtils.getHistoryDateLabels(account)
+        val values = AccountUtils.getBrawlerCountHistoryValues(account)
         
         // Create entries for brawler count history
         val entries = mutableListOf<Entry>()
-        val xLabels = mutableListOf<String>()
-        val dateFormat = SimpleDateFormat("MMM yy", Locale.getDefault())
         
-        // Add historical data points
-        historyData.forEachIndexed { index, player ->
-            entries.add(Entry(index.toFloat(), player.brawlers.size.toFloat()))
-            xLabels.add(dateFormat.format(Date(player.createdAt.time)))
+        // Add data points
+        values.forEachIndexed { index, value ->
+            entries.add(Entry(index.toFloat(), value))
         }
         
-        // Add current data point
-        entries.add(Entry(historyData.size.toFloat(), account.account.brawlers.size.toFloat()))
-        xLabels.add(dateFormat.format(account.updatedAt))
-        
         // Find min and max values for better Y axis scaling
-        val maxBrawlers = entries.maxByOrNull { it.y }?.y ?: account.account.brawlers.size.toFloat()
-        val minBrawlers = entries.minByOrNull { it.y }?.y ?: 0f
+        val maxBrawlers = values.maxOrNull() ?: account.account.brawlers.size.toFloat()
+        val minBrawlers = values.minOrNull() ?: 0f
         val yAxisRange = maxBrawlers - minBrawlers
         val yAxisMin = maxOf(0f, minBrawlers - (yAxisRange * 0.1f)) // 10% padding below
         val yAxisMax = maxBrawlers + (yAxisRange * 0.1f) // 10% padding above
@@ -497,11 +482,11 @@ class AccountDetailFragment : Fragment() {
             // Smooth curve and fill
             mode = LineDataSet.Mode.CUBIC_BEZIER
             fillColor = ContextCompat.getColor(requireContext(), R.color.chart_bar_1)
-            fillAlpha = 50
+            fillAlpha = 85
             setDrawFilled(true)
             
             // Highlight
-            highLightColor = ContextCompat.getColor(requireContext(), R.color.chart_point)
+            highLightColor = ContextCompat.getColor(requireContext(), R.color.chart_bar_1)
             highlightLineWidth = 1.5f
         }
         
@@ -784,11 +769,12 @@ class AccountDetailFragment : Fragment() {
     }
     
     private fun setupEditButton() {
-        binding.fabEditAccount.setOnClickListener {
+        binding.fabFutureProgress.setOnClickListener {
             // Get the current account ID from the ViewModel
             viewModel.account.value?.let { account ->
                 // Show refreshing message
-                Toast.makeText(context, "Refreshing account...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Moving to future progress...", Toast.LENGTH_SHORT).show()
+                navigateToFutureProgress()
                 // TODO: Navigate to edit account screen
                 // In the future, pass the account ID to an edit screen
                 // For now, just show a placeholder message
@@ -802,12 +788,12 @@ class AccountDetailFragment : Fragment() {
             append("Name: ${account.account.name}\n")
             append("Tag: ${account.account.tag}\n")
             append("Level: ${account.account.level}\n")
-            append("Trophies: ${numberFormat.format(account.account.trophies)}\n")
-            append("Highest Trophies: ${numberFormat.format(account.account.highestTrophies)}\n")
+            append("Trophies: ${AccountUtils.formatNumber(account.account.trophies)}\n")
+            append("Highest Trophies: ${AccountUtils.formatNumber(account.account.highestTrophies)}\n")
             
             // Calculate brawlers and maxed brawlers counts
             val brawlerCount = account.account.brawlers.size
-            val maxedBrawlers = account.account.brawlers.count { it.power >= 11 }
+            val maxedBrawlers = AccountUtils.calculateMaxedBrawlers(account)
             append("Brawlers: $brawlerCount ($maxedBrawlers maxed)\n")
             append("\nShared from Brawl Progression Analyzer")
         }
@@ -879,24 +865,20 @@ class AccountDetailFragment : Fragment() {
             accountLevel.text = getString(R.string.level_format, account.account.level)
             
             // Account stats
-            accountTrophies.text = NumberFormat.getIntegerInstance().format(account.account.trophies)
-            accountHighestTrophies.text = NumberFormat.getIntegerInstance().format(account.account.highestTrophies)
+            accountTrophies.text = AccountUtils.formatNumber(account.account.trophies)
+            accountHighestTrophies.text = AccountUtils.formatNumber(account.account.highestTrophies)
             
             // Calculate brawler counts from the brawlers list
             val brawlerCount = account.account.brawlers.size
-            val maxedBrawlers = account.account.brawlers.count { it.power >= 11 }
+            val maxedBrawlers = AccountUtils.calculateMaxedBrawlers(account)
             
             accountBrawlers.text = brawlerCount.toString()
             accountMaxedBrawlers.text = maxedBrawlers.toString()
             
             // Calculate max percentage
-            val maxPercentage = if (brawlerCount > 0) {
-                (maxedBrawlers * 100) / brawlerCount
-            } else {
-                0
-            }
+            val maxPercentage = AccountUtils.calculateMaxedPercentage(account)
             
-            maxedProgress.progress = maxPercentage
+            maxedProgress.progress = maxPercentage.toInt()
             progressionPercentage.text = getString(R.string.maxed_percentage_format, maxPercentage)
             
             // Setup progress summary
@@ -930,52 +912,14 @@ class AccountDetailFragment : Fragment() {
         
         // Calculate trophy progression
         if (historyData.isNotEmpty()) {
-            val oldestPlayer = historyData.minByOrNull { it.createdAt.time }
+            val (totalTrophiesGained, trophiesPercentage) = AccountUtils.calculateTrophyProgress(account)
             
-            // Calculate accumulative trophy gains
-            // Sort history data by timestamp to process in chronological order
-            val sortedHistoryData = historyData.sortedBy { it.createdAt.time }
+            // Set trophy values
+            binding.trophiesGainedValue.text = AccountUtils.formatLargeChange(totalTrophiesGained)
+            binding.trophiesGainedPercentage.text = AccountUtils.formatPercentage(trophiesPercentage)
             
-            // Start with the oldest record
-            var previousTrophies = sortedHistoryData.first().trophies
-            var totalTrophiesGained = 0
-            
-            // Iterate through each record, calculating positive gains only
-            for (i in 1 until sortedHistoryData.size) {
-                val currentTrophies = sortedHistoryData[i].trophies
-                val difference = currentTrophies - previousTrophies
-                
-                // Only add positive gains to the total (ignore trophy losses)
-                if (difference > 0) {
-                    totalTrophiesGained += difference
-                }
-                
-                previousTrophies = currentTrophies
-            }
-            
-            // Also check if there's a gain from the last history record to the current account
-            val lastHistoryTrophies = sortedHistoryData.last().trophies
-            val finalDifference = account.account.trophies - lastHistoryTrophies
-            if (finalDifference > 0) {
-                totalTrophiesGained += finalDifference
-            }
-            
-            // Calculate net gain (can be negative if player lost trophies)
-            val netTrophiesGained = account.account.trophies - sortedHistoryData.first().trophies
-            
-            // Calculate percentage based on the starting value
-            val trophiesPercentage = if (oldestPlayer != null && oldestPlayer.trophies > 0) {
-                (netTrophiesGained * 100.0 / oldestPlayer.trophies).toFloat()
-            } else 0f
-            
-            // Set trophy values (always show accumulative gains, which is always positive or zero)
-            binding.trophiesGainedValue.text = "+${NumberFormat.getIntegerInstance().format(totalTrophiesGained)}"
-            
-            // For percentage, show the net percentage change
-            binding.trophiesGainedPercentage.text = if (trophiesPercentage > 0) 
-                "(+${String.format("%.1f", trophiesPercentage)}%)" 
-            else 
-                "(${String.format("%.1f", trophiesPercentage)}%)"
+            // Calculate net gain/loss for color
+            val netTrophiesGained = account.account.trophies - historyData.minByOrNull { it.createdAt.time }!!.trophies
             
             // Color based on net gain/loss
             binding.trophiesGainedPercentage.setTextColor(
@@ -984,20 +928,11 @@ class AccountDetailFragment : Fragment() {
             )
             
             // Calculate brawler progression
-            val oldBrawlerCount = oldestPlayer?.brawlers?.size ?: 0
-            val newBrawlerCount = account.account.brawlers.size
-            val brawlersGained = newBrawlerCount - oldBrawlerCount
-            
-            val brawlersPercentage = if (oldBrawlerCount > 0) {
-                (brawlersGained * 100.0 / oldBrawlerCount).toFloat()
-            } else 0f
+            val (brawlersGained, brawlersPercentage) = AccountUtils.calculateBrawlerProgress(account)
             
             // Set brawler values
-            binding.brawlersGainedValue.text = if (brawlersGained > 0) "+$brawlersGained" else "$brawlersGained"
-            binding.brawlersGainedPercentage.text = if (brawlersPercentage > 0) 
-                "(+${String.format("%.1f", brawlersPercentage)}%)" 
-            else 
-                "(${String.format("%.1f", brawlersPercentage)}%)"
+            binding.brawlersGainedValue.text = AccountUtils.formatChange(brawlersGained)
+            binding.brawlersGainedPercentage.text = AccountUtils.formatPercentage(brawlersPercentage)
             binding.brawlersGainedPercentage.setTextColor(
                 ContextCompat.getColor(requireContext(), 
                     if (brawlersGained >= 0) R.color.chart_line else R.color.delete_background)
@@ -1015,73 +950,31 @@ class AccountDetailFragment : Fragment() {
         
         // Calculate progression from Progress history
         if (progressHistory.isNotEmpty()) {
-            val totalProgress = progressHistory.fold(account.currentProgress) { acc, progress ->
-                Progress(
-                    coins = acc.coins + progress.coins,
-                    powerPoints = acc.powerPoints + progress.powerPoints,
-                    credits = acc.credits + progress.credits,
-                    gears = acc.gears + progress.gears,
-                    starPowers = acc.starPowers + progress.starPowers,
-                    gadgets = acc.gadgets + progress.gadgets,
-                    brawlers = acc.brawlers, // Not cumulative
-                    averageBrawlerPower = acc.averageBrawlerPower, // Average is not cumulative
-                    averageBrawlerTrophies = acc.averageBrawlerTrophies, // Average is not cumulative
-                    isBoughtPass = acc.isBoughtPass,
-                    isBoughtPassPlus = acc.isBoughtPassPlus,
-                    isBoughRankedPass = acc.isBoughRankedPass,
-                    duration = acc.duration
-                )
-            }
-            
             // Credits
-            val creditsGained = totalProgress.credits - account.currentProgress.credits
-            val creditsPercentage = if (account.currentProgress.credits > 0) {
-                (creditsGained * 100.0 / account.currentProgress.credits).toFloat()
-            } else 100f
+            val (creditsGained, creditsPercentage) = AccountUtils.calculateCreditsProgress(account)
             
-            binding.creditsGainedValue.text = if (creditsGained > 0) "+$creditsGained" else "$creditsGained"
-            binding.creditsGainedPercentage.text = if (creditsPercentage > 0) 
-                "(+${String.format("%.1f", creditsPercentage)}%)" 
-            else 
-                "(${String.format("%.1f", creditsPercentage)}%)"
+            binding.creditsGainedValue.text = AccountUtils.formatChange(creditsGained)
+            binding.creditsGainedPercentage.text = AccountUtils.formatPercentage(creditsPercentage)
             binding.creditsGainedPercentage.setTextColor(
                 ContextCompat.getColor(requireContext(), 
                     if (creditsGained >= 0) R.color.chart_line else R.color.delete_background)
             )
             
             // Coins
-            val coinsGained = totalProgress.coins - account.currentProgress.coins
-            val coinsPercentage = if (account.currentProgress.coins > 0) {
-                (coinsGained * 100.0 / account.currentProgress.coins).toFloat()
-            } else 100f
+            val (coinsGained, coinsPercentage) = AccountUtils.calculateCoinsProgress(account)
             
-            binding.coinsGainedValue.text = if (coinsGained > 0) 
-                "+${NumberFormat.getIntegerInstance().format(coinsGained)}" 
-            else 
-                NumberFormat.getIntegerInstance().format(coinsGained)
-            binding.coinsGainedPercentage.text = if (coinsPercentage > 0) 
-                "(+${String.format("%.1f", coinsPercentage)}%)" 
-            else 
-                "(${String.format("%.1f", coinsPercentage)}%)"
+            binding.coinsGainedValue.text = AccountUtils.formatLargeChange(coinsGained)
+            binding.coinsGainedPercentage.text = AccountUtils.formatPercentage(coinsPercentage)
             binding.coinsGainedPercentage.setTextColor(
                 ContextCompat.getColor(requireContext(), 
                     if (coinsGained >= 0) R.color.chart_line else R.color.delete_background)
             )
             
             // Power Points
-            val powerPointsGained = totalProgress.powerPoints - account.currentProgress.powerPoints
-            val powerPointsPercentage = if (account.currentProgress.powerPoints > 0) {
-                (powerPointsGained * 100.0 / account.currentProgress.powerPoints).toFloat()
-            } else 100f
+            val (powerPointsGained, powerPointsPercentage) = AccountUtils.calculatePowerPointsProgress(account)
             
-            binding.powerPointsGainedValue.text = if (powerPointsGained > 0) 
-                "+${NumberFormat.getIntegerInstance().format(powerPointsGained)}" 
-            else 
-                NumberFormat.getIntegerInstance().format(powerPointsGained)
-            binding.powerPointsGainedPercentage.text = if (powerPointsPercentage > 0) 
-                "(+${String.format("%.1f", powerPointsPercentage)}%)" 
-            else 
-                "(${String.format("%.1f", powerPointsPercentage)}%)"
+            binding.powerPointsGainedValue.text = AccountUtils.formatLargeChange(powerPointsGained)
+            binding.powerPointsGainedPercentage.text = AccountUtils.formatPercentage(powerPointsPercentage)
             binding.powerPointsGainedPercentage.setTextColor(
                 ContextCompat.getColor(requireContext(), 
                     if (powerPointsGained >= 0) R.color.chart_line else R.color.delete_background)
@@ -1324,8 +1217,8 @@ class AccountDetailFragment : Fragment() {
     private fun updateResourcesValues(progress: Progress) {
         // Update resource values from the current progress
         binding.creditsCount.text = progress.credits.toString()
-        binding.coinsCount.text = numberFormat.format(progress.coins)
-        binding.powerPointsCount.text = numberFormat.format(progress.powerPoints)
+        binding.coinsCount.text = AccountUtils.formatNumber(progress.coins)
+        binding.powerPointsCount.text = AccountUtils.formatNumber(progress.powerPoints)
         binding.gadgetsCount.text = progress.gadgets.toString()
         binding.starPowersCount.text = progress.starPowers.toString()
         binding.gearsCount.text = progress.gears.toString()
