@@ -23,12 +23,12 @@ data class BrawlPassPlusRewards(
 ) : PassRewards(id,name,resources)
 data class StarrDropReward(
     val resource: Resource,
-    val chance: Float
+    var chance: Float
 )
 data class StarrDropRewards(
     override val id: Int,
     override val name: String,
     val rarity: RarityData,
-    val chanceToDrop: Float,
+    var chanceToDrop: Float,
     val rewards: List<StarrDropReward>
 ) : Rewards(id,name)
