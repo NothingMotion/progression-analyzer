@@ -1300,12 +1300,12 @@
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_edit_account"
+        android:id="@+id/fab_future_progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:contentDescription="@string/edit_account"
-        app:srcCompat="@drawable/ic_edit" />
+        app:srcCompat="@drawable/ic_calendar" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout> 
