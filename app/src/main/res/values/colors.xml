@@ -30,4 +30,11 @@
     <color name="power_level_background">#00BFA5</color>
     <color name="rank_background">#FF6D00</color>
     <color name="ability_background">#E0E0E0</color>
+    
+    <!-- Rarity colors -->
+    <color name="rare_color">#00C853</color>
+    <color name="super_rare_color">#2979FF</color>
+    <color name="epic_color">#AA00FF</color>
+    <color name="mythic_color">#D50000</color>
+    <color name="legendary_color">#FFD600</color>
 </resources>
