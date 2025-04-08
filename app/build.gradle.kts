@@ -56,7 +56,8 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-
+    // Logging
+    implementation("com.jakewharton.timber:timber:5.0.1")
 
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
     implementation ("com.squareup.retrofit2:converter-moshi:2.9.0")

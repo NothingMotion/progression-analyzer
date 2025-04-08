@@ -2,8 +2,10 @@ package com.nothingmotion.brawlprogressionanalyzer
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
+import com.github.mikephil.charting.BuildConfig
 import com.nothingmotion.brawlprogressionanalyzer.di.PreferencesManagerModule
 import dagger.hilt.android.HiltAndroidApp
+import timber.log.Timber
 
 /**
  * Application class for Brawl Progression Analyzer
@@ -14,6 +16,11 @@ class BrawlAnalyzerApp : Application() {
     
     override fun onCreate() {
         super.onCreate()
+
+        // Initialize Timber for logging
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
 
         val prefsManager  = PreferencesManagerModule.getPreferencesManager(this)
         // Apply the saved theme before Hilt is initialized (using static accessor)
