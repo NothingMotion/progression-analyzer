@@ -3,6 +3,7 @@ package com.nothingmotion.brawlprogressionanalyzer.di
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.AccountRepositoryImpl
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.BrawlerRepositoryImpl
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.BrawlerTableRepositoryImpl
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.NotMotRepositoryImpl
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.PassRepositoryImpl
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.StarrDropRepositoryImpl
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.TokenRepositoryImpl
@@ -13,6 +14,7 @@ import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.Fa
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.AccountRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerTableRepository
+import com.nothingmotion.brawlprogressionanalyzer.domain.repository.NotMotRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.PassRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.StarrDropRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.TokenRepository
@@ -73,9 +75,11 @@ abstract class RepositoryModuleBinding{
     @Singleton
     abstract fun bindPassRepository(passRepositoryImpl: PassRepositoryImpl) : PassRepository
 
-
-
     @Binds
     @Singleton
     abstract fun bindTokenRepository(tokenRepositoryImpl: TokenRepositoryImpl): TokenRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNotMotRepository(notMotRepositoryImpl: NotMotRepositoryImpl): NotMotRepository
 }
