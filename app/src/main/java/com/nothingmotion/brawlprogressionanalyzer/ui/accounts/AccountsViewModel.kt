@@ -6,6 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeAccountRepository
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
+import com.nothingmotion.brawlprogressionanalyzer.domain.repository.AccountRepository
+import com.nothingmotion.brawlprogressionanalyzer.util.TokenManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,8 +23,9 @@ import kotlin.random.Random
 
 @HiltViewModel
 class AccountsViewModel @Inject constructor(
-    private val accountRepository: FakeAccountRepository,
-    private val preferencesManager: PreferencesManager
+    private val accountRepository: AccountRepository,
+    private val preferencesManager: PreferencesManager,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
 
 //    // Exposed accounts as StateFlow from repository
@@ -51,22 +55,21 @@ class AccountsViewModel @Inject constructor(
     
      fun loadAccounts(){
         viewModelScope.launch {
-            try {
-                accountRepository.accounts.collectLatest {accounts->
-                    // %50 to throw error
-                    if (Random.nextInt(0, 5) == 0) {
-                        throw Exception("Failed")
-//                        _accountsState.update{it.copy(isLoading = false, error = "Failed to load accounts")}
+                preferencesManager.track?.let{track->
+                    val token = tokenManager.getAccessToken(track.uuid.toString())
+                    token?.let {
 
-                    }
-                    _accountsState.update { it.copy(isLoading = true,error= null) }
-                    delay(2000)
-                    _accountsState.update { it.copy(accounts = accounts,isLoading= false, error = null) }
-                }
-            }catch (e: Exception){
-                Log.d("AccountsViewModel","error while fetching accounts ${e.message}")
-                _accountsState.update {
-                    it.copy(isLoading = false, error = e.message ?: "Failed to load accounts")
+                        accountRepository.getAllAccounts(it)
+//                            .apply { delay(2000) }
+                            .collect{result ->
+                            when (result){
+                                is Result.Error -> _accountsState.update { it.copy(isLoading= false,error= result.error.name) }
+                                is Result.Loading -> _accountsState.update { it.copy(isLoading= true,error=null) }
+                                is Result.Success -> _accountsState.update { it.copy(accounts = result.data,error=null,isLoading= false) }
+                            }
+                        }
+
+
                 }
             }
         }
@@ -81,7 +84,7 @@ class AccountsViewModel @Inject constructor(
                 _accountsState.update { it.copy(isLoading = true, error = null) }
                 
                 // Load accounts from repository
-                accountRepository.refreshAccounts()
+//                accountRepository.refreshAccounts()
                 
                 // Update state with loaded accounts
                 _accountsState.update { 
@@ -99,7 +102,7 @@ class AccountsViewModel @Inject constructor(
         var account: Account? = null
         viewModelScope.launch {
 
-            account = accountRepository.getAccount(tag)
+//            account = accountRepository.getAccount(tag)
         }
         return account;
     }
@@ -107,59 +110,59 @@ class AccountsViewModel @Inject constructor(
      * Add a new account
      */
     fun addAccount(account: Account) {
-        viewModelScope.launch {
-            try {
-                accountRepository.addAccount(account)
-                // After adding, refresh the list
-                refreshAccounts()
-            } catch (e: Exception) {
-                _accountsState.update { 
-                    it.copy(error = "Failed to add account: ${e.message}") 
-                }
-            }
-        }
+//        viewModelScope.launch {
+//            try {
+//                accountRepository.addAccount(account)
+//                // After adding, refresh the list
+//                refreshAccounts()
+//            } catch (e: Exception) {
+//                _accountsState.update {
+//                    it.copy(error = "Failed to add account: ${e.message}")
+//                }
+//            }
+//        }
     }
     
     /**
      * Delete an account
      */
     fun deleteAccount(accountId: String) {
-        viewModelScope.launch {
-            try {
-                accountRepository.deleteAccount(accountId)
-                _accountsState.value.accounts = _accountsState.value.accounts.filter { it.account.tag !=  accountId}
-                // After deleting, we don't need to refresh manually if the repository emits updates
-            } catch (e: Exception) {
-                _accountsState.update { 
-                    it.copy(error = "Failed to delete account: ${e.message}") 
-                }
-            }
-        }
+//        viewModelScope.launch {
+//            try {
+//                accountRepository.deleteAccount(accountId)
+//                _accountsState.value.accounts = _accountsState.value.accounts.filter { it.account.tag !=  accountId}
+//                // After deleting, we don't need to refresh manually if the repository emits updates
+//            } catch (e: Exception) {
+//                _accountsState.update {
+//                    it.copy(error = "Failed to delete account: ${e.message}")
+//                }
+//            }
+//        }
     }
     
     /**
      * Update account tag
      */
     fun updateAccountTag(accountId: String, newTag: String) {
-        viewModelScope.launch {
-            try {
-                val account = accountRepository.getAccount(accountId)
-                account?.let {
-                    val updatedPlayer = it.account.copy(
-                        tag = newTag
-                    )
-                    val updatedAccount = it.copy(
-                        account = updatedPlayer,
-                        updatedAt = Date()
-                    )
-                    accountRepository.updateAccount(updatedAccount)
-                }
-            } catch (e: Exception) {
-                _accountsState.update { 
-                    it.copy(error = "Failed to update account: ${e.message}") 
-                }
-            }
-        }
+//        viewModelScope.launch {
+//            try {
+//                val account = accountRepository.getAccount(accountId)
+//                account?.let {
+//                    val updatedPlayer = it.account.copy(
+//                        tag = newTag
+//                    )
+//                    val updatedAccount = it.copy(
+//                        account = updatedPlayer,
+//                        updatedAt = Date()
+//                    )
+//                    accountRepository.updateAccount(updatedAccount)
+//                }
+//            } catch (e: Exception) {
+//                _accountsState.update {
+//                    it.copy(error = "Failed to update account: ${e.message}")
+//                }
+//            }
+//        }
     }
     
     /**
