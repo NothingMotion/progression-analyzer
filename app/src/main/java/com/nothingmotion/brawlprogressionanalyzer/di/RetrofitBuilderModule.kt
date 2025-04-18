@@ -7,6 +7,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -29,7 +30,14 @@ object RetrofitBuilderModule {
             .readTimeout(CONNECTION_TIMEOUT,TimeUnit.MILLISECONDS)
             .writeTimeout(CONNECTION_TIMEOUT,TimeUnit.MILLISECONDS)
             .callTimeout(CONNECTION_TIMEOUT,TimeUnit.MILLISECONDS)
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("application-request-sender", "android")
+                    .build()
+                chain.proceed(request)
+            }
             .build()
+
         return Retrofit.Builder()
             .baseUrl(BuildConfig.PROGRESSION_ANALYZER_API)
             .addConverterFactory(GsonConverterFactory.create())
