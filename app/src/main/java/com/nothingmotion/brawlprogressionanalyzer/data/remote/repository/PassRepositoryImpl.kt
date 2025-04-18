@@ -9,7 +9,7 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-class PassRewardsRepositoryImpl : PassRepository {
+class PassRepositoryImpl : PassRepository {
     @Inject lateinit var api: ProgressionAnalyzerAPI
     override suspend fun getPassFreeTable(token: String): Result<PassRewards, DataError.NetworkError> {
         try {
