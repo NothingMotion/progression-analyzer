@@ -3,9 +3,11 @@ package com.nothingmotion.brawlprogressionanalyzer
 import android.animation.ObjectAnimator
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.AnticipateInterpolator
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -29,9 +31,13 @@ import com.nothingmotion.brawlprogressionanalyzer.util.ThemeUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.nothingmotion.brawlprogressionanalyzer.databinding.ActivityMainBinding
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.toJson
+import com.nothingmotion.brawlprogressionanalyzer.ui.NotMotViewModel
 import com.nothingmotion.brawlprogressionanalyzer.ui.tutorial.TutorialManager
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import timber.log.Timber
+import java.util.Date
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -46,6 +52,8 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var preferencesManager: PreferencesManager
 
+
+    val notmotViewModel: NotMotViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
 
         val splashScreen = installSplashScreen()
@@ -76,8 +84,16 @@ class MainActivity : AppCompatActivity() {
                 slideUp.start()
             }
         }
+        setupTimber()
         // Simulate some loading work
         setupApp()
+        lifecycleScope.launch {
+
+            notmotViewModel.state.collectLatest {
+                Timber.tag("MainActivty")
+                    .d("track state is: " + it.success + " and error is: " + it.error)
+            }
+        }
 
         // Apply theme from preferences before setting content view
         themeUtils.applyThemeWithAnimation(this)
@@ -99,13 +115,7 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
-//        // Listen for navigation changes and ensure language is consistently applied
-//        navController.addOnDestinationChangedListener { _, _, _ ->
-//            // Reapply language settings when destination changes
-//            preferencesManager.language?.let { savedLanguage ->
-//                applyLanguage(savedLanguage)
-//            }
-//        }
+
 
         // Set up bottom navigation with smooth transitions
         val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
@@ -141,12 +151,22 @@ class MainActivity : AppCompatActivity() {
         // Example of loading an image from assets (uncomment when you have images in assets)
         // loadImageFromAssets()
     }
-
+    private  fun setupTimber(){
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
+    }
     private fun setupApp() {
         // Do your app initialization here
         // For example, load initial data, set up viewmodels, etc.
         
         // Once everything is ready, set isReady to true
+        preferencesManager.track?.let{it->
+            var track = it;
+            track = track.copy(date = Date())
+            Timber.tag("MainActivity").d(track.toJson())
+            notmotViewModel.trackUser(track)
+        }
         isReady = true
     }
 
