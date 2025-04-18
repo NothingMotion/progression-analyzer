@@ -1,5 +1,6 @@
 package com.nothingmotion.brawlprogressionanalyzer.util
 
+import android.util.Log
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
@@ -8,10 +9,11 @@ import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.ProgressionAnalyzerAPI
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.TokenRepository
+import timber.log.Timber
 import java.util.Date
 import javax.inject.Inject
 
-class TokenManager constructor(){
+class TokenManager @Inject constructor(){
     @Inject lateinit var repository: TokenRepository
     @Inject lateinit var prefsManager: PreferencesManager
     fun generate(userId: String) : String{
@@ -30,11 +32,14 @@ class TokenManager constructor(){
             .build()
             .verify(token)
     }
-    suspend fun generateAccessToken(frontEndToken: String): String{
+    suspend fun generateAccessToken(frontEndToken: String): String?{
         return when (val result = repository.getAccessToken(frontEndToken)){
-            is Result.Error -> ""
-            is Result.Loading -> ""
-            is Result.Success -> result.data.token
+            is Result.Error -> {
+                Timber.tag("TokenManager").e(result.error.name); null}
+            is Result.Loading -> null
+            is Result.Success -> {
+                Timber.tag("TokenManager").d( result.data.response.token?: "null");
+                result.data.response.token}
         }
     }
     suspend fun validateAccessToken(accessToken: String) : Boolean {
@@ -44,10 +49,10 @@ class TokenManager constructor(){
             is Result.Success -> true
         }
     }
-    suspend fun getAccessToken(userId: String) : String{
+    suspend fun getAccessToken(userId: String) : String?{
         // Check if access token already exists
         val accessToken = prefsManager.accessToken
-        val frontEndToken = prefsManager.frontEndToken
+        var frontEndToken = prefsManager.frontEndToken
         if (accessToken != null){
             // Validate access token and if was ok return it
             if(validateAccessToken(accessToken)) return accessToken
@@ -66,6 +71,7 @@ class TokenManager constructor(){
                 } else {
                     // If frontEndToken does not exist, generate a new one
                     prefsManager.frontEndToken = generate(userId)
+                    frontEndToken = prefsManager.frontEndToken
                 }
                 val newAccessToken = generateAccessToken(frontEndToken!!)
                 prefsManager.accessToken = newAccessToken
@@ -86,7 +92,7 @@ class TokenManager constructor(){
             } else {
                 // If frontEndToken does not exist, generate a new one
                 prefsManager.frontEndToken = generate(userId)
-
+                frontEndToken = prefsManager.frontEndToken
             }
             val newAccessToken = generateAccessToken(frontEndToken!!)
             prefsManager.accessToken = newAccessToken
