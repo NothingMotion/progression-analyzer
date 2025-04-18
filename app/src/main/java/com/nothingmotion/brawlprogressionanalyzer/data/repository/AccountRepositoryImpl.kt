@@ -75,6 +75,20 @@ class AccountRepositoryImpl @Inject constructor(
             try {
                 emit(Result.Success(api.getAccounts().map { it.toAccount() }))
             }
+            catch (e: IOException) {
+                emit(Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION))
+            } catch (e: HttpException) {
+                emit(
+                    when (e.code()) {
+                        400 -> Result.Error(DataError.NetworkError.NETWORK_ERROR)
+                        401 -> Result.Error(DataError.NetworkError.UNAUTHORIZED)
+                        403 -> Result.Error(DataError.NetworkError.FORBIDDEN)
+                        429 -> Result.Error(DataError.NetworkError.TOO_MANY_REQUESTS)
+                        500 -> Result.Error(DataError.NetworkError.SERVER_ERROR)
+                        else -> Result.Error(DataError.NetworkError.UNKNOWN)
+                    }
+                )
+            }
             catch(e: Exception){
                 emit(Result.Error(DataError.NetworkError.UNKNOWN))
             }
