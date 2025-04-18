@@ -48,9 +48,9 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
         debug {
-            buildConfigField("String","PROGRESSION_ANALYZER_API","\"XXXX\"")
-            buildConfigField("String","BRAWLIFY_API_URL","\"XXXX\"")
-            buildConfigField("String","APPLICATION_FRONTEND_API_KEY","\"XXXX\"")
+            buildConfigField("String","PROGRESSION_ANALYZER_API","\"$progressionAnalyzerApi\"")
+            buildConfigField("String","BRAWLIFY_API_URL","\"$brawlifyApi\"")
+            buildConfigField("String","APPLICATION_FRONTEND_API_KEY","\"$frontEndSecret\"")
 
             buildFeatures.buildConfig = true
         }
