@@ -5,6 +5,7 @@ import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.History
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerTable
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.PassRewards
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.StarrDropRewards
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Track
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.UpgradeTable
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -71,7 +72,7 @@ interface ProgressionAnalyzerAPI {
     suspend fun getLatestUpdate(@Header("Authorization") authHeader: String) : Any
 
     @POST("notmot/track")
-    suspend fun newTrack(@Header("Authorization") authHeader: String, @Body body : Any) : Any
+    suspend fun newTrack(@Header("Authorization") authHeader: String, @Body body : Track) : Track
 
 
 }
