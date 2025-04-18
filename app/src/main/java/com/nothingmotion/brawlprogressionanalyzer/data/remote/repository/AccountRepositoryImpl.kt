@@ -70,6 +70,37 @@ class AccountRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun refreshAccount(tag: String): Result<Account, DataError.NetworkError> {
+        try {
+            val token = tokenManager.getAccessToken("")
+            return Result.Success(api.refreshAccount(tag,token).toAccount())
+        }
+
+
+
+
+
+
+
+
+        catch(e: IOException){
+            return Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION)
+        }
+        catch(e: HttpException){
+            return when (e.code()){
+                400 -> Result.Error(DataError.NetworkError.NETWORK_ERROR)
+                401 -> Result.Error(DataError.NetworkError.UNAUTHORIZED)
+                403 -> Result.Error(DataError.NetworkError.FORBIDDEN)
+                429 -> Result.Error(DataError.NetworkError.TOO_MANY_REQUESTS)
+                500 -> Result.Error(DataError.NetworkError.SERVER_ERROR)
+                else -> Result.Error(DataError.NetworkError.UNKNOWN)
+            }
+        }
+        catch(e: Exception){
+            return Result.Error(DataError.NetworkError.UNKNOWN)
+        }
+    }
+
     override suspend fun getAllAccounts(): Flow<Result<List<Account>,DataError.NetworkError>> {
         return flow {
             try {
