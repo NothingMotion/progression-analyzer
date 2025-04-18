@@ -1,6 +1,7 @@
 package com.nothingmotion.brawlprogressionanalyzer.data.remote
 
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIAccount
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIToken
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.History
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerTable
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.PassRewards
@@ -44,7 +45,7 @@ interface ProgressionAnalyzerAPI {
     /////////////////////
 
     @GET("token/access")
-    suspend fun getAccessToken(@Header("Authorization") authFrontEndHeader: String): String
+    suspend fun getAccessToken(@Header("Authorization") authFrontEndHeader: String): APIToken
 
     @GET("token/access/validate")
     suspend fun validateAccessToken(@Header("Authorization") authHeader: String) : Any
