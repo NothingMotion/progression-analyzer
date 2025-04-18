@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -6,9 +8,20 @@ plugins {
     id("androidx.navigation.safeargs.kotlin")
 }
 
+val properties = Properties()
+val propertiesFile = rootProject.file("local.properties")
+if (propertiesFile.exists()){
+    propertiesFile.inputStream().use {stream->
+        properties.load(stream)
+    }
+}
 android {
     namespace = "com.nothingmotion.brawlprogressionanalyzer"
     compileSdk = 35
+
+    val progressionAnalyzerApi = properties.getProperty("api.progression_analyzer","")
+    val brawlifyApi = properties.getProperty("api.brawlify","")
+    val frontEndSecret = properties.getProperty("api.application.front_end.key","")
 
     defaultConfig {
         applicationId = "com.nothingmotion.brawlprogressionanalyzer"
@@ -23,9 +36,9 @@ android {
     buildTypes {
         release {
 
-            buildConfigField("String","PROGRESSION_ANALYZER_API","\"XXXX\"")
-            buildConfigField("String","BRAWLIFY_API_URL","\"XXXX\"")
-            buildConfigField("String","APPLICATION_FRONTEND_API_KEY","\"XXXX\"")
+            buildConfigField("String","PROGRESSION_ANALYZER_API","\"$progressionAnalyzerApi\"")
+            buildConfigField("String","BRAWLIFY_API_URL","\"$brawlifyApi\"")
+            buildConfigField("String","APPLICATION_FRONTEND_API_KEY","\"$frontEndSecret\"")
 
             isMinifyEnabled = false
             proguardFiles(
