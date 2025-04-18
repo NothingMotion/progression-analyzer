@@ -24,6 +24,7 @@ android {
         release {
 
             buildConfigField("String","PROGRESSION_ANALYZER_API","\"XXXX\"")
+            buildConfigField("String","BRAWLIFY_API_URL","\"XXXX\"")
             buildConfigField("String","APPLICATION_FRONTEND_API_KEY","\"XXXX\"")
 
             isMinifyEnabled = false
@@ -35,6 +36,7 @@ android {
         }
         debug {
             buildConfigField("String","PROGRESSION_ANALYZER_API","\"XXXX\"")
+            buildConfigField("String","BRAWLIFY_API_URL","\"XXXX\"")
             buildConfigField("String","APPLICATION_FRONTEND_API_KEY","\"XXXX\"")
 
             buildFeatures.buildConfig = true
