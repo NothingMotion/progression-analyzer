@@ -1,10 +1,10 @@
-package com.nothingmotion.brawlprogressionanalyzer.data.repository
+package com.nothingmotion.brawlprogressionanalyzer.data.repository.fake
 
-import com.nothingmotion.brawlprogressionanalyzer.model.BrawlerData
-import com.nothingmotion.brawlprogressionanalyzer.model.Class
-import com.nothingmotion.brawlprogressionanalyzer.model.GadgetData
-import com.nothingmotion.brawlprogressionanalyzer.model.Rarity
-import com.nothingmotion.brawlprogressionanalyzer.model.StarPowerData
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerData
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Class
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.GadgetData
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Rarity
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.StarPowerData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -102,7 +102,7 @@ class FakeBrawlerRepository {
         }
         return starPowers
     }
-    private fun randomRarity():Rarity{
+    private fun randomRarity(): Rarity {
         val random = Random.nextInt(1, 4)
         return when (random) {
             1 -> Rarity(color = "#00FF00", id = 0, name = "Common")
@@ -111,7 +111,7 @@ class FakeBrawlerRepository {
             else -> Rarity(color = "#FF00FF", id = 3, name = "Epic")
         }
     }
-    private fun randomClass(): Class{
+    private fun randomClass(): Class {
         val random = Random.nextInt(1, 4)
         return when (random) {
             1 -> Class(id = 1, name = "Damage Dealer")

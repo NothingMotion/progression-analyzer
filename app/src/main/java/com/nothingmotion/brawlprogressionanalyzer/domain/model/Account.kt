@@ -1,4 +1,4 @@
-package com.nothingmotion.brawlprogressionanalyzer.model
+package com.nothingmotion.brawlprogressionanalyzer.domain.model
 
 import java.util.Date
 import java.util.UUID

@@ -1,4 +1,4 @@
-package com.nothingmotion.brawlprogressionanalyzer.model
+package com.nothingmotion.brawlprogressionanalyzer.domain.model
 
 
 sealed class Resource(
@@ -37,7 +37,7 @@ data class Bling(
 
     override val name: String = "Bling",
     override val amount: Int
-) :Resource(name,amount)
+) : Resource(name,amount)
 data class XPDoubler(
     override val name: String= "XP Doubler",
     override val amount: Int
@@ -66,14 +66,14 @@ data class Pin(
 data class Spray(
     override val name: String = "Spray",
     override val amount: Int
-):Resource(name,amount)
+): Resource(name,amount)
 
 data class BrawlerResource(
     override val name: String = "Brawler",
     override val amount: Int,
 
     val rarity: RarityData
-) :Resource(name,amount)
+) : Resource(name,amount)
 sealed class AbilityResource(
     override val name: String,
     override val amount: Int

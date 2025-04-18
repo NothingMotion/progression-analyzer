@@ -1,4 +1,4 @@
-package com.nothingmotion.brawlprogressionanalyzer.model
+package com.nothingmotion.brawlprogressionanalyzer.domain.model
 
 data class BrawlerTable(
     val rarity: RarityData,

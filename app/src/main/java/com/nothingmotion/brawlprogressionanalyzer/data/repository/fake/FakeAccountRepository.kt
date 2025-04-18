@@ -1,12 +1,12 @@
-package com.nothingmotion.brawlprogressionanalyzer.data.repository
+package com.nothingmotion.brawlprogressionanalyzer.data.repository.fake
 
-import com.nothingmotion.brawlprogressionanalyzer.model.Account
-import com.nothingmotion.brawlprogressionanalyzer.model.Brawler
-import com.nothingmotion.brawlprogressionanalyzer.model.Gadget
-import com.nothingmotion.brawlprogressionanalyzer.model.Gear
-import com.nothingmotion.brawlprogressionanalyzer.model.Player
-import com.nothingmotion.brawlprogressionanalyzer.model.Progress
-import com.nothingmotion.brawlprogressionanalyzer.model.StarPower
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Brawler
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Gadget
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Gear
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Player
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Progress
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.StarPower
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -292,7 +292,7 @@ class FakeAccountRepository @Inject constructor() {
      * Generates player history data for the given months
      */
     private fun generatePlayerHistory(
-        currentPlayer: Player, 
+        currentPlayer: Player,
         historyMonths: Int,
         brawlerCount: Int,
         maxedBrawlersCount: Int

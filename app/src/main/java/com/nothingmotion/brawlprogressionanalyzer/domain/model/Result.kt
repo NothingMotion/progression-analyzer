@@ -1,5 +1,4 @@
-package com.nothingmotion.brawlprogressionanalyzer.model
-import com.nothingmotion.brawlprogressionanalyzer.model.Error as Error
+package com.nothingmotion.brawlprogressionanalyzer.domain.model
 
 typealias RootError = Error
 sealed interface Result<out D, out E: RootError> {

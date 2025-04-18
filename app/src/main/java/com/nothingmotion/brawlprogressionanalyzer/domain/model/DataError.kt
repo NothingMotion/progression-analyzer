@@ -1,8 +1,8 @@
-package com.nothingmotion.brawlprogressionanalyzer.model
+package com.nothingmotion.brawlprogressionanalyzer.domain.model
 
 
-sealed interface DataError :Error {
-    enum class NetworkError : DataError{
+sealed interface DataError : Error {
+    enum class NetworkError : DataError {
         NO_INTERNET_CONNECTION,
         NETWORK_ERROR,
         NOT_FOUND,
@@ -10,7 +10,12 @@ sealed interface DataError :Error {
         SERVER_ERROR,
         TIMEOUT,
         UNKNOWN,
-        SSL_EXCEPTION
+        SSL_EXCEPTION,
+        UNAUTHORIZED,
+
+
+
+        FORBIDDEN
     }
 
 

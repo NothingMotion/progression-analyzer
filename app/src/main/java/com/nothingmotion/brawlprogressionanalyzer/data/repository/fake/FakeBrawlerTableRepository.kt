@@ -1,8 +1,7 @@
-package com.nothingmotion.brawlprogressionanalyzer.data.repository
+package com.nothingmotion.brawlprogressionanalyzer.data.repository.fake
 
-import com.nothingmotion.brawlprogressionanalyzer.model.BrawlerTable
-import com.nothingmotion.brawlprogressionanalyzer.model.RarityData
-import kotlinx.coroutines.flow.Flow
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerTable
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.RarityData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -1,10 +1,8 @@
-package com.nothingmotion.brawlprogressionanalyzer.data.repository
+package com.nothingmotion.brawlprogressionanalyzer.data.repository.fake
 
-import com.nothingmotion.brawlprogressionanalyzer.model.BrawlPassPlusRewards
-import com.nothingmotion.brawlprogressionanalyzer.model.BrawlPassRewards
-import com.nothingmotion.brawlprogressionanalyzer.model.PassRewards
-import com.nothingmotion.brawlprogressionanalyzer.model.StarrDrop
-import com.nothingmotion.brawlprogressionanalyzer.model.StarrDropRewards
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlPassPlusRewards
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlPassRewards
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.PassRewards
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
 
@@ -24,11 +22,13 @@ class FakePassTableRepository @Inject constructor(){
         )
     )
 
-    private val _passPlusTable = MutableStateFlow<BrawlPassPlusRewards>(BrawlPassPlusRewards(
+    private val _passPlusTable = MutableStateFlow<BrawlPassPlusRewards>(
+        BrawlPassPlusRewards(
         id = 3,
         name = "Premium Pass Plus",
         resources = listOf()
-    ))
+    )
+    )
 
     val passFreeTable get() = _passFreeTable
     val passPremiumTable get() = _passPremiumTable
