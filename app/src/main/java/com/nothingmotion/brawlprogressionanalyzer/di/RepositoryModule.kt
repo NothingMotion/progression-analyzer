@@ -1,10 +1,12 @@
 package com.nothingmotion.brawlprogressionanalyzer.di
 
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.AccountRepositoryImpl
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.BrawlerRepositoryImpl
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeAccountRepository
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeBrawlerRepository
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeBrawlerTableRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.AccountRepository
+import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -41,4 +43,9 @@ abstract class RepositoryModuleBinding{
     @Singleton
     abstract fun bindAccountRepository (accountRepositoryImpl: AccountRepositoryImpl) : AccountRepository
 
+
+    @Binds
+    @Singleton
+
+    abstract fun bindBrawlerRepository(brawlerRepositoryImpl: BrawlerRepositoryImpl) : BrawlerRepository
 }
