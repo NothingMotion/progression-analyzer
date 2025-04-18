@@ -7,4 +7,5 @@ import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
 
 interface TokenRepository {
     suspend fun getAccessToken(frontEndToken : String) : Result<APIToken,DataError.NetworkError>
+    suspend fun validateAccessToken(accessToken: String) : Result<String,DataError.NetworkError>
 }

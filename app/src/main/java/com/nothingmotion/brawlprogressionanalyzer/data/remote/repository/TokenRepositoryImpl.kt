@@ -35,4 +35,28 @@ class TokenRepositoryImpl :  TokenRepository{
             return Result.Error(DataError.NetworkError.UNKNOWN)
         }
     }
+
+    override suspend fun validateAccessToken(accessToken: String): Result<String, DataError.NetworkError> {
+        try{
+            return Result.Success(api.validateAccessToken(accessToken).toString())
+        }
+
+
+        catch(e: IOException){
+            return Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION)
+        }
+        catch(e: HttpException){
+            return when (e.code()){
+                400 -> Result.Error(DataError.NetworkError.NETWORK_ERROR)
+                401 -> Result.Error(DataError.NetworkError.UNAUTHORIZED)
+                403 -> Result.Error(DataError.NetworkError.FORBIDDEN)
+                429 -> Result.Error(DataError.NetworkError.TOO_MANY_REQUESTS)
+                500 -> Result.Error(DataError.NetworkError.SERVER_ERROR)
+                else -> Result.Error(DataError.NetworkError.UNKNOWN)
+            }
+        }
+        catch(e: Exception){
+            return Result.Error(DataError.NetworkError.UNKNOWN)
+        }
+    }
 }
