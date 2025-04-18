@@ -6,11 +6,13 @@ import com.auth0.jwt.interfaces.DecodedJWT
 import com.nothingmotion.brawlprogressionanalyzer.BuildConfig
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.ProgressionAnalyzerAPI
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
+import com.nothingmotion.brawlprogressionanalyzer.domain.repository.TokenRepository
 import java.util.Date
 import javax.inject.Inject
 
 class TokenManager constructor(){
-    @Inject lateinit var api: ProgressionAnalyzerAPI
+    @Inject lateinit var repository: TokenRepository
     @Inject lateinit var prefsManager: PreferencesManager
     fun generate(userId: String) : String{
         val algorithm = Algorithm.HMAC256(BuildConfig.APPLICATION_FRONTEND_API_KEY)
@@ -29,10 +31,18 @@ class TokenManager constructor(){
             .verify(token)
     }
     suspend fun generateAccessToken(frontEndToken: String): String{
-        return api.getAccessToken(frontEndToken)
+        return when (val result = repository.getAccessToken(frontEndToken)){
+            is Result.Error -> ""
+            is Result.Loading -> ""
+            is Result.Success -> result.data.token
+        }
     }
     suspend fun validateAccessToken(accessToken: String) : Boolean {
-        return true
+        return when(val result = repository.validateAccessToken(accessToken)){
+            is Result.Error -> false
+            is Result.Loading -> false
+            is Result.Success -> true
+        }
     }
     suspend fun getAccessToken(userId: String) : String{
         // Check if access token already exists
