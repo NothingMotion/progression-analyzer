@@ -9,7 +9,7 @@ import retrofit2.http.Query
 
 interface ProgressionAnalyzerAPI {
     @GET("accounts")
-    suspend fun getAccounts(): List<APIAccount>
+    suspend fun getAccounts(@Header("Authorization") authHeader: String): List<APIAccount>
 
     @GET("accounts/{tag}")
     suspend fun getAccount(

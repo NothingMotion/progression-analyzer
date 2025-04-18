@@ -22,9 +22,9 @@ class AccountRepositoryImpl @Inject constructor(
     lateinit var api: ProgressionAnalyzerAPI
     @Inject
     lateinit var tokenManager: TokenManager
-    override suspend fun getAccount(tag: String): Result<Account, DataError.NetworkError> {
+    override suspend fun getAccount(tag: String,token: String): Result<Account, DataError.NetworkError> {
         try {
-            val token = tokenManager.getAccessToken("")
+//            val token = tokenManager.getAccessToken("")
             return Result.Success(api.getAccount(tag, token).toAccount())
         } catch (e: IOException) {
             return Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION)
@@ -44,12 +44,13 @@ class AccountRepositoryImpl @Inject constructor(
 
     override suspend fun getAccountHistory(
         tag: String,
+        token:String,
         limit: Int?,
         offset: Int?
     ): Flow<Result<List<History>, DataError.NetworkError>> {
         return flow {
             try {
-                val token = tokenManager.getAccessToken("")
+//                val token = tokenManager.getAccessToken("")
                 emit(Result.Success(api.getAccountHistory(tag, limit, offset, token)))
             } catch (e: IOException) {
                 emit(Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION))
@@ -70,9 +71,9 @@ class AccountRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun refreshAccount(tag: String): Result<Account, DataError.NetworkError> {
+    override suspend fun refreshAccount(tag: String,token: String): Result<Account, DataError.NetworkError> {
         try {
-            val token = tokenManager.getAccessToken("")
+//            val token = tokenManager.getAccessToken("")
             return Result.Success(api.refreshAccount(tag,token).toAccount())
         }
         catch(e: IOException){
@@ -93,10 +94,10 @@ class AccountRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAllAccounts(): Flow<Result<List<Account>,DataError.NetworkError>> {
+    override suspend fun getAllAccounts(token:String): Flow<Result<List<Account>,DataError.NetworkError>> {
         return flow {
             try {
-                emit(Result.Success(api.getAccounts().map { it.toAccount() }))
+                emit(Result.Success(api.getAccounts(token).map { it.toAccount() }))
             }
             catch (e: IOException) {
                 emit(Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION))
@@ -118,9 +119,9 @@ class AccountRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun refreshAccounts(): Result<Unit, DataError.NetworkError> {
+    override suspend fun refreshAccounts(token: String): Result<Unit, DataError.NetworkError> {
         try {
-            val token = tokenManager.getAccessToken("")
+//            val token = tokenManager.getAccessToken("")
             api.refreshAccounts(token)
             return Result.Success(Unit)
         }
