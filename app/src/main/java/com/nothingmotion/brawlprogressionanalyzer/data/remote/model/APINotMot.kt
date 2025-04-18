@@ -1,5 +1,7 @@
 package com.nothingmotion.brawlprogressionanalyzer.data.remote.model
 
+import java.util.Date
+
 
 data class APIUpdate(
     val name: String,
@@ -9,7 +11,11 @@ data class APIUpdate(
     val updateDescription: String,
     val url: String,
 )
+data class APITokenResponse (
+    val token : String,
+    val expiresAt:Date,
+)
 data class APIToken(
     val message: String?,
-    val token: String,
+    val response:APITokenResponse
 )
