@@ -22,12 +22,22 @@ android {
 
     buildTypes {
         release {
+
+            buildConfigField("String","PROGRESSION_ANALYZER_API","\"XXXX\"")
+            buildConfigField("String","APPLICATION_FRONTEND_API_KEY","\"XXXX\"")
+
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("debug")
+        }
+        debug {
+            buildConfigField("String","PROGRESSION_ANALYZER_API","\"XXXX\"")
+            buildConfigField("String","APPLICATION_FRONTEND_API_KEY","\"XXXX\"")
+
+            buildFeatures.buildConfig = true
         }
     }
     buildFeatures {
@@ -45,6 +55,7 @@ android {
 
 dependencies {
 
+    val fragment_version = "1.8.6"
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -79,10 +90,7 @@ dependencies {
     //implementation ("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
     kapt ("androidx.hilt:hilt-compiler:1.0.0")
 
-
-//    implementation("com.github.blongho:worldCountryData:v1.5.4-alpha")
-
-    val fragment_version = "1.8.6"
+    
 
     // Java language implementation
     implementation("androidx.fragment:fragment:$fragment_version")
@@ -114,8 +122,11 @@ dependencies {
     // Fragment testing
     debugImplementation("androidx.fragment:fragment-testing:1.6.2")
 
-
-
-
     implementation ("androidx.core:core-splashscreen:1.0.1")
+
+    // Retrofit
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    implementation ("com.auth0:java-jwt:4.4.0")
 }

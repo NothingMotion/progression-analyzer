@@ -1,8 +1,8 @@
 package com.nothingmotion.brawlprogressionanalyzer.util
 
-import com.nothingmotion.brawlprogressionanalyzer.data.repository.FakeStarrDropTableRepository
-import com.nothingmotion.brawlprogressionanalyzer.model.StarrDropReward
-import com.nothingmotion.brawlprogressionanalyzer.model.StarrDropRewards
+import com.nothingmotion.brawlprogressionanalyzer.data.repository.fake.FakeStarrDropTableRepository
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.StarrDropReward
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.StarrDropRewards
 import javax.inject.Inject
 import javax.inject.Singleton
 

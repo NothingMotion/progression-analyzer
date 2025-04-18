@@ -1,6 +1,6 @@
 package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
 
-import com.nothingmotion.brawlprogressionanalyzer.model.Account
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
 
 data class AccountsState
     (

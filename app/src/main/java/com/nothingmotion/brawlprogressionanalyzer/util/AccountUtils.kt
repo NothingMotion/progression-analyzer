@@ -1,8 +1,7 @@
 package com.nothingmotion.brawlprogressionanalyzer.util
 
-import com.nothingmotion.brawlprogressionanalyzer.model.Account
-import com.nothingmotion.brawlprogressionanalyzer.model.Player
-import com.nothingmotion.brawlprogressionanalyzer.model.Progress
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Progress
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date

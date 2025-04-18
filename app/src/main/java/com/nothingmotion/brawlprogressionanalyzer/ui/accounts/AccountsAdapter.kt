@@ -1,6 +1,5 @@
 package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,23 +7,16 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.nothingmotion.brawlprogressionanalyzer.R
 import com.nothingmotion.brawlprogressionanalyzer.databinding.ItemAccountBinding
-import com.nothingmotion.brawlprogressionanalyzer.model.Account
-import com.nothingmotion.brawlprogressionanalyzer.model.Player
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
 import com.nothingmotion.brawlprogressionanalyzer.util.DateUtils
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import android.view.animation.AnimationUtils
 import android.view.animation.DecelerateInterpolator
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
-import com.nothingmotion.brawlprogressionanalyzer.model.Language
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Language
 
 class AccountsAdapter(
     private val onItemClicked: (Account) -> Unit,

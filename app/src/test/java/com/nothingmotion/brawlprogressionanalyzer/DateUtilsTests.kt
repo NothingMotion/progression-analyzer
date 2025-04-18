@@ -1,7 +1,5 @@
 package com.nothingmotion.brawlprogressionanalyzer
 
-import android.os.Debug
-import android.util.Log
 import com.nothingmotion.brawlprogressionanalyzer.util.DateUtils
 import org.junit.Test
 import java.util.Date

@@ -5,9 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnticipateInterpolator
-import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -16,19 +14,14 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.fragment.NavHostFragment
 //import androidx.navigation.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import androidx.core.view.doOnPreDraw
 import androidx.navigation.NavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.core.view.updatePadding
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
-import com.nothingmotion.brawlprogressionanalyzer.model.Language
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Language
 import com.nothingmotion.brawlprogressionanalyzer.util.AssetUtils
 import com.nothingmotion.brawlprogressionanalyzer.util.LanguageDialogHelper
 import com.nothingmotion.brawlprogressionanalyzer.util.LocaleHelper
@@ -37,7 +30,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import com.nothingmotion.brawlprogressionanalyzer.databinding.ActivityMainBinding
 import com.nothingmotion.brawlprogressionanalyzer.ui.tutorial.TutorialManager
-import com.nothingmotion.brawlprogressionanalyzer.ui.accounts.AccountsViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 

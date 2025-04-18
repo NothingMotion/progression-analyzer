@@ -22,8 +22,8 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nothingmotion.brawlprogressionanalyzer.R
-import com.nothingmotion.brawlprogressionanalyzer.model.Brawler
-import com.nothingmotion.brawlprogressionanalyzer.model.Player
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Brawler
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Player
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date

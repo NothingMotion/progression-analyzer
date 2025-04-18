@@ -2,11 +2,11 @@ package com.nothingmotion.brawlprogressionanalyzer.ui.newaccount
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nothingmotion.brawlprogressionanalyzer.data.repository.FakeAccountRepository
-import com.nothingmotion.brawlprogressionanalyzer.model.Account
-import com.nothingmotion.brawlprogressionanalyzer.model.Brawler
-import com.nothingmotion.brawlprogressionanalyzer.model.Player
-import com.nothingmotion.brawlprogressionanalyzer.model.Progress
+import com.nothingmotion.brawlprogressionanalyzer.data.repository.fake.FakeAccountRepository
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Brawler
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Player
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Progress
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -7,13 +7,9 @@ import android.os.Looper
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.animation.doOnEnd
-import androidx.core.content.ContextCompat
 import com.google.android.material.color.MaterialColors
-import com.nothingmotion.brawlprogressionanalyzer.R
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.di.PreferencesManagerModule
-import java.util.concurrent.CompletableFuture
-import java.util.logging.Handler
 import javax.inject.Inject
 import javax.inject.Singleton
 

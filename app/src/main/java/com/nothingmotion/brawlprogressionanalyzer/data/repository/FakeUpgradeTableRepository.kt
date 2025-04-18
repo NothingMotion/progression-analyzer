@@ -1,7 +1,7 @@
 package com.nothingmotion.brawlprogressionanalyzer.data.repository
 
-import com.nothingmotion.brawlprogressionanalyzer.model.UpgradeTable
-import com.nothingmotion.brawlprogressionanalyzer.model.UpgradeTableLevel
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.UpgradeTable
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.UpgradeTableLevel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject

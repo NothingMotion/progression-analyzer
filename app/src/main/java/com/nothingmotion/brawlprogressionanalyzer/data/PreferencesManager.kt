@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.nothingmotion.brawlprogressionanalyzer.model.Language
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Language
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -59,6 +59,15 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
         get() = securePrefs.getString(KEY_API_KEY, null)
         set(value) = securePrefs.edit().putString(KEY_API_KEY, value).apply()
 
+    // Secure token storage
+    var accessToken: String?
+        get() = securePrefs.getString(ACCESS_TOKEN_KEY, null)
+        set(value) = securePrefs.edit().putString(ACCESS_TOKEN_KEY, value).apply()
+
+    var frontEndToken: String?
+        get() = securePrefs.getString(FRONTEND_TOKEN_KEY, null)
+        set(value) = securePrefs.edit().putString(FRONTEND_TOKEN_KEY, value).apply()
+
     companion object {
         private const val SECURE_PREFS_FILE_NAME = "secure_preferences"
 
@@ -70,6 +79,10 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
 
         // Secure preference keys
         private const val KEY_API_KEY = "api_key"
+
+        // Secure token keys
+        private const val ACCESS_TOKEN_KEY = "access_token"
+        private const val FRONTEND_TOKEN_KEY = "frontend_token"
 
         private val _isPickedLanguage  = MutableStateFlow<Boolean> (false)
         val isPickedLanguage get() = PreferencesManager._isPickedLanguage.asStateFlow()

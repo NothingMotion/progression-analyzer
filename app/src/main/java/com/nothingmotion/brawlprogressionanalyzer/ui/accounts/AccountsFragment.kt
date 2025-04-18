@@ -35,13 +35,12 @@ import com.google.android.material.button.MaterialButton
 import com.nothingmotion.brawlprogressionanalyzer.R
 import com.nothingmotion.brawlprogressionanalyzer.databinding.FragmentAccountsBinding
 import com.nothingmotion.brawlprogressionanalyzer.databinding.DialogEditTagBinding
-import com.nothingmotion.brawlprogressionanalyzer.model.Account
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
-import android.view.animation.Animation
 import android.view.animation.OvershootInterpolator
 import android.content.res.Configuration
 import android.util.Log

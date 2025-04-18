@@ -1,9 +1,11 @@
 package com.nothingmotion.brawlprogressionanalyzer.di
 
-import com.nothingmotion.brawlprogressionanalyzer.data.BrawlerApi
-import com.nothingmotion.brawlprogressionanalyzer.data.repository.FakeAccountRepository
-import com.nothingmotion.brawlprogressionanalyzer.data.repository.FakeBrawlerRepository
-import com.nothingmotion.brawlprogressionanalyzer.data.repository.FakeBrawlerTableRepository
+import com.nothingmotion.brawlprogressionanalyzer.data.ProgressionAnalyzerAPI
+import com.nothingmotion.brawlprogressionanalyzer.data.repository.AccountRepositoryImpl
+import com.nothingmotion.brawlprogressionanalyzer.data.repository.fake.FakeAccountRepository
+import com.nothingmotion.brawlprogressionanalyzer.data.repository.fake.FakeBrawlerRepository
+import com.nothingmotion.brawlprogressionanalyzer.data.repository.fake.FakeBrawlerTableRepository
+import com.nothingmotion.brawlprogressionanalyzer.domain.repository.AccountRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,10 +32,10 @@ object RepositoryModule {
     fun provideFakeBrawlerRepository(): FakeBrawlerRepository {
         return FakeBrawlerRepository()
     }
-    
+
     @Provides
     @Singleton
-    fun provideBrawlerApi(brawlerRepository: FakeBrawlerRepository): BrawlerApi {
-        return BrawlerApi(brawlerRepository)
+    fun provideAccountRepository (progressionAnalyzerAPI: ProgressionAnalyzerAPI) : AccountRepository {
+        return AccountRepositoryImpl(progressionAnalyzerAPI)
     }
 } 

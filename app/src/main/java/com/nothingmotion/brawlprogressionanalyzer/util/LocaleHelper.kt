@@ -4,12 +4,10 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Handler
-import android.os.LocaleList
 import android.os.Looper
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
-import androidx.core.os.postDelayed
-import com.nothingmotion.brawlprogressionanalyzer.model.Language
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Language
 import java.util.Locale
 
 /**
@@ -23,7 +21,7 @@ object LocaleHelper {
      * Updates the application locale based on the selected language
      * @param language The language to set
      */
-    fun setLocale(language: Language,isImmediate:Boolean = true, delay: Long = 1000) {
+    fun setLocale(language: Language, isImmediate:Boolean = true, delay: Long = 1000) {
         // Skip if we're already using this language
         if (language == lastAppliedLanguage) return
         

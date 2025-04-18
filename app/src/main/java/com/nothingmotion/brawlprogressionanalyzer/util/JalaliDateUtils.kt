@@ -1,6 +1,5 @@
 package com.nothingmotion.brawlprogressionanalyzer.util
 
-import java.text.SimpleDateFormat
 import java.util.*
 
 /**

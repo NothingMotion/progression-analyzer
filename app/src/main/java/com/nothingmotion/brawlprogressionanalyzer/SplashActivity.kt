@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.widget.ImageView
 import androidx.lifecycle.lifecycleScope
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
-import com.nothingmotion.brawlprogressionanalyzer.model.Language
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Language
 import com.nothingmotion.brawlprogressionanalyzer.util.LocaleHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
