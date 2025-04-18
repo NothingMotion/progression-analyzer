@@ -2,6 +2,8 @@ package com.nothingmotion.brawlprogressionanalyzer
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -11,6 +13,7 @@ import android.widget.ImageView
 import androidx.lifecycle.lifecycleScope
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Language
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Track
 import com.nothingmotion.brawlprogressionanalyzer.util.LocaleHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -50,12 +53,33 @@ class SplashActivity : AppCompatActivity() {
     }
     
     private fun processLanguageAndNavigate() {
+        val (versionString,version) = getAppVersionInfo()
+        if (preferencesManager.track == null) {
+            preferencesManager.track = Track(version= version,versionString= versionString)
+        }else {
+            if (version > preferencesManager.track!!.version!!){
+                preferencesManager.track =  preferencesManager.track!!.copy(version= version,versionString= versionString)
+            }
+        }
         // Apply language if saved, otherwise go directly to main activity
         preferencesManager.language?.let { savedLanguage ->
             applyLanguage(savedLanguage)
         } ?: navigateToMainWithDelay()
     }
-    
+    private fun getAppVersionInfo(): Pair<String, Long> {
+        return try {
+            val packageInfo = packageManager.getPackageInfo(packageName, 0)
+            val versionName = packageInfo.versionName ?: "unknown"
+            val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                packageInfo.longVersionCode
+            } else {
+                packageInfo.versionCode.toLong()
+            }
+            versionName to versionCode
+        } catch (e: PackageManager.NameNotFoundException) {
+            "unknown" to -1
+        }
+    }
     private fun applyLanguage(language: Language) {
         lifecycleScope.launch(Dispatchers.Default) {
             val currentLocale = LocaleHelper.getCurrentLocale(applicationContext).language
