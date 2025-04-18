@@ -2,6 +2,7 @@ package com.nothingmotion.brawlprogressionanalyzer.data.remote
 
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIAccount
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIToken
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIUpdate
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.History
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerTable
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.PassRewards
@@ -70,7 +71,7 @@ interface ProgressionAnalyzerAPI {
     suspend fun getStarrDropRewards(@Header("Authorization") authHeader: String) : List<StarrDropRewards>
 
     @GET("notmot/latest")
-    suspend fun getLatestUpdate(@Header("Authorization") authHeader: String) : Any
+    suspend fun getLatestUpdate(@Header("Authorization") authHeader: String) : APIUpdate
 
     @POST("notmot/track")
     suspend fun newTrack(@Header("Authorization") authHeader: String, @Body body : Track) : Track
