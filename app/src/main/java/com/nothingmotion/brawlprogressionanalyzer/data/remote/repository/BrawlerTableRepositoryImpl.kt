@@ -11,12 +11,12 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-class BrawlerTableRepositoryImpl : BrawlerTableRepository {
+class BrawlerTableRepositoryImpl @Inject constructor(): BrawlerTableRepository {
     @Inject lateinit var api: ProgressionAnalyzerAPI
     override suspend fun getBrawlerTable(token: String): Flow<Result<List<BrawlerTable>,DataError.NetworkError>> {
         return flow {
             try {
-                emit(Result.Success(api.getBrawlerTable(token)))
+                emit(Result.Success(api.getBrawlerTable("Bearer $token")))
             }
             catch (e: IOException) {
                 emit(Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION))

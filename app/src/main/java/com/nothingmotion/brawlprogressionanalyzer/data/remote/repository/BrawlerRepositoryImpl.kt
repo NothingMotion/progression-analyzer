@@ -11,7 +11,7 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-class BrawlerRepositoryImpl() : BrawlerRepository {
+class BrawlerRepositoryImpl @Inject constructor() : BrawlerRepository {
     @Inject lateinit var api : BrawlifyApi
     override suspend fun getBrawler(id: Long): Result<BrawlerData,DataError.NetworkError> {
         try {

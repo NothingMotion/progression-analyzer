@@ -10,12 +10,12 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-class NotMotRepositoryImpl : NotMotRepository {
+class NotMotRepositoryImpl @Inject constructor() : NotMotRepository {
 
     @Inject lateinit var api: ProgressionAnalyzerAPI
     override suspend fun getLatestUpdate(token: String): Result<APIUpdate, DataError.NetworkError> {
         try {
-            return Result.Success(api.getLatestUpdate(token))
+            return Result.Success(api.getLatestUpdate("Bearer $token"))
         }
         catch(e: IOException){
             return Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION)
@@ -40,7 +40,7 @@ class NotMotRepositoryImpl : NotMotRepository {
         data: Track
     ): Result<Track, DataError.NetworkError> {
         try {
-            return Result.Success(api.newTrack(token,data))
+            return Result.Success(api.newTrack("Bearer $token",data))
         }
         catch(e: IOException){
             return Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION)

@@ -1,20 +1,23 @@
 package com.nothingmotion.brawlprogressionanalyzer.data.remote.repository
 
+import android.util.Log
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.ProgressionAnalyzerAPI
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIToken
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.DataError
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.TokenRepository
 import retrofit2.HttpException
+import timber.log.Timber
 import java.io.IOException
+import java.util.logging.Logger
 import javax.inject.Inject
 
 
-class TokenRepositoryImpl :  TokenRepository{
+class TokenRepositoryImpl @Inject constructor():  TokenRepository{
     @Inject lateinit var api: ProgressionAnalyzerAPI
     override suspend fun getAccessToken(frontEndToken: String): Result<APIToken, DataError.NetworkError> {
         try{
-            return Result.Success(api.getAccessToken(frontEndToken))
+            return Result.Success(api.getAccessToken("Bearer $frontEndToken"))
         }
 
 
@@ -38,7 +41,7 @@ class TokenRepositoryImpl :  TokenRepository{
 
     override suspend fun validateAccessToken(accessToken: String): Result<String, DataError.NetworkError> {
         try{
-            return Result.Success(api.validateAccessToken(accessToken).toString())
+            return Result.Success(api.validateAccessToken("Bearer $accessToken").toString())
         }
 
 
@@ -46,6 +49,7 @@ class TokenRepositoryImpl :  TokenRepository{
             return Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION)
         }
         catch(e: HttpException){
+            Timber.tag("TokenRepositoryImpl").e(e.message())
             return when (e.code()){
                 400 -> Result.Error(DataError.NetworkError.NETWORK_ERROR)
                 401 -> Result.Error(DataError.NetworkError.UNAUTHORIZED)

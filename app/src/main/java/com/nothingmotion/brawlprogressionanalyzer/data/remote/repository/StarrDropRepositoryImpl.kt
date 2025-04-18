@@ -11,7 +11,7 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-class StarrDropRepositoryImpl : StarrDropRepository {
+class StarrDropRepositoryImpl @Inject constructor(): StarrDropRepository {
 
 
 
@@ -19,7 +19,7 @@ class StarrDropRepositoryImpl : StarrDropRepository {
     override suspend fun getStarrDropRewards(token: String): Flow<Result<List<StarrDropRewards>, DataError.NetworkError>> {
         return flow {
             try {
-                emit(Result.Success(api.getStarrDropRewards(token)))
+                emit(Result.Success(api.getStarrDropRewards("Bearer $token")))
             }
             catch (e: IOException) {
                 emit(Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION))

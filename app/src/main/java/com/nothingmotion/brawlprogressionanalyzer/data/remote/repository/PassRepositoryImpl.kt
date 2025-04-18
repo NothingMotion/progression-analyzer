@@ -9,11 +9,11 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-class PassRepositoryImpl : PassRepository {
+class PassRepositoryImpl @Inject constructor(): PassRepository {
     @Inject lateinit var api: ProgressionAnalyzerAPI
     override suspend fun getPassFreeTable(token: String): Result<PassRewards, DataError.NetworkError> {
         try {
-            return Result.Success(api.getPassFreeRewards(token))
+            return Result.Success(api.getPassFreeRewards("Bearer $token"))
         }
 
 
@@ -37,7 +37,7 @@ class PassRepositoryImpl : PassRepository {
 
     override suspend fun getPassPremiumTable(token: String): Result<PassRewards, DataError.NetworkError> {
         try {
-            return Result.Success(api.getPassPremiumRewards(token))
+            return Result.Success(api.getPassPremiumRewards("Bearer $token"))
         }
 
 
@@ -61,7 +61,7 @@ class PassRepositoryImpl : PassRepository {
 
     override suspend fun getPassPlusTable(token: String): Result<PassRewards, DataError.NetworkError> {
         try {
-            return Result.Success(api.getPassPlusRewards(token))
+            return Result.Success(api.getPassPlusRewards("Bearer $token"))
         }
 
 
