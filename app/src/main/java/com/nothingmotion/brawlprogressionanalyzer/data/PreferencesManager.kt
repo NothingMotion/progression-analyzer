@@ -6,6 +6,9 @@ import androidx.preference.PreferenceManager
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Language
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Track
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.toJson
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.toTrack
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -53,6 +56,10 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
             return languageValue?.let { Language.valueOf(it) }
         }
         set(value) = standardPrefs.edit().putString(LANGUAGE_KEY, value?.name).apply()
+    // track preferences
+    var track : Track?
+        get() = standardPrefs.getString(TRACK_KEY,null)?.toTrack()
+        set(value) = standardPrefs.edit().putString(TRACK_KEY,value?.toJson()).apply()
 
     // Secure API key storage
     var apiKey: String?
@@ -83,6 +90,8 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
         // Secure token keys
         private const val ACCESS_TOKEN_KEY = "access_token"
         private const val FRONTEND_TOKEN_KEY = "frontend_token"
+
+        private const val TRACK_KEY = "track"
 
         private val _isPickedLanguage  = MutableStateFlow<Boolean> (false)
         val isPickedLanguage get() = PreferencesManager._isPickedLanguage.asStateFlow()
