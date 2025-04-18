@@ -1,4 +1,4 @@
-package com.nothingmotion.brawlprogressionanalyzer.data.repository
+package com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake
 
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.UpgradeTable
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.UpgradeTableLevel

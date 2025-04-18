@@ -1,4 +1,4 @@
-package com.nothingmotion.brawlprogressionanalyzer.data.repository.fake
+package com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake
 
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerTable
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.RarityData

@@ -2,7 +2,7 @@ package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nothingmotion.brawlprogressionanalyzer.data.repository.fake.FakeAccountRepository
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeAccountRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

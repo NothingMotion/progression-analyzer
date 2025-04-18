@@ -1,4 +1,4 @@
-package com.nothingmotion.brawlprogressionanalyzer.data.model
+package com.nothingmotion.brawlprogressionanalyzer.data.remote.model
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Brawler
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Progress
 import java.util.Date

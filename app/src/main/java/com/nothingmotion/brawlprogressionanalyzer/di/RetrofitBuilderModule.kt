@@ -1,7 +1,7 @@
 package com.nothingmotion.brawlprogressionanalyzer.di
 
 import com.nothingmotion.brawlprogressionanalyzer.BuildConfig
-import com.nothingmotion.brawlprogressionanalyzer.data.ProgressionAnalyzerAPI
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.ProgressionAnalyzerAPI
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
@@ -9,9 +9,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
-@Singleton
-@InstallIn(SingletonComponent::class)
 @Module
+@InstallIn(SingletonComponent::class)
 object RetrofitBuilderModule {
 
 

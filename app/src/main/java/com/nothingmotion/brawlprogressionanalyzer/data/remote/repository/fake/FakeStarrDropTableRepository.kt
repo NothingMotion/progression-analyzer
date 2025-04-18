@@ -1,4 +1,4 @@
-package com.nothingmotion.brawlprogressionanalyzer.data.repository.fake
+package com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake
 
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Bling
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerResource

@@ -1,6 +1,6 @@
 package com.nothingmotion.brawlprogressionanalyzer.domain.repository
 
-import com.nothingmotion.brawlprogressionanalyzer.data.model.History
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.History
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.DataError
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result

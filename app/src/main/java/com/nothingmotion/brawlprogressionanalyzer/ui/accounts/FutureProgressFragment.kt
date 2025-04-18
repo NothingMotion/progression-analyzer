@@ -19,10 +19,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.card.MaterialCardView
 import com.nothingmotion.brawlprogressionanalyzer.R
-import com.nothingmotion.brawlprogressionanalyzer.data.repository.fake.FakeBrawlerRepository
-import com.nothingmotion.brawlprogressionanalyzer.data.repository.fake.FakeBrawlerTableRepository
-import com.nothingmotion.brawlprogressionanalyzer.data.repository.fake.FakeStarrDropTableRepository
-import com.nothingmotion.brawlprogressionanalyzer.data.repository.FakeUpgradeTableRepository
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeBrawlerRepository
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeBrawlerTableRepository
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeStarrDropTableRepository
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeUpgradeTableRepository
 import com.nothingmotion.brawlprogressionanalyzer.databinding.FragmentFutureProgressBinding
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerData

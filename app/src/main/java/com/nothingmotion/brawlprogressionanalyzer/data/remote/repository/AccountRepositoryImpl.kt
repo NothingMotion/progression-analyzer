@@ -1,8 +1,8 @@
-    package com.nothingmotion.brawlprogressionanalyzer.data.repository
+    package com.nothingmotion.brawlprogressionanalyzer.data.remote.repository
 
-import com.nothingmotion.brawlprogressionanalyzer.data.ProgressionAnalyzerAPI
-import com.nothingmotion.brawlprogressionanalyzer.data.mappers.toAccount
-import com.nothingmotion.brawlprogressionanalyzer.data.model.History
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.ProgressionAnalyzerAPI
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.mappers.toAccount
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.History
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.DataError
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result

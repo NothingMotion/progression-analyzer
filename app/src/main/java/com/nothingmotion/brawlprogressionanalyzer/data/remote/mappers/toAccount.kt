@@ -1,8 +1,8 @@
-package com.nothingmotion.brawlprogressionanalyzer.data.mappers
+package com.nothingmotion.brawlprogressionanalyzer.data.remote.mappers
 
-import com.nothingmotion.brawlprogressionanalyzer.data.model.APIAccount
-import com.nothingmotion.brawlprogressionanalyzer.data.model.Icon
-import com.nothingmotion.brawlprogressionanalyzer.data.model.Player
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIAccount
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.Icon
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.Player
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
 fun Icon.toIcon() : com.nothingmotion.brawlprogressionanalyzer.domain.model.Icon {
     return com.nothingmotion.brawlprogressionanalyzer.domain.model.Icon(this.id,this.url)
@@ -26,9 +26,9 @@ fun APIAccount.toAccount(): Account {
     return Account(
         this.account.toPlayer(),
         listOf(),
-        listOf(),
+        this.previousProgresses,
         this.currentProgress,
-        listOf(),
+        this.futureProgresses,
         this.createdAt,
         this.updatedAt
     )

@@ -5,11 +5,13 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.nothingmotion.brawlprogressionanalyzer.BuildConfig
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
-import com.nothingmotion.brawlprogressionanalyzer.data.ProgressionAnalyzerAPI
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.ProgressionAnalyzerAPI
 import java.util.Date
 import javax.inject.Inject
 
-class TokenManager constructor(@Inject val api: ProgressionAnalyzerAPI, @Inject val prefsManager: PreferencesManager){
+class TokenManager constructor(){
+    @Inject lateinit var api: ProgressionAnalyzerAPI
+    @Inject lateinit var prefsManager: PreferencesManager
     fun generate(userId: String) : String{
         val algorithm = Algorithm.HMAC256(BuildConfig.APPLICATION_FRONTEND_API_KEY)
         val builder = JWT.create()

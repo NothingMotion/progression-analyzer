@@ -2,7 +2,7 @@ package com.nothingmotion.brawlprogressionanalyzer.ui.newaccount
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nothingmotion.brawlprogressionanalyzer.data.repository.fake.FakeAccountRepository
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeAccountRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Brawler
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Player

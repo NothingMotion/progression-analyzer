@@ -1,7 +1,7 @@
-package com.nothingmotion.brawlprogressionanalyzer.data
+package com.nothingmotion.brawlprogressionanalyzer.data.remote
 
-import com.nothingmotion.brawlprogressionanalyzer.data.model.APIAccount
-import com.nothingmotion.brawlprogressionanalyzer.data.model.History
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIAccount
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.History
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Path
