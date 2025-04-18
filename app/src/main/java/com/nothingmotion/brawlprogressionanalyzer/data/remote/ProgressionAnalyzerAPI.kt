@@ -2,12 +2,14 @@ package com.nothingmotion.brawlprogressionanalyzer.data.remote
 
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIAccount
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.History
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerTable
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ProgressionAnalyzerAPI {
+    /////////////////////////////////
     @GET("accounts")
     suspend fun getAccounts(@Header("Authorization") authHeader: String): List<APIAccount>
 
@@ -33,10 +35,14 @@ interface ProgressionAnalyzerAPI {
 
     @GET("accounts/refresh")
     suspend fun refreshAccounts(@Header("Authorization") authHeader: String): Any
+    /////////////////////
 
     @GET("token/access")
     suspend fun getAccessToken(@Header("Authorization") authFrontEndHeader: String): String
 
     @GET("token/access/validate")
     suspend fun validateAccessToken(@Header("Authorization") authHeader: String) : Any
+    ///////////////////////
+    @GET("table/brawler/rarity")
+    suspend fun getBrawlerTable(@Header("Authorization") authHeader: String): List<BrawlerTable>
 }
