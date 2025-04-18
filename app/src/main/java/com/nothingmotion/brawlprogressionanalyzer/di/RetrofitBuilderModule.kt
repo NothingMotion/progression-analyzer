@@ -36,7 +36,7 @@ object RetrofitBuilderModule {
     @Provides
     fun provideBrawlifyApi() : BrawlifyApi {
         val retrofit = Retrofit.Builder()
-            .baseUrl("")
+            .baseUrl(BuildConfig.BRAWLIFY_API_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
