@@ -13,6 +13,11 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.signature.ObjectKey
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
@@ -21,9 +26,18 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.nothingmotion.brawlprogressionanalyzer.BrawlAnalyzerApp
 import com.nothingmotion.brawlprogressionanalyzer.R
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Brawler
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Player
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
+import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -32,7 +46,7 @@ import java.util.Locale
 /**
  * Adapter for displaying brawler items in a RecyclerView
  */
-class BrawlerAdapter : ListAdapter<Brawler, BrawlerAdapter.BrawlerViewHolder>(DIFF_CALLBACK) {
+class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepository): ListAdapter<Brawler, BrawlerAdapter.BrawlerViewHolder>(DIFF_CALLBACK) {
 
     private var originalList: List<Brawler> = emptyList()
     private var filteredList: List<Brawler> = emptyList()
@@ -62,7 +76,7 @@ class BrawlerAdapter : ListAdapter<Brawler, BrawlerAdapter.BrawlerViewHolder>(DI
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BrawlerViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_brawler, parent, false)
-        return BrawlerViewHolder(view)
+        return BrawlerViewHolder(view,brawlerRepository)
     }
 
     override fun onBindViewHolder(holder: BrawlerViewHolder, position: Int) {
@@ -312,9 +326,9 @@ class BrawlerAdapter : ListAdapter<Brawler, BrawlerAdapter.BrawlerViewHolder>(DI
         } else {
             originalList
         }
-        
+
         filteredList = filtered
-        
+
         // Then sort by selected criteria
         val sorted = when (sortType) {
             SortType.TROPHIES -> filtered.sortedByDescending { it.trophies }
@@ -322,7 +336,7 @@ class BrawlerAdapter : ListAdapter<Brawler, BrawlerAdapter.BrawlerViewHolder>(DI
             SortType.RANK -> filtered.sortedByDescending { it.rank }
             SortType.NAME -> filtered.sortedBy { it.name }
         }
-        
+
         // Only notify for search, not for sort button clicks as they handle scroll themselves
         if (query.isNotEmpty()) {
             submitList(sorted) {
@@ -340,7 +354,7 @@ class BrawlerAdapter : ListAdapter<Brawler, BrawlerAdapter.BrawlerViewHolder>(DI
         return filteredList.isEmpty() && originalList.isNotEmpty()
     }
 
-    class BrawlerViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class BrawlerViewHolder(itemView: View,private val brawlerRepository: BrawlerRepository) : RecyclerView.ViewHolder(itemView) {
         private val brawlerIcon: ImageView = itemView.findViewById(R.id.brawler_icon)
         private val brawlerName: TextView = itemView.findViewById(R.id.brawler_name)
         private val brawlerTrophies: TextView = itemView.findViewById(R.id.brawler_trophies)
@@ -358,7 +372,10 @@ class BrawlerAdapter : ListAdapter<Brawler, BrawlerAdapter.BrawlerViewHolder>(DI
 
         private val numberFormat = NumberFormat.getIntegerInstance()
 
+        private var brawlerDataLoadingJob : Job? = null
+
         fun bind(brawler: Brawler) {
+            brawlerDataLoadingJob?.cancel()
             brawlerName.text = brawler.name
             brawlerTrophies.text = numberFormat.format(brawler.trophies)
             brawlerHighestTrophies.text = numberFormat.format(brawler.highestTrophies)
@@ -367,13 +384,61 @@ class BrawlerAdapter : ListAdapter<Brawler, BrawlerAdapter.BrawlerViewHolder>(DI
 
             // TODO: Add loading of brawler icon from a remote source or local resources
             brawlerIcon.setImageResource(R.color.ability_background)
-
+            setupBrawlerIcon(brawler,itemView.context,itemView,brawlerIcon)
             // Setup abilities
             setupStarPowers(brawler, itemView.context)
             setupGadgets(brawler, itemView.context)
             setupGears(brawler, itemView.context)
         }
+        private fun setupBrawlerIcon(
+            brawler:Brawler,
+            context:Context,
+            itemView: View,
+            brawlerIcon: ImageView,
+            ){
+            Glide.with(context).clear(itemView)
 
+            val cornerRadius = context.resources.getDimensionPixelSize(R.dimen.avatar_corner_radius)
+            val requestOptions = RequestOptions()
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .transform(RoundedCorners(cornerRadius))
+
+            brawler.id.also {
+                val app = context.applicationContext as? BrawlAnalyzerApp
+                val cachedUrl = app?.brawlerDataCache?.get(it)
+                if(cachedUrl != null){
+                    Glide
+                        .with(context)
+                        .load(cachedUrl)
+                        .apply(requestOptions)
+                        .signature(ObjectKey(it.toString()))
+                        .into(brawlerIcon)
+                }else {
+                    brawlerDataLoadingJob = CoroutineScope(Dispatchers.Main).launch {
+                        val brawlerResult = brawlerRepository.getBrawler(it)
+                        when(brawlerResult){
+                            is Result.Error -> {app?.brawlerDataCache?.put(it,null as Any)}
+                            is Result.Loading -> {}
+                            is Result.Success -> {
+                                val imageUrl = brawlerResult.data.imageUrl
+                                Timber.tag("BrawlerViewHolder").d("Loaded brawler icon: ${imageUrl}")
+
+                                app?.brawlerDataCache?.put(it,imageUrl)
+
+                                if(isActive){
+                                    Glide
+                                        .with(context)
+                                        .load(imageUrl)
+                                        .apply(requestOptions)
+                                        .signature(ObjectKey(it.toString()))
+                                        .into(brawlerIcon)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         private fun setupStarPowers(brawler: Brawler, context: Context) {
             if (brawler.starPowers.isNullOrEmpty()) {
                 starPowersContainer.visibility = View.GONE
@@ -387,7 +452,7 @@ class BrawlerAdapter : ListAdapter<Brawler, BrawlerAdapter.BrawlerViewHolder>(DI
                 // Create star power icon
                 val icon = createAbilityIcon(context)
                 starPowersIcons.addView(icon)
-                
+
                 // TODO: Set actual star power icon from a remote source or local resources
                 icon.setImageResource(R.drawable.ic_star_power_placeholder)
                 icon.contentDescription = starPower.name
@@ -407,7 +472,7 @@ class BrawlerAdapter : ListAdapter<Brawler, BrawlerAdapter.BrawlerViewHolder>(DI
                 // Create gadget icon
                 val icon = createAbilityIcon(context)
                 gadgetsIcons.addView(icon)
-                
+
                 // TODO: Set actual gadget icon from a remote source or local resources
                 icon.setImageResource(R.drawable.ic_gadget_placeholder)
                 icon.contentDescription = gadget.name
@@ -427,7 +492,7 @@ class BrawlerAdapter : ListAdapter<Brawler, BrawlerAdapter.BrawlerViewHolder>(DI
                 // Create gear icon
                 val icon = createAbilityIcon(context)
                 gearsIcons.addView(icon)
-                
+
                 // TODO: Set actual gear icon from a remote source or local resources
                 icon.setImageResource(R.drawable.ic_gear_placeholder)
                 icon.contentDescription = gear.name
@@ -438,14 +503,14 @@ class BrawlerAdapter : ListAdapter<Brawler, BrawlerAdapter.BrawlerViewHolder>(DI
             val icon = ImageView(context)
             val size = context.resources.getDimensionPixelSize(R.dimen.ability_icon_size)
             val marginEnd = context.resources.getDimensionPixelSize(R.dimen.ability_icon_margin)
-            
+
             val layoutParams = LinearLayout.LayoutParams(size, size)
             layoutParams.marginEnd = marginEnd
-            
+
             icon.layoutParams = layoutParams
             icon.scaleType = ImageView.ScaleType.CENTER_CROP
             icon.contentDescription = context.getString(R.string.ability_icon_description)
-            
+
             return icon
         }
     }
