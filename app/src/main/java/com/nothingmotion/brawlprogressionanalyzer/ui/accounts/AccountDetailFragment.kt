@@ -23,6 +23,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.signature.ObjectKey
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
@@ -37,18 +42,26 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.nothingmotion.brawlprogressionanalyzer.BrawlAnalyzerApp
 import com.nothingmotion.brawlprogressionanalyzer.R
 import com.nothingmotion.brawlprogressionanalyzer.databinding.FragmentAccountDetailBinding
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Progress
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
+import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepository
 import com.nothingmotion.brawlprogressionanalyzer.util.AccountUtils
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
+import javax.inject.Inject
 import kotlin.math.abs
 
 @AndroidEntryPoint
@@ -62,7 +75,10 @@ class AccountDetailFragment : Fragment() {
 
     private lateinit var account : Account
     private lateinit var brawlerAdapter: BrawlerAdapter
-    
+
+    private var iconLoadingJob: kotlinx.coroutines.Job? = null
+
+    @Inject lateinit var brawlerRepository: BrawlerRepository
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -148,7 +164,7 @@ class AccountDetailFragment : Fragment() {
     }
     
     private fun setupBrawlersList() {
-        brawlerAdapter = BrawlerAdapter()
+        brawlerAdapter = BrawlerAdapter(brawlerRepository)
         binding.brawlersRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = brawlerAdapter
@@ -245,11 +261,66 @@ class AccountDetailFragment : Fragment() {
     
     private fun updateUI(account: Account) {
         with(binding) {
+            iconLoadingJob?.cancel()
             // Header information
             accountName.text = account.account.name
             accountTag.text = account.account.tag
             accountLevel.text = getString(R.string.level_format, account.account.level)
-            
+            // Clear any previous images first to prevent flashing of wrong images
+            Glide.with(requireContext()).clear(accountAvatar)
+
+            // Create standard request options for all icon loads
+            val requestOptions = RequestOptions()
+                .diskCacheStrategy(DiskCacheStrategy.ALL) // Cache both original & resized image
+//                .circleCrop()
+
+            account.account.icon?.id?.let { iconId ->
+                // Get the application instance to access the cache
+                val app = binding.root.context.applicationContext as? BrawlAnalyzerApp
+
+                // Check if this icon URL is already cached
+                val cachedUrl = app?.iconCache?.get(iconId)
+
+                if (cachedUrl != null) {
+                    // Use the cached URL
+                    Glide.with(requireContext())
+                        .load(cachedUrl)
+                        .apply(requestOptions)
+                        .signature(ObjectKey(iconId.toString())) // Use the icon ID as a cache key
+                        .into(accountAvatar)
+                } else {
+                    // Launch a coroutine to fetch the icon
+                    iconLoadingJob = CoroutineScope(Dispatchers.Main).launch {
+                        val iconResult = brawlerRepository.getIcon(iconId)
+                        when (iconResult) {
+                            is Result.Success -> {
+                                val imageUrl = iconResult.data.imageUrl
+                                Timber.tag("AccountsAdapter").d("Loaded icon URL: $imageUrl")
+
+                                // Cache this URL for future use
+                                app?.iconCache?.put(iconId, imageUrl)
+
+                                // Load the icon image URL with Glide - only if our coroutine is still active
+                                // and the ViewHolder hasn't been recycled for another item
+                                if (isActive)
+                                    Glide.with(requireContext())
+                                        .load(imageUrl)
+                                        .apply(requestOptions)
+                                        .signature(ObjectKey(iconId.toString()))
+                                        .into(accountAvatar)
+                            }
+                            is Result.Error -> {
+                                Timber.tag("AccountsAdapter").e("Error loading icon: ${iconResult.error.name}")
+                                // Cache the failure so we don't keep retrying
+                                app?.iconCache?.put(iconId, null as Any)
+                            }
+                            is Result.Loading -> {
+                                // No action needed for loading state
+                            }
+                        }
+                    }
+                }
+            }
             // Stats card
             accountTrophies.text = AccountUtils.formatNumber(account.account.trophies)
             accountHighestTrophies.text = AccountUtils.formatNumber(account.account.highestTrophies)
