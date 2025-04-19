@@ -6,6 +6,7 @@ import com.github.mikephil.charting.BuildConfig
 import com.nothingmotion.brawlprogressionanalyzer.di.PreferencesManagerModule
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
+import androidx.collection.LruCache
 
 /**
  * Application class for Brawl Progression Analyzer
@@ -14,6 +15,10 @@ import timber.log.Timber
 @HiltAndroidApp
 class BrawlAnalyzerApp : Application() {
     
+    // Cache for player icon URLs (Long = icon ID, String? = image URL or null if not available)
+    val iconCache = LruCache<Long, Any>(100) // Cache up to 100 icons
+
+    val brawlerDataCache = LruCache<Long,Any>(100)
     override fun onCreate() {
         super.onCreate()
 
