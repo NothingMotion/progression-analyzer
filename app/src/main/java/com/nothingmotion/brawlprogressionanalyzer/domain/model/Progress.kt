@@ -9,7 +9,7 @@ data class Progress(
     val gears: Int,
 
     val starPowers: Int,
-    val gadgets: Int,
+    val gadgets: Int = 0,
     val brawlers: Int,
     val averageBrawlerPower: Int,
     val averageBrawlerTrophies: Int,
