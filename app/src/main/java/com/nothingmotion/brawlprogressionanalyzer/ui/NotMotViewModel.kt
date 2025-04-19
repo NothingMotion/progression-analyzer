@@ -34,14 +34,18 @@ class NotMotViewModel @Inject constructor(
             preferencesManager.track?.let{
 
                 val token = tokenManager.getAccessToken(it.uuid.toString())
-                token?.let {
+                tokenManager.accessTokenState.collect{state->
 
-                    when (val result = repository.trackUser(token,data)){
-                        is Result.Error -> _state.update {  it.copy(error = result.error.name)}
-                        is Result.Loading -> _state.update { it.copy(loading=true) }
-                        is Result.Success -> _state.update { it.copy(success=true,error= null, loading = false) }
+                    state.success?.let {
+
+                        when (val result = repository.trackUser(it,data)){
+                            is Result.Error -> _state.update {  it.copy(error = result.error.name)}
+                            is Result.Loading -> _state.update { it.copy(loading=true) }
+                            is Result.Success -> _state.update { it.copy(success=true,error= null, loading = false) }
+                        }
                     }
                 }
+
             }
         }
     }
