@@ -7,6 +7,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.ConnectionPool
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -26,10 +27,11 @@ object RetrofitBuilderModule {
     fun provideRetrofit(): Retrofit {
         val CONNECTION_TIMEOUT = 5000L;
         val client = OkHttpClient.Builder()
+            .connectionPool(ConnectionPool(50,1,TimeUnit.MINUTES))
             .connectTimeout(CONNECTION_TIMEOUT,TimeUnit.MILLISECONDS)
+            .callTimeout(CONNECTION_TIMEOUT,TimeUnit.MILLISECONDS)
             .readTimeout(CONNECTION_TIMEOUT,TimeUnit.MILLISECONDS)
             .writeTimeout(CONNECTION_TIMEOUT,TimeUnit.MILLISECONDS)
-            .callTimeout(CONNECTION_TIMEOUT,TimeUnit.MILLISECONDS)
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
                     .addHeader("application-request-sender", "android")
