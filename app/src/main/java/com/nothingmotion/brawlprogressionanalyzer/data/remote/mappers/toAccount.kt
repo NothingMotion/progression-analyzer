@@ -5,11 +5,11 @@ import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.Icon
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.Player
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
 fun Icon.toIcon() : com.nothingmotion.brawlprogressionanalyzer.domain.model.Icon {
-    return com.nothingmotion.brawlprogressionanalyzer.domain.model.Icon(this.id,this.url)
+    return com.nothingmotion.brawlprogressionanalyzer.domain.model.Icon(this.id,"")
 }
 fun Player.toPlayer(): com.nothingmotion.brawlprogressionanalyzer.domain.model.Player {
     return com.nothingmotion.brawlprogressionanalyzer.domain.model.Player(
-        this.id,
+
         this.name,
         this.tag,
         this.trophies,
