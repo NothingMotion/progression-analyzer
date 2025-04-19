@@ -45,6 +45,8 @@ import android.view.animation.OvershootInterpolator
 import android.content.res.Configuration
 import android.util.Log
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
+import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepository
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -56,6 +58,8 @@ class AccountsFragment : Fragment() {
     private lateinit var accountsAdapter: AccountsAdapter
     @Inject
     lateinit var preferencesManager : PreferencesManager
+    @Inject
+    lateinit var brawlerRepository: BrawlerRepository
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -167,7 +171,8 @@ class AccountsFragment : Fragment() {
                 showShareDialog(account)
                 true
             },
-            preferencesManager
+            preferencesManager,
+            brawlerRepository
         )
         
         binding.accountsRecyclerView.apply {
@@ -370,7 +375,7 @@ class AccountsFragment : Fragment() {
                 }
                 
                 // Valid tag, update the account
-                viewModel.updateAccountTag(account.account.id, formattedTag)
+                viewModel.updateAccountTag(account.account.tag, formattedTag)
                 dialog.dismiss()
                 
                 // Show success message
@@ -396,7 +401,7 @@ class AccountsFragment : Fragment() {
             .setTitle("Delete Account")
             .setMessage("Are you sure you want to delete ${account.account.name}?")
             .setPositiveButton("Delete") { _, _ ->
-                viewModel.deleteAccount(account.account.id)
+                viewModel.deleteAccount(account.account.tag)
                 Snackbar.make(
                     binding.root,
                     "Account deleted",
@@ -420,10 +425,12 @@ class AccountsFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 // Use the accountsState flow instead of separate flows
                 viewModel.accountsState.collectLatest { state ->
+                    Timber.tag("AccountsFragment").d("collecting account state..")
                     // Handle loading state
                     if (state.isLoading) {
                         showLoadingState()
                     } else if (state.error != null) {
+                        Timber.tag("AccountsFragment").e(state.error)
                         // Handle error state
                         showErrorState(state.error)
                     } else {
@@ -620,7 +627,7 @@ class AccountsFragment : Fragment() {
     private fun handleAccountClick(account: Account) {
         // Navigate to account details using the global action
         val bundle = Bundle().apply {
-            putString("accountId", account.account.id)
+            putString("accountId", account.account.tag)
         }
         val navOptions = NavOptions.Builder().setPopUpTo(R.id.navigation_accounts,false).build()
         findNavController().navigate(R.id.action_global_to_account_detail, bundle,navOptions)
