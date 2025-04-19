@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 import java.util.Date
 import kotlin.random.Random
@@ -55,23 +56,59 @@ class AccountsViewModel @Inject constructor(
     
      fun loadAccounts(){
         viewModelScope.launch {
-                preferencesManager.track?.let{track->
-                    val token = tokenManager.getAccessToken(track.uuid.toString())
-                    token?.let {
 
-                        accountRepository.getAllAccounts(it)
+                preferencesManager.track?.let{track->
+
+                    _accountsState.update { it.copy(isLoading=true,error=null) }
+                    tokenManager.getAccessToken(track.uuid.toString())
+                    tokenManager.accessTokenState.collectLatest { state ->
+
+                        Timber.tag("AccountsViewModel").d(state.error, state.success)
+
+                        if (state.loading) {
+                            _accountsState.update { it.copy(isLoading = true, error = null) }
+
+                        } else if (state.error != null) {
+
+                            Timber.tag("AccountsViewModel").e(state.error)
+                            _accountsState.update { it.copy(isLoading = false, error = state.error) }
+
+                        } else {
+                            state.success?.let {
+
+                                accountRepository.getAllAccounts(it)
 //                            .apply { delay(2000) }
-                            .collect{result ->
-                            when (result){
-                                is Result.Error -> _accountsState.update { it.copy(isLoading= false,error= result.error.name) }
-                                is Result.Loading -> _accountsState.update { it.copy(isLoading= true,error=null) }
-                                is Result.Success -> _accountsState.update { it.copy(accounts = result.data,error=null,isLoading= false) }
+                                    .collect { result ->
+                                        when (result) {
+                                            is Result.Error -> _accountsState.update {
+                                                it.copy(
+                                                    isLoading = false,
+                                                    error = result.error.name
+                                                )
+                                            }
+
+                                            is Result.Loading -> _accountsState.update {
+                                                it.copy(
+                                                    isLoading = true,
+                                                    error = null
+                                                )
+                                            }
+
+                                            is Result.Success -> _accountsState.update {
+                                                it.copy(
+                                                    accounts = result.data,
+                                                    error = null,
+                                                    isLoading = false
+                                                )
+                                            }
+                                        }
+                                    }
                             }
                         }
-
-
+                    }
+                } ?: run {
+                    _accountsState.update { it.copy(error="Restart Application to fix",isLoading= false) }
                 }
-            }
         }
     }
     /**
