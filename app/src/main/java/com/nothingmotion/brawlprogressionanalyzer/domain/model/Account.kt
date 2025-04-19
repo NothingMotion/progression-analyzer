@@ -1,5 +1,6 @@
 package com.nothingmotion.brawlprogressionanalyzer.domain.model
 
+import com.google.gson.annotations.SerializedName
 import java.util.Date
 import java.util.UUID
 
@@ -7,22 +8,22 @@ import java.util.UUID
  * Data model representing a player account in Brawl Stars
  */
 sealed class Ability(
-    open val id: Long,
-    open val name: String
+    @Transient open val id: Long,
+    @Transient open val name: String
 )
 
 data class Gear(
-    override val id: Long,
+    @SerializedName("id") override val id: Long,
     override val name: String
 ) : Ability(id, name)
 
 data class StarPower(
-    override val id: Long,
+    @SerializedName("id") override val id: Long,
     override val name: String
 ) : Ability(id, name)
 
 data class Gadget(
-    override val id: Long,
+    @SerializedName("id") override val id: Long,
     override val name: String
 ) : Ability(id, name)
 
@@ -44,7 +45,7 @@ data class Icon(
 )
 
 data class Player(
-    val id: String = UUID.randomUUID().toString(),
+//    val id: String = UUID.randomUUID().toString(),
     val name: String,
     val tag: String,
     val trophies: Int,
