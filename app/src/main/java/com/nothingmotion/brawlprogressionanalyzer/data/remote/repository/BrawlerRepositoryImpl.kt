@@ -1,6 +1,7 @@
 package com.nothingmotion.brawlprogressionanalyzer.data.remote.repository
 
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.BrawlifyApi
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIPlayerIcon
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerData
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.DataError
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
@@ -8,6 +9,7 @@ import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepos
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
+import timber.log.Timber
 import java.io.IOException
 import javax.inject.Inject
 
@@ -57,6 +59,23 @@ class BrawlerRepositoryImpl @Inject constructor() : BrawlerRepository {
             catch(e:Exception){
                 emit(Result.Error(DataError.NetworkError.UNKNOWN))
             }
+        }
+    }
+
+    override suspend fun getIcon(id: Long): Result<APIPlayerIcon, DataError.NetworkError> {
+        try {
+            val icons = mutableListOf<APIPlayerIcon>()
+            api.getIcons().player.entries.forEach { (key,icon)-> icons.add(icon)}
+            val icon = icons.find { it->it.id == id }
+            icon?.let{
+                return Result.Success(it)
+            }
+            return Result.Error(DataError.NetworkError.NOT_FOUND)
+        }
+        catch(e:Exception){
+
+            Timber.tag("BrawlerRepositoryImpl").e(e)
+            return Result.Error(DataError.NetworkError.UNKNOWN)
         }
     }
 }
