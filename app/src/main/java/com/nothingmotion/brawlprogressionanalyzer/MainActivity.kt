@@ -135,7 +135,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         setupNavigation()
-        navController.navigate(R.id.accordionViewUsageExampleFragment)
+//        navController.navigate(R.id.accordionViewUsageExampleFragment)
 
         // Show tutorial if it's the first time
         if (TutorialManager.shouldShowTutorial(this)) {
