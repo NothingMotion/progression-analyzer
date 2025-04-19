@@ -123,7 +123,7 @@ class NewAccountViewModel @Inject constructor(
         
         // Create basic player with starter values
         val player = Player(
-            id = id,
+//            id = id,
             name = "New Player", // This would come from API
             tag = tag,
             trophies = 100,

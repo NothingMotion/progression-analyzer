@@ -31,7 +31,7 @@ class FakeAccountRepository @Inject constructor() {
      * Get a specific account by ID
      */
     suspend fun getAccount(id: String): Account? {
-        return _accounts.value.find { it.account.id == id }
+        return _accounts.value.find { it.account.tag == id }
     }
     
     /**
@@ -68,7 +68,7 @@ class FakeAccountRepository @Inject constructor() {
      * Delete an account from the repository
      */
     suspend fun deleteAccount(id: String) {
-        _accounts.value = _accounts.value.filter { it.account.id != id }
+        _accounts.value = _accounts.value.filter { it.account.tag != id }
     }
 
     /**
@@ -76,7 +76,7 @@ class FakeAccountRepository @Inject constructor() {
      */
     suspend fun updateAccount(account: Account) {
         _accounts.value = _accounts.value.map {
-            if (it.account.id == account.account.id) account else it
+            if (it.account.tag == account.account.tag) account else it
         }
     }
 
@@ -135,7 +135,7 @@ class FakeAccountRepository @Inject constructor() {
         val newbieId = UUID.randomUUID().toString()
         val newbieAccount = Account(
             account = Player(
-                id = newbieId, 
+//                id = newbieId,
                 name = "BrawlNewbie 2", 
                 tag = "#2pp", 
                 trophies = 4000, 
@@ -174,7 +174,7 @@ class FakeAccountRepository @Inject constructor() {
         val brawlers = generateBrawlers(brawlerCount, maxedBrawlersCount)
         
         val currentPlayer = Player(
-            id = id,
+//            id = id,
             name = name,
             tag = tag,
             trophies = trophies,
@@ -298,7 +298,7 @@ class FakeAccountRepository @Inject constructor() {
         maxedBrawlersCount: Int
     ): List<Player> {
         val history = mutableListOf<Player>()
-        val random = Random(currentPlayer.id.hashCode())
+        val random = Random(currentPlayer.tag.hashCode())
 
         // We'll create fewer data points for history to keep it simple
         // In a real app, this would be more comprehensive
@@ -322,7 +322,7 @@ class FakeAccountRepository @Inject constructor() {
 
             // Ensure values stay within reasonable bounds
             val historicalPlayer = Player(
-                id = currentPlayer.id,
+//                id = currentPlayer.id,
                 name = currentPlayer.name,
                 tag = currentPlayer.tag,
                 trophies = maxOf(currentPlayer.trophies - trophiesDecrease + trophiesRandom, 0),
