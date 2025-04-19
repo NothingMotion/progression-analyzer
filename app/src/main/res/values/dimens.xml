@@ -11,4 +11,7 @@
     <!-- Brawler dimensions -->
     <dimen name="ability_icon_size">32dp</dimen>
     <dimen name="ability_icon_margin">8dp</dimen>
+    
+    <!-- Account list dimensions -->
+    <dimen name="avatar_corner_radius">12dp</dimen>
 </resources> 
