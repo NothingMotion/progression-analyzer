@@ -30,6 +30,7 @@ class AccountRepositoryImpl @Inject constructor(
         } catch (e: IOException) {
             return Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION)
         } catch (e: HttpException) {
+            Timber.tag("AccountRepositoryImpl").e(e)
             return when (e.code()) {
                 400 -> Result.Error(DataError.NetworkError.NETWORK_ERROR)
                 401 -> Result.Error(DataError.NetworkError.UNAUTHORIZED)
