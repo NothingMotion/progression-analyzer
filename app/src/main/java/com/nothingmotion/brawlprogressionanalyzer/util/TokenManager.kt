@@ -9,6 +9,8 @@ import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.ProgressionAnalyzerAPI
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.TokenRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import timber.log.Timber
 import java.util.Date
 import javax.inject.Inject
@@ -16,6 +18,10 @@ import javax.inject.Inject
 class TokenManager @Inject constructor(){
     @Inject lateinit var repository: TokenRepository
     @Inject lateinit var prefsManager: PreferencesManager
+
+    private val _accessTokenState = MutableStateFlow(AccessTokenState())
+    val accessTokenState get()= _accessTokenState
+
     fun generate(userId: String) : String{
         val algorithm = Algorithm.HMAC256(BuildConfig.APPLICATION_FRONTEND_API_KEY)
         val builder = JWT.create()
@@ -35,11 +41,16 @@ class TokenManager @Inject constructor(){
     suspend fun generateAccessToken(frontEndToken: String): String?{
         return when (val result = repository.getAccessToken(frontEndToken)){
             is Result.Error -> {
-                Timber.tag("TokenManager").e(result.error.name); null}
-            is Result.Loading -> null
+                _accessTokenState.update { it.copy(success= null,error= result.error.name, loading = false) }
+                Timber.tag("TokenManager").e(result.error.name); null
+            }
+            is Result.Loading ->{
+                null
+            }
             is Result.Success -> {
                 Timber.tag("TokenManager").d( result.data.response.token?: "null");
-                result.data.response.token}
+                result.data.response.token
+            }
         }
     }
     suspend fun validateAccessToken(accessToken: String) : Boolean {
@@ -49,13 +60,16 @@ class TokenManager @Inject constructor(){
             is Result.Success -> true
         }
     }
-    suspend fun getAccessToken(userId: String) : String?{
+    suspend fun getAccessToken(userId: String){
         // Check if access token already exists
         val accessToken = prefsManager.accessToken
         var frontEndToken = prefsManager.frontEndToken
         if (accessToken != null){
             // Validate access token and if was ok return it
-            if(validateAccessToken(accessToken)) return accessToken
+            if(validateAccessToken(accessToken)) {
+                _accessTokenState.update { it.copy(success= accessToken,error=null,loading= false) }
+                return
+            }
             else {
                 // If access token is not valid, generate a new one
                 // Check if frontEndToken exists
@@ -74,8 +88,11 @@ class TokenManager @Inject constructor(){
                     frontEndToken = prefsManager.frontEndToken
                 }
                 val newAccessToken = generateAccessToken(frontEndToken!!)
-                prefsManager.accessToken = newAccessToken
-                return newAccessToken
+                newAccessToken?.let {token->
+
+                    prefsManager.accessToken = token
+                    _accessTokenState.update { it.copy(success= token,error=null,loading=false) }
+                }
             }
         }else {
             // If access token does not exist, generate a new one
@@ -95,8 +112,18 @@ class TokenManager @Inject constructor(){
                 frontEndToken = prefsManager.frontEndToken
             }
             val newAccessToken = generateAccessToken(frontEndToken!!)
-            prefsManager.accessToken = newAccessToken
-            return newAccessToken
+
+
+
+            newAccessToken?.let {token->
+                prefsManager.accessToken = token
+                _accessTokenState.update { it.copy(success= token,error=null,loading=false) }
+            }
         }
     }
+    data class AccessTokenState(
+        val success: String? = null,
+        val error: String? = null,
+        val loading: Boolean = false
+    )
 }
