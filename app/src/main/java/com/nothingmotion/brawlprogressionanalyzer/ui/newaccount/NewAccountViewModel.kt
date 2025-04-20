@@ -41,7 +41,7 @@ class NewAccountViewModel @Inject constructor(
         }
         
         // Basic validation - should start with # and have 8-9 alphanumeric characters
-        val regex = Regex("^#[0-9A-Z]{8,9}$")
+        val regex = Regex("^#[0-9A-Za-z]{3,}$")
         val isValid = regex.matches(formattedTag)
         
         return if (isValid) {
@@ -89,7 +89,7 @@ class NewAccountViewModel @Inject constructor(
 
                 // In a real app, you would fetch player data from API here
                 // For now, simulate API call with delay
-                kotlinx.coroutines.delay(1500)
+                kotlinx.coroutines.delay(5000)
 
                 // Create a new starter account
                 val newAccount = createNewAccountFromTag(formattedTag)
@@ -107,7 +107,8 @@ class NewAccountViewModel @Inject constructor(
      */
     private suspend fun addAccount(account: Account) {
         try {
-            accountRepository.addAccount(account)
+//            accountRepository.addAccount(account)
+            throw Exception("This is demo exception")
         } catch (e: Exception) {
             throw Exception("Failed to add account: ${e.message}")
         }
