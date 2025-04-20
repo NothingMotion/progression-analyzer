@@ -30,6 +30,8 @@ import com.bumptech.glide.signature.ObjectKey
 import com.nothingmotion.brawlprogressionanalyzer.BrawlAnalyzerApp
 import kotlinx.coroutines.isActive
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.nothingmotion.brawlprogressionanalyzer.util.AssetUtils
+import kotlinx.coroutines.Job
 
 class AccountsAdapter(
     private val onItemClicked: (Account) -> Unit,
@@ -110,17 +112,39 @@ class AccountsAdapter(
 
         // Keep track of the current icon loading job to cancel it when necessary
         private var iconLoadingJob: kotlinx.coroutines.Job? = null
-
+        private var staticIconJobs: MutableList<Job?> = mutableListOf()
         fun bind(account: Account) {
             // Cancel the previous loading job if it exists
             iconLoadingJob?.cancel()
-            
+            staticIconJobs.forEach { it?.cancel() }.also{staticIconJobs.clear()}
+
             binding.apply {
                 accountName.text = account.account.name
                 accountTag.text = account.account.tag
                 accountTrophies.text = account.account.trophies.toString()
                 accountLevel.text = binding.root.context.getString(R.string.level_format, account.account.level)
 
+                val trophyIconJob = CoroutineScope(Dispatchers.Main).launch {
+                    if (isActive && adapterPosition != RecyclerView.NO_POSITION) {
+                        val bitmap = AssetUtils.loadImageAsync(
+                            itemView.context,
+                            "images/icons/icon_trophy_medium.png"
+                        )
+                        bitmap?.let {
+                            accountTrophiesIcon.setImageBitmap(it)
+                        }
+                    }
+                }
+                val brawlerIconJob = CoroutineScope(Dispatchers.Main).launch{
+                    if (isActive && adapterPosition != RecyclerView.NO_POSITION) {
+                        val bitmap = AssetUtils.loadImageAsync(itemView.context,"images/icons/icon_brawler_super_rare.png")
+                        bitmap?.let{
+                            accountBrawlersIcon.setImageBitmap(it)
+                        }
+                    }
+                }
+                staticIconJobs.add(trophyIconJob)
+                staticIconJobs.add(brawlerIconJob)
                 // Clear any previous images first to prevent flashing of wrong images
                 Glide.with(itemView).clear(accountAvatar)
                 
@@ -171,7 +195,7 @@ class AccountsAdapter(
                                 is Result.Error -> {
                                     Timber.tag("AccountsAdapter").e("Error loading icon: ${iconResult.error.name}")
                                     // Cache the failure so we don't keep retrying
-                                    app?.iconCache?.put(iconId, null as Any)
+                                    app?.iconCache?.remove(iconId)
                                 }
                                 is Result.Loading -> {
                                     // No action needed for loading state
