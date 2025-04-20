@@ -32,6 +32,7 @@ object RetrofitBuilderModule {
             .callTimeout(CONNECTION_TIMEOUT,TimeUnit.MILLISECONDS)
             .readTimeout(CONNECTION_TIMEOUT,TimeUnit.MILLISECONDS)
             .writeTimeout(CONNECTION_TIMEOUT,TimeUnit.MILLISECONDS)
+            .retryOnConnectionFailure(false)
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
                     .addHeader("application-request-sender", "android")
