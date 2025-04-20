@@ -25,6 +25,7 @@ import kotlin.random.Random
 @HiltViewModel
 class AccountsViewModel @Inject constructor(
     private val accountRepository: AccountRepository,
+    private val fakeAccountRepository: FakeAccountRepository,
     private val preferencesManager: PreferencesManager,
     private val tokenManager: TokenManager
 ) : ViewModel() {
@@ -52,8 +53,17 @@ class AccountsViewModel @Inject constructor(
         // Initial load of accounts
 //        refreshAccounts()
         loadAccounts()
+//        loadFakeAccounts()
     }
-    
+    fun loadFakeAccounts() {
+        viewModelScope.launch{
+            fakeAccountRepository.accounts.collectLatest {accounts->
+                delay(5000)
+//                _accountsState.update { it.copy(error="An internal error occured",isLoading= false) }
+                _accountsState.update { it.copy(accounts = accounts,isLoading=false,error=null) }
+            }
+        }
+    }
      fun loadAccounts(){
         viewModelScope.launch {
 
