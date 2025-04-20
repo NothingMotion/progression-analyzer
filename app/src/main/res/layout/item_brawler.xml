@@ -40,16 +40,32 @@
             tools:text="El Primo" />
 
         <!-- Trophies -->
-        <TextView
-            android:id="@+id/brawler_trophies_label"
+        <LinearLayout
+            android:id="@+id/trophies_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/trophies"
-            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-            android:textColor="?attr/colorOutline"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
             app:layout_constraintStart_toStartOf="@+id/brawler_name"
-            app:layout_constraintTop_toBottomOf="@+id/brawler_name" />
+            app:layout_constraintTop_toBottomOf="@+id/brawler_name"
+            android:layout_marginTop="4dp">
+            <ImageView
+                android:id="@+id/trophies_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:contentDescription="trophies_icon"
+                app:srcCompat="@drawable/circle_shape_legendary"
+                android:layout_gravity="center"
+                android:layout_marginEnd="4dp"/>
+            <TextView
+                android:id="@+id/brawler_trophies_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/trophies"
+                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                android:textColor="?attr/colorOutline"
+                />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/brawler_trophies"
@@ -57,22 +73,38 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-            app:layout_constraintBottom_toBottomOf="@+id/brawler_trophies_label"
-            app:layout_constraintStart_toEndOf="@+id/brawler_trophies_label"
-            app:layout_constraintTop_toTopOf="@+id/brawler_trophies_label"
+            app:layout_constraintBottom_toBottomOf="@+id/trophies_group"
+            app:layout_constraintStart_toEndOf="@+id/trophies_group"
+            app:layout_constraintTop_toTopOf="@+id/trophies_group"
             tools:text="750" />
 
         <!-- Highest Trophies -->
-        <TextView
-            android:id="@+id/brawler_highest_trophies_label"
+        <LinearLayout
+            android:id="@+id/highest_trophies_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/highest"
-            android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-            android:textColor="?attr/colorOutline"
-            app:layout_constraintStart_toStartOf="@+id/brawler_trophies_label"
-            app:layout_constraintTop_toBottomOf="@+id/brawler_trophies_label" />
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            app:layout_constraintStart_toStartOf="@+id/trophies_group"
+            app:layout_constraintTop_toBottomOf="@+id/trophies_group"
+            android:layout_marginTop="4dp">
+            <ImageView
+                android:id="@+id/highest_trophies_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:contentDescription="trophies_icon"
+                app:srcCompat="@drawable/circle_shape_legendary"
+                android:layout_gravity="center"
+                android:layout_marginEnd="4dp"/>
+            <TextView
+                android:id="@+id/brawler_highest_trophies_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/highest"
+                android:textAppearance="@style/TextAppearance.Material3.BodySmall"
+                android:textColor="?attr/colorOutline"
+                />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/brawler_highest_trophies"
@@ -80,9 +112,9 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-            app:layout_constraintBottom_toBottomOf="@+id/brawler_highest_trophies_label"
-            app:layout_constraintStart_toEndOf="@+id/brawler_highest_trophies_label"
-            app:layout_constraintTop_toTopOf="@+id/brawler_highest_trophies_label"
+            app:layout_constraintBottom_toBottomOf="@+id/highest_trophies_group"
+            app:layout_constraintStart_toEndOf="@+id/highest_trophies_group"
+            app:layout_constraintTop_toTopOf="@+id/highest_trophies_group"
             tools:text="850" />
 
         <!-- Power and Rank Container (Side by Side) -->
@@ -159,7 +191,7 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/brawler_name"
-            app:layout_constraintTop_toBottomOf="@+id/brawler_highest_trophies_label">
+            app:layout_constraintTop_toBottomOf="@+id/highest_trophies_group">
 
             <!-- Star Powers -->
             <HorizontalScrollView
