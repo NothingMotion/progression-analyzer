@@ -10,6 +10,7 @@ import com.nothingmotion.brawlprogressionanalyzer.domain.repository.NotMotReposi
 import com.nothingmotion.brawlprogressionanalyzer.util.TokenManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,13 +34,19 @@ class NotMotViewModel @Inject constructor(
         viewModelScope.launch {
             preferencesManager.track?.let{
 
+                _state.update { it.copy(loading=true,error=null) }
                 val token = tokenManager.getAccessToken(it.uuid.toString())
-                tokenManager.accessTokenState.collect{state->
-
+                tokenManager.accessTokenState.collectLatest{state->
+                    if (state.loading){
+                        _state.update { it.copy(loading=true,error=null) }
+                    }
+                    else if(state.error != null){
+                        _state.update { it.copy(loading=false,error=state.error) }
+                    }
                     state.success?.let {
 
                         when (val result = repository.trackUser(it,data)){
-                            is Result.Error -> _state.update {  it.copy(error = result.error.name)}
+                            is Result.Error -> _state.update {  it.copy(error = result.error.name,loading=false)}
                             is Result.Loading -> _state.update { it.copy(loading=true) }
                             is Result.Success -> _state.update { it.copy(success=true,error= null, loading = false) }
                         }
