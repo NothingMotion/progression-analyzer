@@ -31,12 +31,15 @@ class TokenManager @Inject constructor(){
             .withExpiresAt(Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 1 day
         return builder.sign(algorithm)
     }
-    fun decode(token: String) : DecodedJWT{
+    fun decode(token: String) : DecodedJWT?{
         val algorithm = Algorithm.HMAC256(BuildConfig.APPLICATION_FRONTEND_API_KEY)
-        return JWT.require(algorithm)
+        return try {JWT.require(algorithm)
             .withIssuer("progression-analyzer")
             .build()
-            .verify(token)
+            .verify(token)}
+        catch(e: Exception){
+            null
+        }
     }
     suspend fun generateAccessToken(frontEndToken: String): String?{
         return when (val result = repository.getAccessToken(frontEndToken)){
@@ -76,7 +79,7 @@ class TokenManager @Inject constructor(){
                 if (frontEndToken != null) {
                     // Decode the frontEndToken to check if it is valid
                     val decodedToken = decode(frontEndToken)
-                    val decodedUserId = decodedToken.getClaim("userId").asString()
+                    val decodedUserId = decodedToken?.getClaim("userId")?.asString()
                     if (decodedUserId != userId) {
                         // If the user ID does not match, generate a new frontEndToken
                         val newFrontEndToken = generate(userId)
@@ -100,7 +103,7 @@ class TokenManager @Inject constructor(){
             if (frontEndToken != null) {
                 // Decode the frontEndToken to check if it is valid
                 val decodedToken = decode(frontEndToken)
-                val decodedUserId = decodedToken.getClaim("userId").asString()
+                val decodedUserId = decodedToken?.getClaim("userId")?.asString()
                 if (decodedUserId != userId) {
                     // If the user ID does not match, generate a new frontEndToken
                     val newFrontEndToken = generate(userId)
