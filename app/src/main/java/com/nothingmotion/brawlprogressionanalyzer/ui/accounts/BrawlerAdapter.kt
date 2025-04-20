@@ -54,6 +54,9 @@ class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepositor
     private var onListUpdatedListener: OnListUpdatedListener? = null
     private var accountHistory: List<Player>? = null
 
+
+
+    private var brawlerIconJob : Job? = null
     interface OnListUpdatedListener {
         fun onListUpdated()
     }
@@ -112,8 +115,47 @@ class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepositor
         brawlerHighestTrophies.text = NumberFormat.getIntegerInstance().format(brawler.highestTrophies)
 
         // TODO: Set brawler icon when available
-        brawlerIcon.setImageResource(R.color.ability_background)
+//        brawlerIcon.setImageResource(R.color.ability_background)
+        brawlerIconJob?.cancel()
+        val cornerRadius = context.resources.getDimensionPixelSize(R.dimen.avatar_corner_radius)
+        val requestOptions = RequestOptions()
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .transform(RoundedCorners(cornerRadius))
+        brawler.id.also {
+            val app = context.applicationContext as? BrawlAnalyzerApp
+            val cachedUrl = app?.brawlerDataCache?.get(it)
+            if(cachedUrl != null){
+                Glide
+                    .with(context)
+                    .load(cachedUrl)
+                    .apply(requestOptions)
+                    .signature(ObjectKey(it.toString()))
+                    .into(brawlerIcon)
+            }else {
+                brawlerIconJob = CoroutineScope(Dispatchers.Main).launch {
+                    val brawlerResult = brawlerRepository.getBrawler(it)
+                    when(brawlerResult){
+                        is Result.Error -> {app?.brawlerDataCache?.remove(it)}
+                        is Result.Loading -> {}
+                        is Result.Success -> {
+                            val imageUrl = brawlerResult.data.imageUrl
+                            Timber.tag("BrawlerViewHolder").d("Loaded brawler icon: ${imageUrl}")
 
+                            app?.brawlerDataCache?.put(it,imageUrl)
+
+                            if(isActive){
+                                Glide
+                                    .with(context)
+                                    .load(imageUrl)
+                                    .apply(requestOptions)
+                                    .signature(ObjectKey(it.toString()))
+                                    .into(brawlerIcon)
+                            }
+                        }
+                    }
+                }
+            }
+        }
         // Set up the trophy history chart
         setupBrawlerTrophyChart(context, brawler, brawlerTrophyChart, noHistoryText)
 
@@ -417,7 +459,7 @@ class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepositor
                     brawlerDataLoadingJob = CoroutineScope(Dispatchers.Main).launch {
                         val brawlerResult = brawlerRepository.getBrawler(it)
                         when(brawlerResult){
-                            is Result.Error -> {app?.brawlerDataCache?.put(it,null as Any)}
+                            is Result.Error -> {app?.brawlerDataCache?.remove(it)}
                             is Result.Loading -> {}
                             is Result.Success -> {
                                 val imageUrl = brawlerResult.data.imageUrl
