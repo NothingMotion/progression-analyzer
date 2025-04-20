@@ -81,7 +81,7 @@ class AccountsFragment : Fragment() {
 
     private fun setUpRetryButton() {
         binding.retryButton.setOnClickListener {
-            viewModel.loadAccounts()
+            hideErrorWithAnimation()
         }
     }
 
@@ -193,7 +193,7 @@ class AccountsFragment : Fragment() {
                 ContextCompat.getColor(requireContext(), R.color.edit_background)
             )
             private val editIcon = ContextCompat.getDrawable(
-                requireContext(), R.drawable.ic_edit
+                requireContext(), R.drawable.ic_copy
             )
             private val editIconMargin = resources.getDimensionPixelSize(R.dimen.swipe_icon_margin)
             private val paint = Paint().apply {
@@ -216,7 +216,8 @@ class AccountsFragment : Fragment() {
                 accountsAdapter.notifyItemChanged(position)
                 
                 // Handle edit action
-                handleEditAccount(account)
+//                handleEditAccount(account)
+                showShareDialog(account)
             }
             
             override fun onChildDraw(
@@ -252,7 +253,7 @@ class AccountsFragment : Fragment() {
                 
                 // Draw text
                 c.drawText(
-                    "Edit",
+                    "Copy",
                     itemView.right - editIconMargin * 3f - editIcon.intrinsicWidth,
                     itemView.top + itemHeight / 2f + paint.textSize / 3,
                     paint
@@ -459,7 +460,18 @@ class AccountsFragment : Fragment() {
         binding.accountsRecyclerView.visibility = View.GONE
         binding.errorStateGroup?.visibility = View.GONE
     }
-    
+    private fun hideErrorWithAnimation(){
+        binding.errorStateGroup.animate()
+            .translationY(-50f)
+            .alpha(0f)
+            .setDuration(300)
+            .withEndAction{
+                binding.errorStateGroup.visibility = View.GONE
+                viewModel.loadAccounts()
+
+            }
+            .start()
+    }
     private fun hideLoadingWithAnimation(accounts: List<Account>) {
         // Fade out loading view
         binding.loadingAccountsGroup.animate()
