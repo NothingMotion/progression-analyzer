@@ -125,6 +125,7 @@ class NewAccountFragment : Fragment() {
     
     private fun showLoading(isLoading: Boolean) {
         if (isLoading) {
+            binding.loadingText.text = "Adding Account ${binding.playerTagEditText.text}"
             // Animate button out and show loading
             binding.addAccountButton.animate()
                 .alpha(0f)
@@ -134,7 +135,7 @@ class NewAccountFragment : Fragment() {
                 .withEndAction {
                     binding.addAccountButton.visibility = View.GONE
                     binding.findTagHelp.visibility = View.GONE
-                    binding.loadingAnimation.visibility = View.VISIBLE
+                    binding.loadingStateGroup.visibility = View.VISIBLE
                 }
                 .start()
                 
@@ -143,7 +144,7 @@ class NewAccountFragment : Fragment() {
             binding.findTagHelp.alpha = 0.5f
         } else {
             // Hide loading
-            binding.loadingAnimation.visibility = View.GONE
+            binding.loadingStateGroup.visibility = View.GONE
             
             // Animate button back
             binding.addAccountButton.apply {
@@ -205,7 +206,7 @@ class NewAccountFragment : Fragment() {
     }
     
     private fun resetUI() {
-        binding.loadingAnimation.visibility = View.GONE
+        binding.loadingStateGroup.visibility = View.GONE
         binding.addAccountButton.visibility = View.VISIBLE
         binding.playerTagLayout.error = null
         setInputEnabled(true)
