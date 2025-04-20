@@ -37,6 +37,7 @@ import com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.text.NumberFormat
 import javax.inject.Inject
 import kotlin.math.ceil
@@ -88,7 +89,8 @@ class FutureProgressFragment : Fragment() {
 
         // Get account ID from arguments and load account data
         arguments?.getString("accountId")?.let { accountId ->
-            observeAccount(accountId)
+            Timber.tag("FutureProgressFragment").d(accountId)
+            observeAccount(accountId.replace("#",""))
         }
         
         // Observe the brawler table
@@ -162,13 +164,13 @@ class FutureProgressFragment : Fragment() {
         
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.account.collectLatest { account ->
-                    account?.let {
-                        this@FutureProgressFragment.account = it
-                        if (::upgradeTable.isInitialized) {
-                            updateUI()
-                        }
-                    }
+                viewModel.state.collectLatest { account ->
+//                    account?.let {
+//                        this@FutureProgressFragment.account = it
+//                        if (::upgradeTable.isInitialized) {
+//                            updateUI()
+//                        }
+//                    }
                 }
             }
         }
