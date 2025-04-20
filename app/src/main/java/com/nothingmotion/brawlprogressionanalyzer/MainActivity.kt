@@ -90,7 +90,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
 
             notmotViewModel.state.collectLatest {
-                Timber.tag("MainActivty")
+                Timber.tag("MainActivity")
                     .d("track state is: " + it.success + " and error is: " + it.error)
             }
         }
