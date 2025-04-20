@@ -10,107 +10,241 @@
         android:layout_width="match_parent"
         android:layout_height="256dp"
         android:fitsSystemWindows="true"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
+        android:gravity="center"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
+        android:visibility="visible"
+
+
+        tools:visibility="gone">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
+            app:collapsedTitleGravity="center_vertical"
+            app:collapsedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Collapsed"
             app:contentScrim="?attr/colorPrimary"
+            app:expandedTitleMarginBottom="16dp"
             app:expandedTitleMarginEnd="16dp"
             app:expandedTitleMarginStart="16dp"
-            app:expandedTitleMarginBottom="16dp"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            app:titleEnabled="true"
             app:expandedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Expanded"
-            app:collapsedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Collapsed">
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:titleEnabled="true">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:fitsSystemWindows="true"
-                    app:layout_collapseMode="parallax">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:fitsSystemWindows="true"
+                app:layout_collapseMode="parallax">
 
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/account_avatar"
-                        android:layout_width="96dp"
-                        android:layout_height="96dp"
-                        android:layout_marginStart="24dp"
-                        android:layout_marginTop="96dp"
-                        android:background="?attr/colorPrimaryContainer"
-                        android:scaleType="centerCrop"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Medium"
-                        tools:src="@tools:sample/avatars" />
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/account_avatar"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="96dp"
+                    android:background="?attr/colorPrimaryContainer"
+                    android:scaleType="centerCrop"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:shapeAppearance="@style/ShapeAppearance.Material3.Corner.Medium"
+                    tools:src="@tools:sample/avatars" />
 
-                    <TextView
-                        android:id="@+id/account_name"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginEnd="24dp"
-                        android:textAppearance="?attr/textAppearanceHeadline6"
-                        android:textColor="?attr/colorOnPrimary"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/account_avatar"
-                        app:layout_constraintTop_toTopOf="@+id/account_avatar"
-                        tools:text="ProGamer123" />
+                <TextView
+                    android:id="@+id/account_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="24dp"
+                    android:textAppearance="?attr/textAppearanceHeadline6"
+                    android:textColor="?attr/colorOnPrimaryContainer"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/account_avatar"
+                    app:layout_constraintTop_toTopOf="@+id/account_avatar"
+                    tools:text="ProGamer123" />
 
-                    <TextView
-                        android:id="@+id/account_tag"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textAppearance="?attr/textAppearanceSubtitle1"
-                        android:textColor="?attr/colorOnPrimaryContainer"
-                        app:layout_constraintStart_toStartOf="@+id/account_name"
-                        app:layout_constraintTop_toBottomOf="@+id/account_name"
-                        tools:text="#2YQ9VRLJ" />
+                <TextView
+                    android:id="@+id/account_tag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
+                    android:textColor="?attr/colorOnPrimaryContainer"
+                    app:layout_constraintStart_toStartOf="@+id/account_name"
+                    app:layout_constraintTop_toBottomOf="@+id/account_name"
+                    tools:text="#2YQ9VRLJ" />
 
-                    <TextView
-                        android:id="@+id/account_level"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textAppearance="?attr/textAppearanceCaption"
-                        android:textColor="?attr/colorOnPrimaryContainer"
-                        app:layout_constraintStart_toStartOf="@+id/account_tag"
-                        app:layout_constraintTop_toBottomOf="@+id/account_tag"
-                        tools:text="Level 234" />
+                <TextView
+                    android:id="@+id/account_level"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?attr/textAppearanceCaption"
+                    android:textColor="?attr/colorOnPrimaryContainer"
+                    app:layout_constraintStart_toStartOf="@+id/account_tag"
+                    app:layout_constraintTop_toBottomOf="@+id/account_tag"
+                    tools:text="Level 234" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
-                
-                <androidx.appcompat.widget.Toolbar
-                    android:id="@+id/toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:paddingBottom="8dp"
-                    app:layout_collapseMode="pin"
-                    app:navigationIcon="@drawable/ic_back"
-                    app:title="Account Details">
-                    
-                    <ImageButton
-                        android:id="@+id/share_button"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_gravity="end"
-                        android:layout_marginEnd="8dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="@string/share_account"
-                        app:srcCompat="@drawable/ic_share"
-                        app:tint="?attr/colorOnPrimary" />
-                        
-                </androidx.appcompat.widget.Toolbar>
-            
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:paddingBottom="8dp"
+
+                app:layout_collapseMode="pin"
+                app:navigationIcon="@drawable/ic_back"
+                app:title="Account Details"
+                app:titleTextColor="?attr/colorOnPrimaryContainer">
+
+                <ImageButton
+                    android:id="@+id/share_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/share_account"
+                    app:srcCompat="@drawable/ic_share"
+                    app:tint="?attr/colorOnPrimary" />
+
+            </androidx.appcompat.widget.Toolbar>
+
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.core.widget.NestedScrollView
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/loading_accounts_group"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_gravity="center_vertical"
+        android:visibility="gone"
+        tools:visibility="gone">
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/loading_animation"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.4"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/loading" />
+
+        <TextView
+            android:id="@+id/loading_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/loading_accounts"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/loading_animation" />
+
+        <Button
+            android:id="@+id/back_loading_button"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/back"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/loading_text" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Error State Group -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/error_state_group"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:visibility="gone">
+
+        <ImageView
+            android:id="@+id/error_icon"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_error"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.4"
+            app:tint="?attr/colorError" />
+
+        <TextView
+            android:id="@+id/error_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="32dp"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:text="@string/error_title"
+            android:textAppearance="?attr/textAppearanceTitleLarge"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/error_icon" />
+
+        <TextView
+            android:id="@+id/error_message_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="32dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="@string/error_loading_accounts"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?android:attr/textColorSecondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/error_title" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:padding="12dp"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/error_message_text">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/retry_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                android:text="@string/retry" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/back_button"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/back"
+
+                />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/account_details_group"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:visibility="visible">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -139,24 +273,66 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
+                    <com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView
+                        android:id="@+id/read_description_player_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@+id/stats_title"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:title="(Read more)"
+                        app:animationDuration="300"
+                        app:accordionCardElevation="0dp"
+                        app:accordionCardCornerRadius="0dp"
+                        app:accordionMarginHorizontal="0dp"
+                        app:accordionMarginVertical="4dp"
+                        app:accordionPadding="2dp"
+                        app:contentBackground="?attr/colorOnPrimary"
+                        app:titleTextAppearance="?attr/textAppearanceBodyMedium"
+                        app:titleTextColor="?attr/colorOnSurfaceVariant"
+                        >
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:text="@string/read_description_player_status"
+                            />
+                    </com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView>
+
                     <com.google.android.material.divider.MaterialDivider
                         android:id="@+id/stats_divider"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        app:layout_constraintTop_toBottomOf="@id/stats_title" />
+                        app:layout_constraintTop_toBottomOf="@id/read_description_player_status" />
 
                     <!-- Trophies -->
 
-                    <TextView
-                        android:id="@+id/trophies_label"
+                    <LinearLayout
+                        android:id="@+id/trophies_group"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/trophies"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:orientation="horizontal"
+                        android:gravity="center_horizontal"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/stats_divider" />
+                        app:layout_constraintTop_toBottomOf="@id/stats_divider"
+                        android:layout_marginTop="16dp">
+                        <ImageView
+                            android:id="@+id/trophies_icon"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:contentDescription="trophies_icon"
+                            app:srcCompat="@drawable/circle_shape_legendary"
+                            android:layout_gravity="center"
+                            android:layout_marginEnd="4dp"/>
+                        <TextView
+                            android:id="@+id/trophies_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="@string/trophies"
+                            android:textAppearance="?attr/textAppearanceBodyMedium" />
+                    </LinearLayout>
 
                     <!-- Highest Trophies -->
 
@@ -168,21 +344,36 @@
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="?attr/colorPrimary"
                         android:visibility="visible"
-                        tools:text="25,430"
-                        app:layout_constraintBottom_toBottomOf="@id/trophies_label"
-                        app:layout_constraintStart_toEndOf="@id/trophies_label"
-                        app:layout_constraintTop_toTopOf="@id/trophies_label"/>
-
-                    <TextView
-                        android:id="@+id/highest_trophies_label"
+                        app:layout_constraintBottom_toBottomOf="@id/trophies_group"
+                        app:layout_constraintStart_toEndOf="@id/trophies_group"
+                        app:layout_constraintTop_toTopOf="@id/trophies_group"
+                        tools:text="25,430" />
+                    <LinearLayout
+                        android:id="@+id/highest_trophies_group"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_horizontal"
                         android:layout_marginTop="16dp"
-                        android:text="@string/highest_trophies"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
-
-                        app:layout_constraintStart_toStartOf="@id/trophies_label"
-                        app:layout_constraintTop_toBottomOf="@id/trophies_label" />
+                        app:layout_constraintStart_toStartOf="@id/trophies_group"
+                        app:layout_constraintTop_toBottomOf="@id/trophies_group" >
+                        <ImageView
+                            android:id="@+id/highest_trophies_icon"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:contentDescription="trophies_icon"
+                            app:srcCompat="@drawable/circle_shape_common"
+                            android:layout_gravity="center"
+                            android:layout_marginEnd="4dp"/>
+                        <TextView
+                            android:id="@+id/highest_trophies_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/highest_trophies"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:layout_gravity="center"
+                            />
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/account_highest_trophies"
@@ -192,22 +383,38 @@
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="?attr/colorPrimary"
                         android:visibility="visible"
-                        app:layout_constraintBottom_toBottomOf="@id/highest_trophies_label"
-                        app:layout_constraintStart_toEndOf="@id/highest_trophies_label"
-                        app:layout_constraintTop_toTopOf="@id/highest_trophies_label"
+                        app:layout_constraintBottom_toBottomOf="@id/highest_trophies_group"
+                        app:layout_constraintStart_toEndOf="@id/highest_trophies_group"
+                        app:layout_constraintTop_toTopOf="@id/highest_trophies_group"
                         tools:text="27,820" />
 
-                    <!-- Brawlers -->
-                    <TextView
-                        android:id="@+id/brawlers_label"
+
+                    <LinearLayout
+                        android:id="@+id/brawlers_group"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/brawlers"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:orientation="horizontal"
+                        android:gravity="center_horizontal"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/highest_trophies_label"
-                        />
+                        app:layout_constraintTop_toBottomOf="@id/highest_trophies_group"
+                        android:layout_marginTop="16dp">
+                        <ImageView
+                            android:id="@+id/brawlers_icon"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:contentDescription="trophies_icon"
+                            app:srcCompat="@drawable/circle_shape_super_rare"
+                            android:layout_gravity="center"
+                            android:layout_marginEnd="4dp"/>
+                        <TextView
+                            android:id="@+id/brawlers_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/brawlers"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            />
+                    </LinearLayout>
+                    <!-- Brawlers -->
 
                     <TextView
                         android:id="@+id/account_brawlers"
@@ -216,22 +423,37 @@
                         android:layout_marginStart="4dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:visibility="visible"
-                        app:layout_constraintBottom_toBottomOf="@+id/brawlers_label"
-                        app:layout_constraintStart_toEndOf="@+id/brawlers_label"
-                        app:layout_constraintTop_toTopOf="@+id/brawlers_label"
-                        tools:text="65" />
-
-                    <!-- Maxed Brawlers -->
-                    <TextView
-                        android:id="@+id/maxed_brawlers_label"
+                        app:layout_constraintBottom_toBottomOf="@+id/brawlers_group"
+                        app:layout_constraintStart_toEndOf="@+id/brawlers_group"
+                        app:layout_constraintTop_toTopOf="@+id/brawlers_group"
+                        tools:text="65"
+                        android:textColor="?attr/colorPrimary"/>
+                    <LinearLayout
+                        android:id="@+id/maxed_brawlers_group"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/maxed_brawlers"
-                        android:textAppearance="?attr/textAppearanceBodyMedium"
+                        android:orientation="horizontal"
+                        android:gravity="center_horizontal"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/brawlers_label"
-                      />
+                        app:layout_constraintTop_toBottomOf="@id/brawlers_group"
+                        android:layout_marginTop="16dp">
+                        <ImageView
+                            android:id="@+id/maxed_brawlers_icon"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:contentDescription="trophies_icon"
+                            app:srcCompat="@drawable/circle_shape_rare"
+                            android:layout_gravity="center"
+                            android:layout_marginEnd="4dp"/>
+                        <TextView
+                            android:id="@+id/maxed_brawlers_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/maxed_brawlers"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            />
+                    </LinearLayout>
+                    <!-- Maxed Brawlers -->
 
                     <TextView
                         android:id="@+id/account_maxed_brawlers"
@@ -241,454 +463,547 @@
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="?attr/colorPrimary"
                         android:visibility="visible"
-                        app:layout_constraintBottom_toBottomOf="@id/maxed_brawlers_label"
-                        app:layout_constraintStart_toEndOf="@id/maxed_brawlers_label"
-                        app:layout_constraintTop_toTopOf="@id/maxed_brawlers_label"
+                        app:layout_constraintBottom_toBottomOf="@id/maxed_brawlers_group"
+                        app:layout_constraintStart_toEndOf="@id/maxed_brawlers_group"
+                        app:layout_constraintTop_toTopOf="@id/maxed_brawlers_group"
                         tools:text="45" />
 
 
-                        <!-- Rarities Accordion -->
-                        <com.google.android.material.card.MaterialCardView
-                            android:id="@+id/rarities_accordion"
+                    <!-- Rarities Accordion -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/rarities_accordion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginTop="8dp"
+                        app:cardCornerRadius="0dp"
+                        app:cardElevation="0dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/account_maxed_brawlers"
+                        app:strokeWidth="0dp">
+
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginStart="-8dp"
-                            app:cardElevation="0dp"
-                            app:cardCornerRadius="0dp"
-                            app:strokeWidth="0dp"
-                            app:layout_constraintTop_toBottomOf="@id/account_maxed_brawlers"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent">
+                            android:orientation="vertical">
 
+                            <!-- Accordion Header -->
                             <LinearLayout
+                                android:id="@+id/rarities_header"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical">
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:padding="8dp">
 
-                                <!-- Accordion Header -->
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/rarities_click_to_open"
+                                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                                <ImageView
+                                    android:id="@+id/rarities_expand_icon"
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:src="@drawable/ic_expand_more"
+                                    app:tint="?attr/colorOnSurfaceVariant" />
+                            </LinearLayout>
+
+                            <!-- Accordion Content -->
+                            <LinearLayout
+                                android:id="@+id/rarities_content"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="16dp"
+                                android:visibility="gone">
+
+                                <!-- Common Rarity -->
                                 <LinearLayout
-                                    android:id="@+id/rarities_header"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:orientation="horizontal"
-                                    android:padding="8dp"
-                                    android:gravity="center_vertical">
+                                    android:layout_marginBottom="8dp"
+                                    android:gravity="center_vertical"
+                                    android:orientation="horizontal">
+
+                                    <View
+                                        android:layout_width="16dp"
+                                        android:layout_height="16dp"
+                                        android:layout_marginEnd="8dp"
+                                        android:background="@drawable/circle_shape_common" />
 
                                     <TextView
                                         android:layout_width="0dp"
                                         android:layout_height="wrap_content"
                                         android:layout_weight="1"
-                                        android:text="@string/rarities_click_to_open"
-                                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                                        android:textColor="?attr/colorOnSurfaceVariant" />
+                                        android:text="@string/rarity_common" />
 
-                                    <ImageView
-                                        android:id="@+id/rarities_expand_icon"
-                                        android:layout_width="24dp"
-                                        android:layout_height="24dp"
-                                        android:src="@drawable/ic_expand_more"
-                                        app:tint="?attr/colorOnSurfaceVariant" />
+                                    <TextView
+                                        android:id="@+id/common_count"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="12" />
                                 </LinearLayout>
 
-                                <!-- Accordion Content -->
+                                <!-- Rare Rarity -->
                                 <LinearLayout
-                                    android:id="@+id/rarities_content"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:orientation="vertical"
-                                    android:padding="16dp"
-                                    android:visibility="gone">
+                                    android:layout_marginBottom="8dp"
+                                    android:gravity="center_vertical"
+                                    android:orientation="horizontal">
 
-                                    <!-- Common Rarity -->
-                                    <LinearLayout
-                                        android:layout_width="match_parent"
+                                    <View
+                                        android:layout_width="16dp"
+                                        android:layout_height="16dp"
+                                        android:layout_marginEnd="8dp"
+                                        android:background="@drawable/circle_shape_rare" />
+
+                                    <TextView
+                                        android:layout_width="0dp"
                                         android:layout_height="wrap_content"
-                                        android:orientation="horizontal"
-                                        android:gravity="center_vertical"
-                                        android:layout_marginBottom="8dp">
+                                        android:layout_weight="1"
+                                        android:text="@string/rarity_rare" />
 
-                                        <View
-                                            android:layout_width="16dp"
-                                            android:layout_height="16dp"
-                                            android:background="@drawable/circle_shape_common"
-                                            android:layout_marginEnd="8dp" />
-
-                                        <TextView
-                                            android:layout_width="0dp"
-                                            android:layout_height="wrap_content"
-                                            android:layout_weight="1"
-                                            android:text="@string/rarity_common" />
-
-                                        <TextView
-                                            android:id="@+id/common_count"
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:text="12" />
-                                    </LinearLayout>
-
-                                    <!-- Rare Rarity -->
-                                    <LinearLayout
-                                        android:layout_width="match_parent"
+                                    <TextView
+                                        android:id="@+id/rare_count"
+                                        android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:orientation="horizontal"
-                                        android:gravity="center_vertical"
-                                        android:layout_marginBottom="8dp">
+                                        android:text="8" />
+                                </LinearLayout>
 
-                                        <View
-                                            android:layout_width="16dp"
-                                            android:layout_height="16dp"
-                                            android:background="@drawable/circle_shape_rare"
-                                            android:layout_marginEnd="8dp" />
+                                <!-- Super Rare Rarity -->
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="8dp"
+                                    android:gravity="center_vertical"
+                                    android:orientation="horizontal">
 
-                                        <TextView
-                                            android:layout_width="0dp"
-                                            android:layout_height="wrap_content"
-                                            android:layout_weight="1"
-                                            android:text="@string/rarity_rare" />
+                                    <View
+                                        android:layout_width="16dp"
+                                        android:layout_height="16dp"
+                                        android:layout_marginEnd="8dp"
+                                        android:background="@drawable/circle_shape_super_rare" />
 
-                                        <TextView
-                                            android:id="@+id/rare_count"
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:text="8" />
-                                    </LinearLayout>
-
-                                    <!-- Super Rare Rarity -->
-                                    <LinearLayout
-                                        android:layout_width="match_parent"
+                                    <TextView
+                                        android:layout_width="0dp"
                                         android:layout_height="wrap_content"
-                                        android:orientation="horizontal"
-                                        android:gravity="center_vertical"
-                                        android:layout_marginBottom="8dp">
+                                        android:layout_weight="1"
+                                        android:text="@string/rarity_super_rare" />
 
-                                        <View
-                                            android:layout_width="16dp"
-                                            android:layout_height="16dp"
-                                            android:background="@drawable/circle_shape_super_rare"
-                                            android:layout_marginEnd="8dp" />
-
-                                        <TextView
-                                            android:layout_width="0dp"
-                                            android:layout_height="wrap_content"
-                                            android:layout_weight="1"
-                                            android:text="@string/rarity_super_rare" />
-
-                                        <TextView
-                                            android:id="@+id/super_rare_count"
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:text="15" />
-                                    </LinearLayout>
-
-                                    <!-- Epic Rarity -->
-                                    <LinearLayout
-                                        android:layout_width="match_parent"
+                                    <TextView
+                                        android:id="@+id/super_rare_count"
+                                        android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:orientation="horizontal"
-                                        android:gravity="center_vertical"
-                                        android:layout_marginBottom="8dp">
+                                        android:text="15" />
+                                </LinearLayout>
 
-                                        <View
-                                            android:layout_width="16dp"
-                                            android:layout_height="16dp"
-                                            android:background="@drawable/circle_shape_epic"
-                                            android:layout_marginEnd="8dp" />
+                                <!-- Epic Rarity -->
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="8dp"
+                                    android:gravity="center_vertical"
+                                    android:orientation="horizontal">
 
-                                        <TextView
-                                            android:layout_width="0dp"
-                                            android:layout_height="wrap_content"
-                                            android:layout_weight="1"
-                                            android:text="@string/rarity_epic" />
+                                    <View
+                                        android:layout_width="16dp"
+                                        android:layout_height="16dp"
+                                        android:layout_marginEnd="8dp"
+                                        android:background="@drawable/circle_shape_epic" />
 
-                                        <TextView
-                                            android:id="@+id/epic_count"
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:text="10" />
-                                    </LinearLayout>
-
-                                    <!-- Mythic Rarity -->
-                                    <LinearLayout
-                                        android:layout_width="match_parent"
+                                    <TextView
+                                        android:layout_width="0dp"
                                         android:layout_height="wrap_content"
-                                        android:orientation="horizontal"
-                                        android:gravity="center_vertical"
-                                        android:layout_marginBottom="8dp">
+                                        android:layout_weight="1"
+                                        android:text="@string/rarity_epic" />
 
-                                        <View
-                                            android:layout_width="16dp"
-                                            android:layout_height="16dp"
-                                            android:background="@drawable/circle_shape_mythic"
-                                            android:layout_marginEnd="8dp" />
-
-                                        <TextView
-                                            android:layout_width="0dp"
-                                            android:layout_height="wrap_content"
-                                            android:layout_weight="1"
-                                            android:text="@string/rarity_mythic" />
-
-                                        <TextView
-                                            android:id="@+id/mythic_count"
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:text="12" />
-                                    </LinearLayout>
-
-                                    <!-- Legendary Rarity -->
-                                    <LinearLayout
-                                        android:layout_width="match_parent"
+                                    <TextView
+                                        android:id="@+id/epic_count"
+                                        android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:orientation="horizontal"
-                                        android:gravity="center_vertical">
+                                        android:text="10" />
+                                </LinearLayout>
 
-                                        <View
-                                            android:layout_width="16dp"
-                                            android:layout_height="16dp"
-                                            android:background="@drawable/circle_shape_legendary"
-                                            android:layout_marginEnd="8dp" />
+                                <!-- Mythic Rarity -->
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="8dp"
+                                    android:gravity="center_vertical"
+                                    android:orientation="horizontal">
 
-                                        <TextView
-                                            android:layout_width="0dp"
-                                            android:layout_height="wrap_content"
-                                            android:layout_weight="1"
-                                            android:text="@string/rarity_legendary" />
+                                    <View
+                                        android:layout_width="16dp"
+                                        android:layout_height="16dp"
+                                        android:layout_marginEnd="8dp"
+                                        android:background="@drawable/circle_shape_mythic" />
 
-                                        <TextView
-                                            android:id="@+id/legendary_count"
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:text="8" />
-                                    </LinearLayout>
+                                    <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:text="@string/rarity_mythic" />
+
+                                    <TextView
+                                        android:id="@+id/mythic_count"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="12" />
+                                </LinearLayout>
+
+                                <!-- Legendary Rarity -->
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center_vertical"
+                                    android:orientation="horizontal">
+
+                                    <View
+                                        android:layout_width="16dp"
+                                        android:layout_height="16dp"
+                                        android:layout_marginEnd="8dp"
+                                        android:background="@drawable/circle_shape_legendary" />
+
+                                    <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:text="@string/rarity_legendary" />
+
+                                    <TextView
+                                        android:id="@+id/legendary_count"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="8" />
                                 </LinearLayout>
                             </LinearLayout>
-                        </com.google.android.material.card.MaterialCardView>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
 
-                        <!-- Resources Accordion -->
-                        <com.google.android.material.card.MaterialCardView
-                            android:id="@+id/resources_accordion"
+                    <!-- Resources Accordion -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/resources_accordion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginTop="8dp"
+                        app:cardCornerRadius="0dp"
+                        app:cardElevation="0dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/rarities_accordion"
+                        app:strokeWidth="0dp">
+
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginStart="-8dp"
-                            app:cardElevation="0dp"
-                            app:cardCornerRadius="0dp"
-                            app:strokeWidth="0dp"
-                            app:layout_constraintTop_toBottomOf="@id/rarities_accordion"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent">
+                            android:orientation="vertical">
 
+                            <!-- Accordion Header -->
                             <LinearLayout
+                                android:id="@+id/resources_header"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical">
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:padding="8dp">
 
-                                <!-- Accordion Header -->
+                                <TextView
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/resources_click_to_open"
+                                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                                    android:textColor="?attr/colorOnSurfaceVariant" />
+
+                                <ImageView
+                                    android:id="@+id/resources_expand_icon"
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:src="@drawable/ic_expand_more"
+                                    app:tint="?attr/colorOnSurfaceVariant" />
+                            </LinearLayout>
+
+                            <!-- Accordion Content -->
+                            <LinearLayout
+                                android:id="@+id/resources_content"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="16dp"
+                                android:visibility="visible">
+
+                                <!-- Credits -->
                                 <LinearLayout
-                                    android:id="@+id/resources_header"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:orientation="horizontal"
-                                    android:padding="8dp"
-                                    android:gravity="center_vertical">
-
-                                    <TextView
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="1"
-                                        android:text="@string/resources_click_to_open"
-                                        android:textAppearance="?attr/textAppearanceBodyMedium"
-                                        android:textColor="?attr/colorOnSurfaceVariant" />
-
-                                    <ImageView
-                                        android:id="@+id/resources_expand_icon"
-                                        android:layout_width="24dp"
-                                        android:layout_height="24dp"
-                                        android:src="@drawable/ic_expand_more"
-                                        app:tint="?attr/colorOnSurfaceVariant" />
-                                </LinearLayout>
-
-                                <!-- Accordion Content -->
-                                <LinearLayout
-                                    android:id="@+id/resources_content"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="vertical"
-                                    android:padding="16dp"
-                                    android:visibility="gone">
+                                    android:layout_marginBottom="8dp"
+                                    android:orientation="horizontal">
 
                                     <!-- Credits -->
                                     <LinearLayout
-                                        android:layout_width="match_parent"
+                                        android:layout_width="0dp"
                                         android:layout_height="wrap_content"
-                                        android:orientation="horizontal"
-                                        android:layout_marginBottom="8dp">
-
-                                        <!-- Credits -->
+                                        android:layout_weight="1"
+                                        android:orientation="vertical">
                                         <LinearLayout
-                                            android:layout_width="0dp"
+                                            android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:layout_weight="1"
-                                            android:orientation="vertical">
-
+                                            android:orientation="horizontal"
+                                            android:gravity="center_vertical"
+                                            >
+                                            <ImageView
+                                                android:layout_width="16dp"
+                                                android:layout_height="16dp"
+                                                android:src="@drawable/circle_shape_legendary"
+                                                android:contentDescription="credits_icon"
+                                                android:id="@+id/credits_icon"
+                                                android:layout_marginEnd="4dp"
+                                                />
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="@string/credits"
                                                 android:textAppearance="?attr/textAppearanceBodySmall" />
-
-                                            <TextView
-                                                android:id="@+id/credits_count"
-                                                android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content"
-                                                android:textAppearance="?attr/textAppearanceBodyMedium"
-                                                android:textColor="?attr/colorPrimary"
-                                                tools:text="250" />
                                         </LinearLayout>
 
-                                        <!-- Coins -->
-                                        <LinearLayout
-                                            android:layout_width="0dp"
+                                        <TextView
+                                            android:id="@+id/credits_count"
+                                            android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:layout_weight="1"
-                                            android:orientation="vertical">
+                                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                                            android:textColor="?attr/colorPrimary"
+                                            tools:text="250"
+                                            android:layout_marginStart="2dp"/>
+                                    </LinearLayout>
 
+                                    <!-- Coins -->
+                                    <LinearLayout
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:orientation="vertical">
+                                        <LinearLayout
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:orientation="horizontal"
+                                            android:gravity="center_vertical"
+                                            >
+                                            <ImageView
+                                                android:layout_width="16dp"
+                                                android:layout_height="16dp"
+                                                android:src="@drawable/circle_shape_legendary"
+                                                android:contentDescription="coins_icon"
+                                                android:id="@+id/coins_icon"
+                                                android:layout_marginEnd="4dp"
+                                                />
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="@string/coins"
                                                 android:textAppearance="?attr/textAppearanceBodySmall" />
-
-                                            <TextView
-                                                android:id="@+id/coins_count"
-                                                android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content"
-                                                android:textAppearance="?attr/textAppearanceBodyMedium"
-                                                android:textColor="?attr/colorPrimary"
-                                                tools:text="12,500" />
                                         </LinearLayout>
-                                    </LinearLayout>
 
-                                    <!-- Power Points and Gadgets -->
-                                    <LinearLayout
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:orientation="horizontal"
-                                        android:layout_marginBottom="8dp"
-                                        android:layout_marginTop="8dp">
-
-                                        <!-- Power Points -->
-                                        <LinearLayout
-                                            android:layout_width="0dp"
+                                        <TextView
+                                            android:id="@+id/coins_count"
+                                            android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:layout_weight="1"
-                                            android:orientation="vertical">
+                                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                                            android:textColor="?attr/colorPrimary"
+                                            tools:text="12,500"
+                                            android:layout_marginStart="2dp"/>
+                                    </LinearLayout>
+                                </LinearLayout>
 
+                                <!-- Power Points and Gadgets -->
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="8dp"
+                                    android:layout_marginBottom="8dp"
+                                    android:orientation="horizontal">
+
+                                    <!-- Power Points -->
+                                    <LinearLayout
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:orientation="vertical">
+                                        <LinearLayout
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:orientation="horizontal"
+                                            android:gravity="center_vertical"
+                                            >
+                                            <ImageView
+                                                android:layout_width="16dp"
+                                                android:layout_height="16dp"
+                                                android:src="@drawable/circle_shape_legendary"
+                                                android:contentDescription="power_points_icon"
+                                                android:id="@+id/power_points_icon"
+                                                android:layout_marginEnd="4dp"
+                                                />
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="@string/power_points"
                                                 android:textAppearance="?attr/textAppearanceBodySmall" />
-
-                                            <TextView
-                                                android:id="@+id/power_points_count"
-                                                android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content"
-                                                android:textAppearance="?attr/textAppearanceBodyMedium"
-                                                android:textColor="?attr/colorPrimary"
-                                                tools:text="8,750" />
                                         </LinearLayout>
 
-                                        <!-- Gadgets -->
-                                        <LinearLayout
-                                            android:layout_width="0dp"
+                                        <TextView
+                                            android:id="@+id/power_points_count"
+                                            android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:layout_weight="1"
-                                            android:orientation="vertical">
+                                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                                            android:textColor="?attr/colorPrimary"
+                                            android:layout_marginStart="2dp"
+                                            tools:text="8,750" />
+                                    </LinearLayout>
 
+                                    <!-- Gadgets -->
+                                    <LinearLayout
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:orientation="vertical">
+                                        <LinearLayout
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:orientation="horizontal"
+                                            android:gravity="center_vertical"
+                                            >
+                                            <ImageView
+                                                android:layout_width="16dp"
+                                                android:layout_height="16dp"
+                                                android:src="@drawable/circle_shape_legendary"
+                                                android:contentDescription="gadgets_icon"
+                                                android:id="@+id/gadgets_icon"
+                                                android:layout_marginEnd="4dp"
+                                                />
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="@string/gadgets"
                                                 android:textAppearance="?attr/textAppearanceBodySmall" />
-
-                                            <TextView
-                                                android:id="@+id/gadgets_count"
-                                                android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content"
-                                                android:textAppearance="?attr/textAppearanceBodyMedium"
-                                                android:textColor="?attr/colorPrimary"
-                                                tools:text="45" />
                                         </LinearLayout>
-                                    </LinearLayout>
 
-                                    <!-- Star Powers and Gears -->
-                                    <LinearLayout
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:orientation="horizontal"
-                                        android:layout_marginTop="8dp">
-
-                                        <!-- Star Powers -->
-                                        <LinearLayout
-                                            android:layout_width="0dp"
+                                        <TextView
+                                            android:id="@+id/gadgets_count"
+                                            android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:layout_weight="1"
-                                            android:orientation="vertical">
+                                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                                            android:textColor="?attr/colorPrimary"
+                                            android:layout_marginStart="2dp"
+                                            tools:text="45" />
+                                    </LinearLayout>
+                                </LinearLayout>
 
+                                <!-- Star Powers and Gears -->
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="8dp"
+                                    android:orientation="horizontal">
+
+                                    <!-- Star Powers -->
+                                    <LinearLayout
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:orientation="vertical">
+
+
+                                        <LinearLayout
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:orientation="horizontal"
+                                            android:gravity="center_vertical"
+                                            >
+                                            <ImageView
+                                                android:layout_width="16dp"
+                                                android:layout_height="16dp"
+                                                android:src="@drawable/circle_shape_legendary"
+                                                android:contentDescription="star_powers_icon"
+                                                android:id="@+id/star_powers_icon"
+                                                android:layout_marginEnd="4dp"
+                                                />
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="@string/star_powers"
                                                 android:textAppearance="?attr/textAppearanceBodySmall" />
-
-                                            <TextView
-                                                android:id="@+id/star_powers_count"
-                                                android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content"
-                                                android:textAppearance="?attr/textAppearanceBodyMedium"
-                                                android:textColor="?attr/colorPrimary"
-                                                tools:text="38" />
                                         </LinearLayout>
 
-                                        <!-- Gears -->
-                                        <LinearLayout
-                                            android:layout_width="0dp"
+                                        <TextView
+                                            android:id="@+id/star_powers_count"
+                                            android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:layout_weight="1"
-                                            android:orientation="vertical">
+                                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                                            android:textColor="?attr/colorPrimary"
+                                            tools:text="38"
+                                            android:layout_marginStart="2dp"/>
+                                    </LinearLayout>
 
+                                    <!-- Gears -->
+                                    <LinearLayout
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:orientation="vertical">
+                                        <LinearLayout
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:orientation="horizontal"
+                                            android:gravity="center_vertical"
+                                            >
+                                            <ImageView
+                                                android:layout_width="16dp"
+                                                android:layout_height="16dp"
+                                                android:src="@drawable/circle_shape_legendary"
+                                                android:contentDescription="gears_icon"
+                                                android:id="@+id/gears_icon"
+                                                android:layout_marginEnd="4dp"
+                                                />
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="@string/gears"
                                                 android:textAppearance="?attr/textAppearanceBodySmall" />
-
-                                            <TextView
-                                                android:id="@+id/gears_count"
-                                                android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content"
-                                                android:textAppearance="?attr/textAppearanceBodyMedium"
-                                                android:textColor="?attr/colorPrimary"
-                                                tools:text="42" />
                                         </LinearLayout>
+
+                                        <TextView
+                                            android:id="@+id/gears_count"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                                            android:textColor="?attr/colorPrimary"
+                                            android:layout_marginStart="2dp"
+                                            tools:text="42" />
                                     </LinearLayout>
                                 </LinearLayout>
                             </LinearLayout>
-                        </com.google.android.material.card.MaterialCardView>
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
                     <!-- Barrier to position elements below both accordions -->
                     <TextView
                         android:id="@+id/how_to_max_out"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
                         android:text="@string/how_to_max_out"
                         android:textAppearance="?attr/textAppearanceBodySmall"
-                        android:textStyle="italic"
                         android:textColor="?attr/colorSecondary"
-                        android:layout_marginStart="8dp"
+                        android:textStyle="italic"
                         android:visibility="gone"
                         app:layout_constraintBottom_toBottomOf="@id/account_maxed_brawlers"
                         app:layout_constraintStart_toEndOf="@id/account_maxed_brawlers" />
+
                     <androidx.constraintlayout.widget.Barrier
                         android:id="@+id/accordions_barrier"
                         android:layout_width="wrap_content"
@@ -712,12 +1027,12 @@
                         android:id="@+id/progression_percentage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="?attr/colorPrimary"
-                        android:layout_marginStart="8dp"
+                        app:layout_constraintBottom_toBottomOf="@id/progression_label"
                         app:layout_constraintStart_toEndOf="@id/progression_label"
                         app:layout_constraintTop_toTopOf="@id/progression_label"
-                        app:layout_constraintBottom_toBottomOf="@id/progression_label"
                         tools:text="72% Maxed" />
 
                     <com.google.android.material.progressindicator.LinearProgressIndicator
@@ -763,49 +1078,74 @@
                         android:id="@+id/brawlers_card_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/brawler_list"
-                        android:textAppearance="?attr/textAppearanceTitleLarge"
                         android:layout_marginTop="4dp"
                         android:layout_marginBottom="4dp"
+                        android:text="@string/brawler_list"
+                        android:textAppearance="?attr/textAppearanceTitleLarge"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <!-- Search Box -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/search_brawlers_container"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                         android:layout_width="0dp"
                         android:layout_height="36dp"
                         android:layout_marginStart="16dp"
                         android:layout_marginEnd="8dp"
-                        app:startIconDrawable="@drawable/ic_search"
-                        app:startIconTint="?attr/colorPrimary"
-                        app:hintEnabled="false"
+                        android:hint="@string/search_brawlers"
                         app:boxStrokeWidth="1dp"
                         app:boxStrokeWidthFocused="1.5dp"
-                        android:hint="@string/search_brawlers"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-                        app:layout_constraintStart_toEndOf="@id/brawlers_card_title"
+                        app:hintEnabled="false"
+                        app:layout_constraintBottom_toBottomOf="@id/brawlers_card_title"
                         app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/brawlers_card_title"
                         app:layout_constraintTop_toTopOf="@id/brawlers_card_title"
-                        app:layout_constraintBottom_toBottomOf="@id/brawlers_card_title">
+                        app:startIconDrawable="@drawable/ic_search"
+                        app:startIconTint="?attr/colorPrimary">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/search_brawlers_input"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:paddingVertical="4dp"
-                            android:textSize="14sp"
                             android:imeOptions="actionSearch"
                             android:inputType="text"
-                            android:maxLines="1" />
+                            android:maxLines="1"
+                            android:paddingVertical="4dp"
+                            android:textSize="14sp" />
                     </com.google.android.material.textfield.TextInputLayout>
-
+                    <com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView
+                        android:id="@+id/read_description_brawlers_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@+id/brawlers_card_title"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:title="(Read more)"
+                        app:animationDuration="300"
+                        app:accordionCardElevation="0dp"
+                        app:accordionCardCornerRadius="0dp"
+                        app:accordionMarginHorizontal="0dp"
+                        app:accordionMarginVertical="12dp"
+                        app:accordionPadding="2dp"
+                        app:contentBackground="?attr/colorOnPrimary"
+                        app:titleTextAppearance="?attr/textAppearanceBodyMedium"
+                        app:titleTextColor="?attr/colorOnSurfaceVariant"
+                        android:layout_marginVertical="4dp"
+                        >
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:text="@string/read_description_brawlers"
+                            />
+                    </com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView>
                     <com.google.android.material.divider.MaterialDivider
                         android:id="@+id/brawlers_divider"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        app:layout_constraintTop_toBottomOf="@id/brawlers_card_title" />
+                        app:layout_constraintTop_toBottomOf="@id/read_description_brawlers_status" />
 
                     <!-- Sorting Options -->
                     <HorizontalScrollView
@@ -815,56 +1155,56 @@
                         android:layout_marginTop="10dp"
                         android:paddingVertical="2dp"
                         android:scrollbars="none"
-                        app:layout_constraintTop_toBottomOf="@id/brawlers_divider"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent">
+                        app:layout_constraintTop_toBottomOf="@id/brawlers_divider">
 
                         <com.google.android.material.chip.ChipGroup
                             android:id="@+id/sort_chip_group"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:paddingHorizontal="2dp" 
+                            android:paddingHorizontal="2dp"
                             android:paddingVertical="2dp"
-                            app:singleSelection="true"
                             app:chipSpacingHorizontal="8dp"
-                            app:selectionRequired="true">
+                            app:selectionRequired="true"
+                            app:singleSelection="true">
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chip_trophies"
+                                style="@style/Widget.App.Chip.Filter"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/trophies"
-                                app:chipIconVisible="true"
-                                app:chipIcon="@drawable/ic_trophy"
                                 android:checked="true"
-                                style="@style/Widget.App.Chip.Filter" />
+                                android:text="@string/trophies"
+                                app:chipIcon="@drawable/ic_trophy"
+                                app:chipIconVisible="true" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chip_power"
+                                style="@style/Widget.App.Chip.Filter"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/power"
-                                app:chipIconVisible="true"
                                 app:chipIcon="@drawable/ic_power"
-                                style="@style/Widget.App.Chip.Filter" />
+                                app:chipIconVisible="true" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chip_rank"
+                                style="@style/Widget.App.Chip.Filter"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/rank"
-                                app:chipIconVisible="true"
                                 app:chipIcon="@drawable/ic_rank"
-                                style="@style/Widget.App.Chip.Filter" />
+                                app:chipIconVisible="true" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chip_name"
+                                style="@style/Widget.App.Chip.Filter"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/name"
-                                app:chipIconVisible="true"
                                 app:chipIcon="@drawable/ic_sort_az"
-                                style="@style/Widget.App.Chip.Filter" />
+                                app:chipIconVisible="true" />
                         </com.google.android.material.chip.ChipGroup>
                     </HorizontalScrollView>
 
@@ -925,13 +1265,30 @@
                         android:textAppearance="?attr/textAppearanceTitleLarge"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
-
+                    <com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView
+                        android:id="@+id/read_description_progress_history"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@+id/progress_history_title"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:title="(Read more)"
+                        app:animationDuration="300"
+                        app:accordionCardElevation="0dp"
+                        app:accordionCardCornerRadius="0dp"
+                        app:accordionMarginHorizontal="0dp"
+                        app:accordionMarginVertical="4dp"
+                        app:accordionPadding="2dp"
+                        app:contentBackground="?attr/colorOnPrimary"
+                        app:titleTextAppearance="?attr/textAppearanceBodyMedium"
+                        app:titleTextColor="?attr/colorOnSurfaceVariant"
+                        >
+                    </com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView>
                     <com.google.android.material.divider.MaterialDivider
                         android:id="@+id/progress_history_divider"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        app:layout_constraintTop_toBottomOf="@id/progress_history_title" />
+                        app:layout_constraintTop_toBottomOf="@id/read_description_progress_history" />
 
                     <!-- 1. Trophies Gained -->
                     <TextView
@@ -959,11 +1316,11 @@
                         android:id="@+id/trophies_gained_percentage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="?attr/colorPrimary"
                         app:layout_constraintBaseline_toBaselineOf="@id/trophies_gained_value"
                         app:layout_constraintStart_toEndOf="@id/trophies_gained_value"
-                        android:layout_marginStart="8dp"
                         tools:text="(+15.2%)" />
 
                     <!-- 2. Brawlers Gained -->
@@ -992,11 +1349,11 @@
                         android:id="@+id/brawlers_gained_percentage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="?attr/colorPrimary"
                         app:layout_constraintBaseline_toBaselineOf="@id/brawlers_gained_value"
                         app:layout_constraintStart_toEndOf="@id/brawlers_gained_value"
-                        android:layout_marginStart="8dp"
                         tools:text="(+8.7%)" />
 
                     <!-- 3. Credits Gained -->
@@ -1025,11 +1382,11 @@
                         android:id="@+id/credits_gained_percentage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="?attr/colorPrimary"
                         app:layout_constraintBaseline_toBaselineOf="@id/credits_gained_value"
                         app:layout_constraintStart_toEndOf="@id/credits_gained_value"
-                        android:layout_marginStart="8dp"
                         tools:text="(+12.5%)" />
 
                     <!-- 4. Coins Gained -->
@@ -1058,11 +1415,11 @@
                         android:id="@+id/coins_gained_percentage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="?attr/colorPrimary"
                         app:layout_constraintBaseline_toBaselineOf="@id/coins_gained_value"
                         app:layout_constraintStart_toEndOf="@id/coins_gained_value"
-                        android:layout_marginStart="8dp"
                         tools:text="(+22.1%)" />
 
                     <!-- 5. Power Points Gained -->
@@ -1091,11 +1448,11 @@
                         android:id="@+id/power_points_gained_percentage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
                         android:textAppearance="?attr/textAppearanceBodyMedium"
                         android:textColor="?attr/colorPrimary"
                         app:layout_constraintBaseline_toBaselineOf="@id/power_points_gained_value"
                         app:layout_constraintStart_toEndOf="@id/power_points_gained_value"
-                        android:layout_marginStart="8dp"
                         tools:text="(+18.6%)" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
@@ -1123,146 +1480,163 @@
                         android:textAppearance="?attr/textAppearanceTitleLarge"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
-
+                    <com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView
+                        android:id="@+id/read_description_history"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@id/history_title"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:title="(Read more)"
+                        app:animationDuration="300"
+                        app:accordionCardElevation="0dp"
+                        app:accordionCardCornerRadius="0dp"
+                        app:accordionMarginHorizontal="0dp"
+                        app:accordionMarginVertical="4dp"
+                        app:accordionPadding="2dp"
+                        app:contentBackground="?attr/colorOnPrimary"
+                        app:titleTextAppearance="?attr/textAppearanceBodyMedium"
+                        app:titleTextColor="?attr/colorOnSurfaceVariant"
+                        >
+                    </com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView>
                     <com.google.android.material.divider.MaterialDivider
                         android:id="@+id/history_divider"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        app:layout_constraintTop_toBottomOf="@id/history_title" />
+                        app:layout_constraintTop_toBottomOf="@id/read_description_history" />
 
                     <TextView
                         android:id="@+id/no_history_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
                         android:text="@string/no_progression_history"
                         android:textAlignment="center"
                         android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
                         android:textColor="?android:attr/textColorSecondary"
-                        android:layout_marginTop="16dp"
-                        app:layout_constraintTop_toBottomOf="@id/history_divider"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent" />
-                    
+                        app:layout_constraintTop_toBottomOf="@id/history_divider" />
+
                     <!-- Charts Container -->
                     <LinearLayout
                         android:id="@+id/charts_container"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
                         android:layout_marginTop="16dp"
-                        app:layout_constraintTop_toBottomOf="@id/history_divider"
+                        android:orientation="vertical"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent">
-                        
+                        app:layout_constraintTop_toBottomOf="@id/history_divider">
+
                         <!-- 1. Trophy History Chart -->
                         <LinearLayout
                             android:id="@+id/trophy_chart_container"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_marginBottom="24dp">
-                            
+                            android:layout_marginBottom="24dp"
+                            android:orientation="vertical">
+
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@string/trophy_history"
-                                android:textAppearance="?attr/textAppearanceTitleMedium"
                                 android:layout_marginStart="8dp"
                                 android:layout_marginEnd="8dp"
-                                android:layout_marginBottom="8dp" />
-                                
+                                android:layout_marginBottom="8dp"
+                                android:text="@string/trophy_history"
+                                android:textAppearance="?attr/textAppearanceTitleMedium" />
+
                             <com.github.mikephil.charting.charts.LineChart
                                 android:id="@+id/trophy_history_chart"
                                 android:layout_width="match_parent"
                                 android:layout_height="200dp" />
                         </LinearLayout>
-                        
+
                         <!-- 2. Brawlers Amount Chart -->
                         <LinearLayout
                             android:id="@+id/brawler_chart_container"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_marginBottom="24dp">
-                            
+                            android:layout_marginBottom="24dp"
+                            android:orientation="vertical">
+
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@string/brawler_count"
-                                android:textAppearance="?attr/textAppearanceTitleMedium"
                                 android:layout_marginStart="8dp"
                                 android:layout_marginEnd="8dp"
-                                android:layout_marginBottom="8dp" />
-                                
+                                android:layout_marginBottom="8dp"
+                                android:text="@string/brawler_count"
+                                android:textAppearance="?attr/textAppearanceTitleMedium" />
+
                             <com.github.mikephil.charting.charts.LineChart
                                 android:id="@+id/brawler_count_chart"
                                 android:layout_width="match_parent"
                                 android:layout_height="200dp" />
                         </LinearLayout>
-                        
+
                         <!-- 3. Credits Gained Chart -->
                         <LinearLayout
                             android:id="@+id/credits_chart_container"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_marginBottom="24dp">
-                            
+                            android:layout_marginBottom="24dp"
+                            android:orientation="vertical">
+
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@string/credits_gained"
-                                android:textAppearance="?attr/textAppearanceTitleMedium"
                                 android:layout_marginStart="8dp"
                                 android:layout_marginEnd="8dp"
-                                android:layout_marginBottom="8dp" />
-                                
+                                android:layout_marginBottom="8dp"
+                                android:text="@string/credits_gained"
+                                android:textAppearance="?attr/textAppearanceTitleMedium" />
+
                             <com.github.mikephil.charting.charts.BarChart
                                 android:id="@+id/credits_chart"
                                 android:layout_width="match_parent"
                                 android:layout_height="200dp" />
                         </LinearLayout>
-                        
+
                         <!-- 4. Coins Gained Chart -->
                         <LinearLayout
                             android:id="@+id/coins_chart_container"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_marginBottom="24dp">
-                            
+                            android:layout_marginBottom="24dp"
+                            android:orientation="vertical">
+
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@string/coins_gained"
-                                android:textAppearance="?attr/textAppearanceTitleMedium"
                                 android:layout_marginStart="8dp"
                                 android:layout_marginEnd="8dp"
-                                android:layout_marginBottom="8dp" />
-                                
+                                android:layout_marginBottom="8dp"
+                                android:text="@string/coins_gained"
+                                android:textAppearance="?attr/textAppearanceTitleMedium" />
+
                             <com.github.mikephil.charting.charts.BarChart
                                 android:id="@+id/coins_chart"
                                 android:layout_width="match_parent"
                                 android:layout_height="200dp" />
                         </LinearLayout>
-                        
+
                         <!-- 5. Power Points Gained Chart -->
                         <LinearLayout
                             android:id="@+id/power_points_chart_container"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
-                            
+
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@string/power_points_gained"
-                                android:textAppearance="?attr/textAppearanceTitleMedium"
                                 android:layout_marginStart="8dp"
                                 android:layout_marginEnd="8dp"
-                                android:layout_marginBottom="8dp" />
-                                
+                                android:layout_marginBottom="8dp"
+                                android:text="@string/power_points_gained"
+                                android:textAppearance="?attr/textAppearanceTitleMedium" />
+
                             <com.github.mikephil.charting.charts.BarChart
                                 android:id="@+id/power_points_chart"
                                 android:layout_width="match_parent"
@@ -1274,12 +1648,12 @@
                         android:id="@+id/track_progression_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp"
                         android:layout_gravity="center"
+                        android:layout_marginTop="24dp"
                         android:text="@string/track_progression"
-                        app:layout_constraintTop_toBottomOf="@id/no_history_text"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent" />
+                        app:layout_constraintTop_toBottomOf="@id/no_history_text" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -1290,8 +1664,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
                 android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
                 android:text="@string/see_future_progress"
                 app:icon="@drawable/ic_calendar"
                 app:layout_constraintTop_toBottomOf="@id/history_card" />

@@ -16,6 +16,7 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -23,7 +24,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
@@ -44,15 +44,20 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nothingmotion.brawlprogressionanalyzer.BrawlAnalyzerApp
 import com.nothingmotion.brawlprogressionanalyzer.R
+import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.databinding.FragmentAccountDetailBinding
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Language
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Progress
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepository
 import com.nothingmotion.brawlprogressionanalyzer.util.AccountUtils
+import com.nothingmotion.brawlprogressionanalyzer.util.AssetUtils
+import com.nothingmotion.brawlprogressionanalyzer.util.JalaliDateUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -73,12 +78,20 @@ class AccountDetailFragment : Fragment() {
     private val numberFormat = DecimalFormat("#,###")
     private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
 
+
+
+
+
+
+    private var jalaliUtils = JalaliDateUtils()
+
     private lateinit var account : Account
     private lateinit var brawlerAdapter: BrawlerAdapter
 
     private var iconLoadingJob: kotlinx.coroutines.Job? = null
 
     @Inject lateinit var brawlerRepository: BrawlerRepository
+    @Inject lateinit var prefManager: PreferencesManager
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -96,15 +109,81 @@ class AccountDetailFragment : Fragment() {
         setupBrawlersList()
         setupRaritiesAccordion()
         setupResourcesAccordion()
+        setupStaticIcons()
         // Get accountId from arguments
         arguments?.getString("accountId")?.let { accountId ->
             observeAccount(accountId)
+            setupRetryButton(accountId)
         }
         
         setupEditButton()
         setupFutureProgressButton()
+
+        setupBackButtons()
     }
-    
+
+    private fun setupStaticIcons() {
+        binding.apply {
+            lifecycleScope.launch {
+
+                val coin = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_coin.png")
+                val credit = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_credit.png")
+                val powerPoint = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_power_point.png")
+                val gadget = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_gadget.png")
+                val starPower = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_star_power.png")
+                val gear = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_gear.png")
+
+                val trophies = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_trophy_medium.png")
+                val highest = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_leaderboards.png")
+                val brawlers = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_brawlers.png")
+                coin?.let{
+                    coinsIcon.setImageBitmap(it)
+                }
+                credit?.let{
+                    creditsIcon.setImageBitmap(it)
+                }
+                powerPoint?.let{
+                    powerPointsIcon.setImageBitmap(it)
+                }
+                gadget?.let{
+                    gadgetsIcon.setImageBitmap(it)
+                }
+                starPower?.let{
+                    starPowersIcon.setImageBitmap(it)
+                }
+                gear?.let{
+                    gearsIcon.setImageBitmap(it)
+                }
+
+                trophies?.let{
+                    trophiesIcon.setImageBitmap(it)
+                }
+                highest?.let{
+                    highestTrophiesIcon.setImageBitmap(it)
+                }
+                brawlers?.let{
+                    brawlersIcon.setImageBitmap(it)
+                    maxedBrawlersIcon.setImageBitmap(it)
+                }
+
+            }
+        }
+    }
+
+    private fun setupBackButtons() {
+        val stopAccountJob = {viewModel.stop()}
+        binding.backButton.setOnClickListener {stopAccountJob(); findNavController().popBackStack() }
+        binding.backLoadingButton.setOnClickListener {stopAccountJob(); findNavController().popBackStack() }
+    }
+
+
+
+
+    private fun setupRetryButton(accountId: String){
+        binding.retryButton.setOnClickListener {
+            viewModel.getAccount(accountId)
+        }
+    }
     private fun setupToolbar() {
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigate(R.id.action_account_detail_to_accounts)
@@ -249,16 +328,79 @@ class AccountDetailFragment : Fragment() {
         
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.account.collectLatest { account ->
-                    account?.let {
-                        this@AccountDetailFragment.account = it
-                        updateUI(it)
+                viewModel.state.collectLatest { state ->
+                    if(state.loading){
+                        binding.loadingText.text = "Loading $accountId.."
+
+                        binding.fabFutureProgress.visibility = View.GONE
+                        binding.appBar.visibility = View.GONE
+                        binding.accountDetailsGroup.visibility = View.GONE
+                        binding.errorStateGroup.visibility = View.GONE
+
+                        binding.loadingAccountsGroup.apply {
+                            if (binding.errorStateGroup.isVisible){
+                                binding.errorStateGroup.apply {
+                                    applyAnimation(this,false, Runnable { applyAnimation(binding.loadingAccountsGroup,true) })
+                                }
+                            }else {
+
+                                applyAnimation(this,true)
+                            }
+
+                        }
+                    }
+                    else if(state.error != null) {
+                        binding.errorMessageText.text = state.error
+
+                        binding.loadingAccountsGroup.visibility = View.GONE
+                        binding.appBar.visibility = View.GONE
+                        binding.accountDetailsGroup.visibility = View.GONE
+                        binding.fabFutureProgress.visibility = View.GONE
+
+                        binding.errorStateGroup.apply {
+                            if(binding.loadingAccountsGroup.isVisible){
+                                binding.loadingAccountsGroup.apply {
+                                    applyAnimation(this,false, Runnable { applyAnimation(binding.errorStateGroup,true) })
+                                }
+                            }else {
+                                applyAnimation(this,true)
+
+                            }
+                        }
+                    }
+                    else {
+                        state.account?.let {
+//                            binding.loadingAccountsGroup.visibility = View.GONE
+                            binding.errorStateGroup.visibility = View.GONE
+
+                            binding.loadingAccountsGroup.apply { applyAnimation(this,false, Runnable {
+
+                                binding.appBar.apply { applyAnimation(this,true) }
+                                binding.accountDetailsGroup.apply { applyAnimation(this,true) }
+                            }) }
+                            binding.fabFutureProgress.visibility = View.VISIBLE
+                            account = it
+                            updateUI(it)
+                        }
                     }
                 }
             }
         }
     }
-    
+    private fun applyAnimation(view: View, isIn: Boolean = true,withEndAction:Runnable = Runnable {  }){
+        view.apply {
+            alpha = if(isIn) 0f else 1f;
+            translationY = if(isIn) -50f else 50f;
+            visibility= View.VISIBLE
+            animate()
+                .alpha(if(isIn) 1f else 0f)
+                .translationY(if(isIn) 50f else -50f)
+                .setDuration(300)
+                .withEndAction { if(!isIn){visibility = View.GONE} }
+                .withEndAction(withEndAction)
+                .start()
+        }
+    }
     private fun updateUI(account: Account) {
         with(binding) {
             iconLoadingJob?.cancel()
@@ -312,7 +454,7 @@ class AccountDetailFragment : Fragment() {
                             is Result.Error -> {
                                 Timber.tag("AccountsAdapter").e("Error loading icon: ${iconResult.error.name}")
                                 // Cache the failure so we don't keep retrying
-                                app?.iconCache?.put(iconId, null as Any)
+                                app?.iconCache?.remove(iconId)
                             }
                             is Result.Loading -> {
                                 // No action needed for loading state
@@ -352,12 +494,26 @@ class AccountDetailFragment : Fragment() {
                 R.string.maxed_percentage_format,
                 progressPercentage.toInt()
             )
-            
+
+            var lastUpdate : String = "";
+            prefManager.language?.let{
+                when(it){
+                    Language.ENGLISH -> {
+                        lastUpdate = getString(
+                            R.string.last_updated_format,
+                            dateFormat.format(account.updatedAt)
+                        )
+                    }
+                    Language.PERSIAN -> {
+                        lastUpdate = getString(
+                            R.string.last_updated_format,
+                            JalaliDateUtils.dateToJalali(account.updatedAt)
+                        )
+                    }
+                }
+            }
             // Last updated
-            lastUpdated.text = getString(
-                R.string.last_updated_format,
-                dateFormat.format(account.updatedAt)
-            )
+            lastUpdated.text = lastUpdate
             
             // Pass account history to adapter for trophy history charts
             brawlerAdapter.setAccountHistory(account.history)
@@ -834,7 +990,7 @@ class AccountDetailFragment : Fragment() {
     private fun setupEditButton() {
         binding.fabFutureProgress.setOnClickListener {
             // Get the current account ID from the ViewModel
-            viewModel.account.value?.let { account ->
+            viewModel.state.value?.let { account ->
                 // Show refreshing message
                 Toast.makeText(context, "Moving to future progress...", Toast.LENGTH_SHORT).show()
                 navigateToFutureProgress()
