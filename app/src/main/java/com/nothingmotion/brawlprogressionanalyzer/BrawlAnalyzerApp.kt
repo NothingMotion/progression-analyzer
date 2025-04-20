@@ -1,6 +1,7 @@
 package com.nothingmotion.brawlprogressionanalyzer
 
 import android.app.Application
+import android.graphics.Bitmap
 import androidx.appcompat.app.AppCompatDelegate
 import com.github.mikephil.charting.BuildConfig
 import com.nothingmotion.brawlprogressionanalyzer.di.PreferencesManagerModule
@@ -16,9 +17,9 @@ import androidx.collection.LruCache
 class BrawlAnalyzerApp : Application() {
     
     // Cache for player icon URLs (Long = icon ID, String? = image URL or null if not available)
-    val iconCache = LruCache<Long, Any>(100) // Cache up to 100 icons
+    val iconCache = LruCache<Long, String>(100) // Cache up to 100 icons
 
-    val brawlerDataCache = LruCache<Long,Any>(100)
+    val brawlerDataCache = LruCache<Long, String>(200)
     override fun onCreate() {
         super.onCreate()
 
