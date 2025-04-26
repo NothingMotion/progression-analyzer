@@ -35,7 +35,7 @@ class NotMotViewModel @Inject constructor(
             preferencesManager.track?.let{
 
                 _state.update { it.copy(loading=true,error=null) }
-                val token = tokenManager.getAccessToken(it.uuid.toString())
+                val token = tokenManager.collectAccessToken(it.uuid.toString())
                 tokenManager.accessTokenState.collectLatest{state->
                     if (state.loading){
                         _state.update { it.copy(loading=true,error=null) }
