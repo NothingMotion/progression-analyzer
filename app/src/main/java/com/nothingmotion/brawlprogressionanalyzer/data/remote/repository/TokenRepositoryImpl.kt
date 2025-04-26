@@ -9,6 +9,7 @@ import com.nothingmotion.brawlprogressionanalyzer.domain.repository.TokenReposit
 import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
+import java.io.InterruptedIOException
 import java.util.logging.Logger
 import javax.inject.Inject
 
@@ -19,9 +20,12 @@ class TokenRepositoryImpl @Inject constructor():  TokenRepository{
         try{
             return Result.Success(api.getAccessToken("Bearer $frontEndToken"))
         }
-
-
+        catch(e: InterruptedIOException){
+            return Result.Error(DataError.NetworkError.TIMEOUT)
+        }
         catch(e: IOException){
+
+            Timber.tag("TokenRepositoryImpl").e(e)
             return Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION)
         }
         catch(e: HttpException){
@@ -46,6 +50,7 @@ class TokenRepositoryImpl @Inject constructor():  TokenRepository{
 
 
         catch(e: IOException){
+            Timber.tag("TokenRepositoryImpl").e(e)
             return Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION)
         }
         catch(e: HttpException){
