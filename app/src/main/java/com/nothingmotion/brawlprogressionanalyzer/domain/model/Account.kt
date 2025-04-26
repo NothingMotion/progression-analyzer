@@ -1,6 +1,7 @@
 package com.nothingmotion.brawlprogressionanalyzer.domain.model
 
 import com.google.gson.annotations.SerializedName
+import java.util.Collections.emptyList
 import java.util.Date
 import java.util.UUID
 
@@ -56,8 +57,8 @@ data class Player(
     val createdAt: Date = Date()
 )
 data class Account(
-    val account: Player,
-    val history: List<Player>? = null,
+    var account: Player,
+    var history: List<Player>? = null,
     val previousProgresses: List<Progress>? = null,
     val currentProgress: Progress,
     val futureProgresses: List<Progress>? = null,
