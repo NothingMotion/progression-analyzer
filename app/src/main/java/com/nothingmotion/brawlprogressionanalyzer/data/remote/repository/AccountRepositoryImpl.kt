@@ -1,8 +1,13 @@
     package com.nothingmotion.brawlprogressionanalyzer.data.remote.repository
 
+import com.nothingmotion.brawlprogressionanalyzer.data.db.ApplicationDatabase
+import com.nothingmotion.brawlprogressionanalyzer.data.db.models.AccountEntity
+import com.nothingmotion.brawlprogressionanalyzer.data.db.models.BrawlerEntity
+import com.nothingmotion.brawlprogressionanalyzer.data.db.models.PlayerEntity
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.ProgressionAnalyzerAPI
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.mappers.toAccount
-import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.History
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.mappers.toPlayer
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIHistory
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.DataError
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
@@ -25,8 +30,12 @@ class AccountRepositoryImpl @Inject constructor(
     lateinit var tokenManager: TokenManager
     override suspend fun getAccount(tag: String,token: String): Result<Account, DataError.NetworkError> {
         try {
-//            val token = tokenManager.getAccessToken("")
-            return Result.Success(api.getAccount(tag, "Bearer $token").toAccount())
+            val token = tokenManager.getAccessToken("")
+            val history = api.getAccountHistory(tag,10,0,"Bearer $token")
+            val account =  api.getAccount(tag, "Bearer $token").toAccount()
+
+
+            return Result.Success(account)
         } catch (e: IOException) {
             return Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION)
         } catch (e: HttpException) {
@@ -40,6 +49,7 @@ class AccountRepositoryImpl @Inject constructor(
                 else -> Result.Error(DataError.NetworkError.UNKNOWN)
             }
         } catch (e: Exception) {
+            Timber.tag("AccountRepositoryImpl").e(e)
             return Result.Error(DataError.NetworkError.UNKNOWN)
         }
     }
@@ -49,11 +59,11 @@ class AccountRepositoryImpl @Inject constructor(
         token:String,
         limit: Int?,
         offset: Int?
-    ): Flow<Result<List<History>, DataError.NetworkError>> {
+    ): Flow<Result<List<APIHistory>, DataError.NetworkError>> {
         return flow {
             try {
 //                val token = tokenManager.getAccessToken("")
-                emit(Result.Success(api.getAccountHistory(tag, limit, offset, "Bearer $token")))
+                emit(Result.Success(api.getAccountHistory(tag, limit, offset, "Bearer $token").history))
             } catch (e: IOException) {
                 emit(Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION))
             } catch (e: HttpException) {
@@ -99,7 +109,7 @@ class AccountRepositoryImpl @Inject constructor(
     override suspend fun getAllAccounts(token:String): Flow<Result<List<Account>,DataError.NetworkError>> {
         return flow {
             try {
-                emit(Result.Success(api.getAccounts("Bearer $token").map { it.toAccount() }))
+                emit(Result.Success(api.getAccounts("Bearer $token",limit=4,offset=0).accounts.map { it.toAccount() }))
             }
             catch (e: IOException) {
                 emit(Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION))
