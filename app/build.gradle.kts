@@ -4,8 +4,13 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("kotlin-kapt")
+//    id("com.google.devtools.ksp")
+
     id("com.google.dagger.hilt.android")
     id("androidx.navigation.safeargs.kotlin")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
+
 }
 
 val properties = Properties()
@@ -19,10 +24,13 @@ android {
     namespace = "com.nothingmotion.brawlprogressionanalyzer"
     compileSdk = 35
 
+
     val progressionAnalyzerApi = properties.getProperty("api.progression_analyzer","")
     val brawlifyApi = properties.getProperty("api.brawlify","")
+    val brawlifyCdnApi = properties.getProperty("api.brawlify.cdn","")
+    val brawlNinjaApi = properties.getProperty("api.brawlninja","")
+    val brawlNinjaCdn = properties.getProperty("api.brawlninja.cdn","")
     val frontEndSecret = properties.getProperty("api.application.front_end.key","")
-
     defaultConfig {
         applicationId = "com.nothingmotion.brawlprogressionanalyzer"
         minSdk = 21
@@ -39,6 +47,9 @@ android {
             buildConfigField("String","PROGRESSION_ANALYZER_API","\"$progressionAnalyzerApi\"")
             buildConfigField("String","BRAWLIFY_API_URL","\"$brawlifyApi\"")
             buildConfigField("String","APPLICATION_FRONTEND_API_KEY","\"$frontEndSecret\"")
+            buildConfigField("String","BRAWLIFY_CDN_API_URL","\"$brawlifyCdnApi\"")
+            buildConfigField("String","BRAWL_NINJA_API_URL","\"$brawlNinjaApi\"")
+            buildConfigField("String","BRAWL_NINJA_CDN_API_URL","\"$brawlNinjaCdn\"")
 
             isMinifyEnabled = false
             proguardFiles(
@@ -51,7 +62,9 @@ android {
             buildConfigField("String","PROGRESSION_ANALYZER_API","\"$progressionAnalyzerApi\"")
             buildConfigField("String","BRAWLIFY_API_URL","\"$brawlifyApi\"")
             buildConfigField("String","APPLICATION_FRONTEND_API_KEY","\"$frontEndSecret\"")
-
+            buildConfigField("String","BRAWLIFY_CDN_API_URL","\"$brawlifyCdnApi\"")
+            buildConfigField("String","BRAWL_NINJA_API_URL","\"$brawlNinjaApi\"")
+            buildConfigField("String","BRAWL_NINJA_CDN_API_URL","\"$brawlNinjaCdn\"")
             buildFeatures.buildConfig = true
         }
     }
@@ -71,6 +84,8 @@ android {
 dependencies {
 
     val fragment_version = "1.8.6"
+
+    implementation(libs.firebase.crashlytics)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -148,4 +163,24 @@ dependencies {
     // Glide 
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     kapt ("com.github.bumptech.glide:compiler:4.16.0")
+
+    // worker
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
+    // dagger work
+    implementation("androidx.hilt:hilt-work:1.0.0")
+    implementation ("com.jakewharton.threetenabp:threetenabp:1.4.6")
+
+
+    val room_version = "2.6.1"
+
+    implementation("androidx.room:room-runtime:$room_version")
+//    implementation("androidx.room:room-runtime-android:$room_version")
+    // If this project uses any Kotlin source, use Kotlin Symbol Processing (KSP)
+    // See Add the KSP plugin to your project
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
+
+
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation("androidx.room:room-ktx:$room_version")
 }
