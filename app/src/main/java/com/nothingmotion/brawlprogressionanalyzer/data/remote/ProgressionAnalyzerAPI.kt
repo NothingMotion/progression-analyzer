@@ -1,9 +1,11 @@
 package com.nothingmotion.brawlprogressionanalyzer.data.remote
 
+import com.nothingmotion.brawlprogressionanalyzer.crashlytics.common.CrashLytics
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIAccount
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIAccountsResult
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIHistoryResult
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIToken
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIUpdate
-import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.History
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerTable
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.PassRewards
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.StarrDropRewards
@@ -19,7 +21,7 @@ import retrofit2.http.Query
 interface ProgressionAnalyzerAPI {
     /////////////////////////////////
     @GET("accounts")
-    suspend fun getAccounts(@Header("Authorization") authHeader: String): List<APIAccount>
+    suspend fun getAccounts(@Header("Authorization") authHeader: String, @Query("limit") limit: Int?=0, @Query("offset") offset: Int?=0): APIAccountsResult
 
     @GET("accounts/{tag}")
     suspend fun getAccount(
@@ -33,7 +35,7 @@ interface ProgressionAnalyzerAPI {
         @Query("limit") limit: Int? = null,
         @Query("offset") offset: Int? = null,
         @Header("Authorization") authHeader: String
-    ): List<History>
+    ): APIHistoryResult
 
     @GET("accounts/{tag}/refresh")
     suspend fun refreshAccount(
@@ -76,5 +78,8 @@ interface ProgressionAnalyzerAPI {
     @POST("notmot/track")
     suspend fun newTrack(@Header("Authorization") authHeader: String, @Body body : Track) : Track
 
+
+    @POST("notmot/crashlytics")
+    suspend fun newCrash(@Header("Authorization") authHeader: String, @Body body: CrashLytics.CrashReport): CrashLytics.CrashReport
 
 }
