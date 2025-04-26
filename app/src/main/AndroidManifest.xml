@@ -30,6 +30,13 @@
             android:name=".MainActivity"
             android:exported="false"
             android:theme="@style/Theme.App.Starting" />
-    </application>
+
+        <provider
+            android:authorities="${applicationId}.androidx-startup"
+            android:name="androidx.startup.InitializationProvider"
+            tools:node="remove"
+            />
+
+</application>
 
 </manifest>
