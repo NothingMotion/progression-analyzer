@@ -21,7 +21,7 @@ import javax.inject.Singleton
 @Singleton
 class PreferencesManager @Inject constructor(@ApplicationContext private val context: Context) {
     // Regular preferences for non-sensitive data like UI settings
-    private val standardPrefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+    val standardPrefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
     // Secure encrypted preferences for sensitive data (API keys, tokens, etc)
     private val securePrefs: SharedPreferences by lazy {
@@ -40,7 +40,7 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
 
     // Theme preferences
     var darkMode: Boolean
-        get() = standardPrefs.getBoolean(KEY_DARK_MODE, false)
+        get() = standardPrefs.getBoolean(KEY_DARK_MODE, true)
         set(value) = standardPrefs.edit().putBoolean(KEY_DARK_MODE, value).apply()
 
     // Notification preferences
