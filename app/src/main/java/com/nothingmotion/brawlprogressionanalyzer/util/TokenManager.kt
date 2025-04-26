@@ -1,12 +1,10 @@
 package com.nothingmotion.brawlprogressionanalyzer.util
 
-import android.util.Log
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.nothingmotion.brawlprogressionanalyzer.BuildConfig
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
-import com.nothingmotion.brawlprogressionanalyzer.data.remote.ProgressionAnalyzerAPI
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.TokenRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +40,7 @@ class TokenManager @Inject constructor(){
         }
     }
     suspend fun generateAccessToken(frontEndToken: String): String?{
+        Timber.tag("TokenManager").d("Frontend Token is: ${frontEndToken}")
         return when (val result = repository.getAccessToken(frontEndToken)){
             is Result.Error -> {
                 _accessTokenState.update { it.copy(success= null,error= result.error.name, loading = false) }
@@ -63,11 +62,11 @@ class TokenManager @Inject constructor(){
             is Result.Success -> true
         }
     }
-    suspend fun getAccessToken(userId: String){
+    suspend fun collectAccessToken(userId: String){
         // Check if access token already exists
         val accessToken = prefsManager.accessToken
         var frontEndToken = prefsManager.frontEndToken
-        if (accessToken != null){
+        if (accessToken != null && accessToken != ""){
             // Validate access token and if was ok return it
             if(validateAccessToken(accessToken)) {
                 _accessTokenState.update { it.copy(success= accessToken,error=null,loading= false) }
@@ -76,7 +75,7 @@ class TokenManager @Inject constructor(){
             else {
                 // If access token is not valid, generate a new one
                 // Check if frontEndToken exists
-                if (frontEndToken != null) {
+                if (frontEndToken != null && frontEndToken != "") {
                     // Decode the frontEndToken to check if it is valid
                     val decodedToken = decode(frontEndToken)
                     val decodedUserId = decodedToken?.getClaim("userId")?.asString()
@@ -123,6 +122,68 @@ class TokenManager @Inject constructor(){
                 _accessTokenState.update { it.copy(success= token,error=null,loading=false) }
             }
         }
+    }
+
+    suspend fun getAccessToken(uuid: String) : String? {
+        // Check if access token already exists
+        val accessToken = prefsManager.accessToken
+        var frontEndToken = prefsManager.frontEndToken
+        if (accessToken != null){
+            // Validate access token and if was ok return it
+            if(validateAccessToken(accessToken)) {
+                return accessToken
+            }
+            else {
+                // If access token is not valid, generate a new one
+                // Check if frontEndToken exists
+                if (frontEndToken != null) {
+                    // Decode the frontEndToken to check if it is valid
+                    val decodedToken = decode(frontEndToken)
+                    val decodedUserId = decodedToken?.getClaim("userId")?.asString()
+                    if (decodedUserId != uuid) {
+                        // If the user ID does not match, generate a new frontEndToken
+                        val newFrontEndToken = generate(uuid)
+                        prefsManager.frontEndToken = newFrontEndToken
+                    }
+                } else {
+                    // If frontEndToken does not exist, generate a new one
+                    prefsManager.frontEndToken = generate(uuid)
+                    frontEndToken = prefsManager.frontEndToken
+                }
+                val newAccessToken = generateAccessToken(frontEndToken!!)
+                newAccessToken?.let {token->
+
+                    prefsManager.accessToken = token
+                    return token;
+                }
+            }
+        }else {
+            // If access token does not exist, generate a new one
+            // Check if frontEndToken exists
+            if (frontEndToken != null) {
+                // Decode the frontEndToken to check if it is valid
+                val decodedToken = decode(frontEndToken)
+                val decodedUserId = decodedToken?.getClaim("userId")?.asString()
+                if (decodedUserId != uuid) {
+                    // If the user ID does not match, generate a new frontEndToken
+                    val newFrontEndToken = generate(uuid)
+                    prefsManager.frontEndToken = newFrontEndToken
+                }
+            } else {
+                // If frontEndToken does not exist, generate a new one
+                prefsManager.frontEndToken = generate(uuid)
+                frontEndToken = prefsManager.frontEndToken
+            }
+            val newAccessToken = generateAccessToken(frontEndToken!!)
+
+
+
+            newAccessToken?.let {token->
+                prefsManager.accessToken = token
+                return token
+            }
+        }
+        return null
     }
     data class AccessTokenState(
         val success: String? = null,
