@@ -2,13 +2,16 @@ package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -27,16 +30,30 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nothingmotion.brawlprogressionanalyzer.BrawlAnalyzerApp
+import com.nothingmotion.brawlprogressionanalyzer.BuildConfig
 import com.nothingmotion.brawlprogressionanalyzer.R
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.mappers.toBitmap
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Ability
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.AbilityData
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.AbilityDataNinja
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Brawler
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.GadgetData
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.GadgetDataNinja
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Player
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.StarPowerDataNinja
+import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlNinjaRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepository
+import com.nothingmotion.brawlprogressionanalyzer.ui.accounts.BrawlNinjaViewModel
+import com.nothingmotion.brawlprogressionanalyzer.util.AssetUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
@@ -46,7 +63,8 @@ import java.util.Locale
 /**
  * Adapter for displaying brawler items in a RecyclerView
  */
-class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepository): ListAdapter<Brawler, BrawlerAdapter.BrawlerViewHolder>(DIFF_CALLBACK) {
+class BrawlerAdapter constructor(private val brawlNinjaViewModel: BrawlNinjaViewModel) :
+    ListAdapter<Brawler, BrawlerAdapter.BrawlerViewHolder>(DIFF_CALLBACK) {
 
     private var originalList: List<Brawler> = emptyList()
     private var filteredList: List<Brawler> = emptyList()
@@ -55,8 +73,8 @@ class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepositor
     private var accountHistory: List<Player>? = null
 
 
+    private var brawlerIconJob: Job? = null
 
-    private var brawlerIconJob : Job? = null
     interface OnListUpdatedListener {
         fun onListUpdated()
     }
@@ -79,12 +97,12 @@ class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepositor
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BrawlerViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_brawler, parent, false)
-        return BrawlerViewHolder(view,brawlerRepository)
+        return BrawlerViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: BrawlerViewHolder, position: Int) {
         val brawler = getItem(position)
-        holder.bind(brawler)
+        holder.bind(brawler,brawlNinjaViewModel)
 
         // Set long click listener to show brawler details popup
         holder.itemView.setOnLongClickListener {
@@ -103,7 +121,8 @@ class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepositor
         val brawlerPower = dialogView.findViewById<TextView>(R.id.brawler_power)
         val brawlerRank = dialogView.findViewById<TextView>(R.id.brawler_rank)
         val brawlerTrophies = dialogView.findViewById<TextView>(R.id.brawler_trophies)
-        val brawlerHighestTrophies = dialogView.findViewById<TextView>(R.id.brawler_highest_trophies)
+        val brawlerHighestTrophies =
+            dialogView.findViewById<TextView>(R.id.brawler_highest_trophies)
         val brawlerTrophyChart = dialogView.findViewById<LineChart>(R.id.brawler_trophy_chart)
         val noHistoryText = dialogView.findViewById<TextView>(R.id.no_history_text)
 
@@ -112,49 +131,29 @@ class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepositor
         brawlerPower.text = brawler.power.toString()
         brawlerRank.text = brawler.rank.toString()
         brawlerTrophies.text = NumberFormat.getIntegerInstance().format(brawler.trophies)
-        brawlerHighestTrophies.text = NumberFormat.getIntegerInstance().format(brawler.highestTrophies)
+        brawlerHighestTrophies.text =
+            NumberFormat.getIntegerInstance().format(brawler.highestTrophies)
 
         // TODO: Set brawler icon when available
 //        brawlerIcon.setImageResource(R.color.ability_background)
         brawlerIconJob?.cancel()
+
         val cornerRadius = context.resources.getDimensionPixelSize(R.dimen.avatar_corner_radius)
+
         val requestOptions = RequestOptions()
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .transform(RoundedCorners(cornerRadius))
+
         brawler.id.also {
-            val app = context.applicationContext as? BrawlAnalyzerApp
-            val cachedUrl = app?.brawlerDataCache?.get(it)
-            if(cachedUrl != null){
-                Glide
-                    .with(context)
-                    .load(cachedUrl)
-                    .apply(requestOptions)
-                    .signature(ObjectKey(it.toString()))
-                    .into(brawlerIcon)
-            }else {
-                brawlerIconJob = CoroutineScope(Dispatchers.Main).launch {
-                    val brawlerResult = brawlerRepository.getBrawler(it)
-                    when(brawlerResult){
-                        is Result.Error -> {app?.brawlerDataCache?.remove(it)}
-                        is Result.Loading -> {}
-                        is Result.Success -> {
-                            val imageUrl = brawlerResult.data.imageUrl
-                            Timber.tag("BrawlerViewHolder").d("Loaded brawler icon: ${imageUrl}")
-
-                            app?.brawlerDataCache?.put(it,imageUrl)
-
-                            if(isActive){
-                                Glide
-                                    .with(context)
-                                    .load(imageUrl)
-                                    .apply(requestOptions)
-                                    .signature(ObjectKey(it.toString()))
-                                    .into(brawlerIcon)
-                            }
-                        }
-                    }
-                }
-            }
+            val imageUrl = BuildConfig.BRAWLIFY_CDN_API_URL + "brawlers/borderless/${it}.png"
+            Timber.tag("BrawlerAdapter")
+                .d("Loaded brawler icon: $imageUrl")
+            Glide
+                .with(context)
+                .load(imageUrl)
+                .apply(requestOptions)
+                .signature(ObjectKey(it.toString()))
+                .into(brawlerIcon)
         }
         // Set up the trophy history chart
         setupBrawlerTrophyChart(context, brawler, brawlerTrophyChart, noHistoryText)
@@ -396,28 +395,39 @@ class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepositor
         return filteredList.isEmpty() && originalList.isNotEmpty()
     }
 
-    class BrawlerViewHolder(itemView: View,private val brawlerRepository: BrawlerRepository) : RecyclerView.ViewHolder(itemView) {
+    class BrawlerViewHolder(itemView: View) :
+        RecyclerView.ViewHolder(itemView) {
         private val brawlerIcon: ImageView = itemView.findViewById(R.id.brawler_icon)
         private val brawlerName: TextView = itemView.findViewById(R.id.brawler_name)
         private val brawlerTrophies: TextView = itemView.findViewById(R.id.brawler_trophies)
-        private val brawlerHighestTrophies: TextView = itemView.findViewById(R.id.brawler_highest_trophies)
+        private val brawlerHighestTrophies: TextView =
+            itemView.findViewById(R.id.brawler_highest_trophies)
         private val brawlerPower: TextView = itemView.findViewById(R.id.brawler_power)
         private val brawlerRank: TextView = itemView.findViewById(R.id.brawler_rank)
 
         // Ability containers
-        private val starPowersContainer: HorizontalScrollView = itemView.findViewById(R.id.star_powers_container)
+        private val starPowersContainer: HorizontalScrollView =
+            itemView.findViewById(R.id.star_powers_container)
         private val starPowersIcons: LinearLayout = itemView.findViewById(R.id.star_powers_icons)
-        private val gadgetsContainer: HorizontalScrollView = itemView.findViewById(R.id.gadgets_container)
+        private val gadgetsContainer: HorizontalScrollView =
+            itemView.findViewById(R.id.gadgets_container)
         private val gadgetsIcons: LinearLayout = itemView.findViewById(R.id.gadgets_icons)
-        private val gearsContainer: HorizontalScrollView = itemView.findViewById(R.id.gears_container)
+        private val gearsContainer: HorizontalScrollView =
+            itemView.findViewById(R.id.gears_container)
         private val gearsIcons: LinearLayout = itemView.findViewById(R.id.gears_icons)
 
         private val numberFormat = NumberFormat.getIntegerInstance()
 
-        private var brawlerDataLoadingJob : Job? = null
+        private var brawlerDataLoadingJob: Job? = null
+        private var gadgetIconLoadingJobs: MutableList<Job?> = mutableListOf()
+        private var pendingAbilityDialog: Triple<Context, String, Boolean>? = null
 
-        fun bind(brawler: Brawler) {
+        private lateinit var brawlNinjaViewModel: BrawlNinjaViewModel
+        fun bind(brawler: Brawler,
+                 brawlNinjaViewModel: BrawlNinjaViewModel) {
             brawlerDataLoadingJob?.cancel()
+            this.brawlNinjaViewModel = brawlNinjaViewModel
+
             brawlerName.text = brawler.name
             brawlerTrophies.text = numberFormat.format(brawler.trophies)
             brawlerHighestTrophies.text = numberFormat.format(brawler.highestTrophies)
@@ -426,18 +436,19 @@ class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepositor
 
             // TODO: Add loading of brawler icon from a remote source or local resources
             brawlerIcon.setImageResource(R.color.ability_background)
-            setupBrawlerIcon(brawler,itemView.context,itemView,brawlerIcon)
+            setupBrawlerIcon(brawler, itemView.context, itemView, brawlerIcon)
             // Setup abilities
             setupStarPowers(brawler, itemView.context)
             setupGadgets(brawler, itemView.context)
             setupGears(brawler, itemView.context)
         }
+
         private fun setupBrawlerIcon(
-            brawler:Brawler,
-            context:Context,
+            brawler: Brawler,
+            context: Context,
             itemView: View,
             brawlerIcon: ImageView,
-            ){
+        ) {
             Glide.with(context).clear(itemView)
 
             val cornerRadius = context.resources.getDimensionPixelSize(R.dimen.avatar_corner_radius)
@@ -446,41 +457,18 @@ class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepositor
                 .transform(RoundedCorners(cornerRadius))
 
             brawler.id.also {
-                val app = context.applicationContext as? BrawlAnalyzerApp
-                val cachedUrl = app?.brawlerDataCache?.get(it)
-                if(cachedUrl != null){
-                    Glide
-                        .with(context)
-                        .load(cachedUrl)
-                        .apply(requestOptions)
-                        .signature(ObjectKey(it.toString()))
-                        .into(brawlerIcon)
-                }else {
-                    brawlerDataLoadingJob = CoroutineScope(Dispatchers.Main).launch {
-                        val brawlerResult = brawlerRepository.getBrawler(it)
-                        when(brawlerResult){
-                            is Result.Error -> {app?.brawlerDataCache?.remove(it)}
-                            is Result.Loading -> {}
-                            is Result.Success -> {
-                                val imageUrl = brawlerResult.data.imageUrl
-                                Timber.tag("BrawlerViewHolder").d("Loaded brawler icon: ${imageUrl}")
-
-                                app?.brawlerDataCache?.put(it,imageUrl)
-
-                                if(isActive){
-                                    Glide
-                                        .with(context)
-                                        .load(imageUrl)
-                                        .apply(requestOptions)
-                                        .signature(ObjectKey(it.toString()))
-                                        .into(brawlerIcon)
-                                }
-                            }
-                        }
-                    }
-                }
+                val imageUrl = BuildConfig.BRAWLIFY_CDN_API_URL + "brawlers/borderless/${it}.png"
+                Timber.tag("BrawlerViewHolder")
+                    .d("Loaded brawler icon: $imageUrl")
+                Glide
+                    .with(context)
+                    .load(imageUrl)
+                    .apply(requestOptions)
+                    .signature(ObjectKey(it.toString()))
+                    .into(brawlerIcon)
             }
         }
+
         private fun setupStarPowers(brawler: Brawler, context: Context) {
             if (brawler.starPowers.isNullOrEmpty()) {
                 starPowersContainer.visibility = View.GONE
@@ -493,10 +481,24 @@ class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepositor
             brawler.starPowers?.forEach { starPower ->
                 // Create star power icon
                 val icon = createAbilityIcon(context)
-                starPowersIcons.addView(icon)
-
-                // TODO: Set actual star power icon from a remote source or local resources
                 icon.setImageResource(R.drawable.ic_star_power_placeholder)
+                starPowersIcons.addView(icon)
+                CoroutineScope(Dispatchers.Main).launch {
+                    Timber.tag("BrawlerViewHolder").d("Loading star power icon: ${starPower.id}")
+                    val imageUrl =
+                        BuildConfig.BRAWLIFY_CDN_API_URL + "star-powers/borderless/${starPower.id}.png"
+                    Timber.tag("BrawlerViewHolder").d("Loaded star power icon: ${imageUrl}")
+                    Glide.with(context)
+                        .load(imageUrl)
+                        .apply(RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(icon)
+                }
+                
+                icon.setOnClickListener {
+                    createAbilityListener(context, brawler.name, starPower.id.toString(), false)
+                }
+                
+                // TODO: Set actual star power icon from a remote source or local resources
                 icon.contentDescription = starPower.name
             }
         }
@@ -506,20 +508,44 @@ class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepositor
                 gadgetsContainer.visibility = View.GONE
                 return
             }
-
             gadgetsContainer.visibility = View.VISIBLE
             gadgetsIcons.removeAllViews()
 
             brawler.gadgets?.forEach { gadget ->
+                // Create parent container
+
                 // Create gadget icon
                 val icon = createAbilityIcon(context)
+                // Add parent container to gadgetsIcons
                 gadgetsIcons.addView(icon)
 
-                // TODO: Set actual gadget icon from a remote source or local resources
-                icon.setImageResource(R.drawable.ic_gadget_placeholder)
+                gadgetIconLoadingJobs.forEach { it?.cancel() }
+                    .also { gadgetIconLoadingJobs.clear() }
+
+                Timber.tag("BrawlerViewHolder").d("Loading gadget icon: ${gadget.id}")
+
+                val imageUrl =
+                    BuildConfig.BRAWLIFY_CDN_API_URL + "gadgets/borderless/${gadget.id}.png"
+
+                Timber.tag("BrawlerViewHolder").d("Loaded gadget icon: ${imageUrl}")
+
+                if (adapterPosition != RecyclerView.NO_POSITION)
+                    Glide.with(context)
+                        .load(imageUrl)
+                        .apply(RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .signature(ObjectKey(gadget.id.toString()))
+                        .into(icon)
+
+                icon.setOnClickListener {
+                    createAbilityListener(context, brawler.name, gadget.id.toString(), true)
+                }
+
                 icon.contentDescription = gadget.name
+
             }
+            // TODO: Set actual gadget icon from a remote source or local resources
         }
+
 
         private fun setupGears(brawler: Brawler, context: Context) {
             if (brawler.gears.isNullOrEmpty()) {
@@ -533,10 +559,21 @@ class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepositor
             brawler.gears?.forEach { gear ->
                 // Create gear icon
                 val icon = createAbilityIcon(context)
+                icon.setImageResource(R.drawable.ic_gear_placeholder)
                 gearsIcons.addView(icon)
 
+
+                CoroutineScope(Dispatchers.Main).launch {
+                    Timber.tag("BrawlerViewHolder").d("Loading gear icon: ${gear.id}")
+                    val imageUrl =
+                        BuildConfig.BRAWLIFY_CDN_API_URL + "gears/regular/${gear.id}.png"
+                    Timber.tag("BrawlerViewHolder").d("Loaded gear icon: ${imageUrl}")
+                    Glide.with(context)
+                        .load(imageUrl)
+                        .apply(RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(icon)
+                }
                 // TODO: Set actual gear icon from a remote source or local resources
-                icon.setImageResource(R.drawable.ic_gear_placeholder)
                 icon.contentDescription = gear.name
             }
         }
@@ -553,10 +590,217 @@ class BrawlerAdapter constructor(private val brawlerRepository: BrawlerRepositor
             icon.scaleType = ImageView.ScaleType.CENTER_CROP
             icon.contentDescription = context.getString(R.string.ability_icon_description)
 
+            // Make the icon clickable and add ripple effect
+            icon.isClickable = true
+            icon.isFocusable = true
+            
+            // Set a background with ripple effect
+            val outValue = android.util.TypedValue()
+            context.theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true)
+            icon.setBackgroundResource(outValue.resourceId)
+            
+            // Add padding to ensure the ripple is visible
+            val padding = context.resources.getDimensionPixelSize(R.dimen.ability_icon_margin) / 2
+            icon.setPadding(padding, padding, padding, padding)
+            
             return icon
         }
-    }
+        
+        private var currentAbilityDialog: androidx.appcompat.app.AlertDialog? = null
+        
+        private fun createAbilityListener(context: Context, brawlerName: String, abilityId: String, isGadget: Boolean) {
+            // Create and show the dialog with loading state
+            val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_ability_details, null)
+            
+            // Get references to the groups and views
+            val loadingGroup = dialogView.findViewById<androidx.constraintlayout.widget.Group>(R.id.loading_group)
+            val errorGroup = dialogView.findViewById<androidx.constraintlayout.widget.Group>(R.id.error_group)
+            val contentGroup = dialogView.findViewById<androidx.constraintlayout.widget.Group>(R.id.content_group)
+            
+            // Error views
+            val errorText = dialogView.findViewById<TextView>(R.id.error_text)
+            val retryButton = dialogView.findViewById<Button>(R.id.retry_button)
+            
+            // Content views
+            val abilityIcon = dialogView.findViewById<ImageView>(R.id.ability_icon)
+            val abilityName = dialogView.findViewById<TextView>(R.id.ability_name)
+            val abilityType = dialogView.findViewById<TextView>(R.id.ability_type)
+            val abilityDescription = dialogView.findViewById<TextView>(R.id.ability_description)
+            
+            // Set initial state to loading
+            loadingGroup.visibility = View.VISIBLE
+            errorGroup.visibility = View.GONE
+            contentGroup.visibility = View.GONE
+            
+            // Create the dialog
+            val dialog = MaterialAlertDialogBuilder(context)
+                .setView(dialogView)
+                .setNegativeButton(android.R.string.cancel, null)
+                .create()
+            
+            // Store the current dialog
+            currentAbilityDialog?.dismiss()
+            currentAbilityDialog = dialog
+            
+            // Show the dialog
+            dialog.show()
+            
+            // Set up retry button click listener
+            retryButton.setOnClickListener {
+                // Explicitly update UI to loading state
+                loadingGroup.visibility = View.VISIBLE
+                errorGroup.visibility = View.GONE
+                contentGroup.visibility = View.GONE
+                
+                // Add a small delay to ensure UI updates before network request
+                CoroutineScope(Dispatchers.Main).launch {
+                    // Log the retry attempt
+                    Timber.tag("BrawlerAdapter").d("Retry button clicked for brawler: $brawlerName")
+                    
+                    // Retry fetching the data with a special prefix to bypass random errors
+                    brawlNinjaViewModel.getBrawler(context.applicationContext,"retry_$brawlerName")
+                }
+            }
+            
+            // First try to get from cache
 
+            val appContext = context.applicationContext
+            val brawlerData = brawlNinjaViewModel.getBrawlerFromCache(appContext,brawlerName)
+
+            if (brawlerData != null) {
+                // Find the ability based on the type
+                val ability = if (isGadget) {
+                    brawlerData.gadgets.find { it.id == abilityId }
+                } else {
+                    brawlerData.starpowers.find { it.id == abilityId }
+                }
+
+                // Update dialog if ability found
+                ability?.let {
+                    updateDialogWithAbility(it, abilityIcon, abilityName, abilityType, abilityDescription, loadingGroup, contentGroup)
+                    return
+                }
+            }
+
+            // Set up state collection when we need to fetch data
+            setupStateCollection(context, brawlerName, abilityId, isGadget, dialogView)
+            
+            // If we couldn't find the ability in cache, fetch the brawler data
+            brawlNinjaViewModel.getBrawler(context.applicationContext,brawlerName)
+        }
+        
+        private fun updateDialogWithAbility(
+            ability: AbilityDataNinja,
+            abilityIcon: ImageView,
+            abilityName: TextView,
+            abilityType: TextView,
+            abilityDescription: TextView,
+            loadingGroup: androidx.constraintlayout.widget.Group,
+            contentGroup: androidx.constraintlayout.widget.Group
+        ) {
+            // Set ability details
+            abilityName.text = ability.name
+            abilityDescription.text = ability.description
+            
+            // Set ability type
+            when (ability) {
+                is GadgetDataNinja -> {
+                    abilityType.text = "Gadget"
+                    // Load gadget icon
+                    val imageUrl = BuildConfig.BRAWLIFY_CDN_API_URL + "gadgets/borderless/${ability.id}.png"
+                    Glide.with(abilityIcon.context)
+                        .load(imageUrl)
+                        .apply(RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(abilityIcon)
+                }
+                is StarPowerDataNinja -> {
+                    abilityType.text = "Star Power"
+                    // Load star power icon
+                    val imageUrl = BuildConfig.BRAWLIFY_CDN_API_URL + "star-powers/borderless/${ability.id}.png"
+                    Glide.with(abilityIcon.context)
+                        .load(imageUrl)
+                        .apply(RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(abilityIcon)
+                }
+                else -> {
+                    abilityType.text = "Ability"
+                }
+            }
+            
+            // Switch to content state
+            loadingGroup.visibility = View.GONE
+            contentGroup.visibility = View.VISIBLE
+        }
+        
+        private fun setupStateCollection(context: Context, brawlerName: String, abilityId: String, isGadget: Boolean, dialogView: View) {
+            // Get references to the groups and views
+            val loadingGroup = dialogView.findViewById<androidx.constraintlayout.widget.Group>(R.id.loading_group)
+            val errorGroup = dialogView.findViewById<androidx.constraintlayout.widget.Group>(R.id.error_group)
+            val contentGroup = dialogView.findViewById<androidx.constraintlayout.widget.Group>(R.id.content_group)
+            
+            // Error views
+            val errorText = dialogView.findViewById<TextView>(R.id.error_text)
+            
+            // Content views
+            val abilityIcon = dialogView.findViewById<ImageView>(R.id.ability_icon)
+            val abilityName = dialogView.findViewById<TextView>(R.id.ability_name)
+            val abilityType = dialogView.findViewById<TextView>(R.id.ability_type)
+            val abilityDescription = dialogView.findViewById<TextView>(R.id.ability_description)
+            
+            CoroutineScope(Dispatchers.Main).launch {
+                brawlNinjaViewModel.state.collectLatest { state ->
+
+                    Timber.tag("BrawlerViewHolder").d("State: $state")
+                    when (state) {
+                        is BrawlNinjaViewModel.BrawlNinjaState.Success -> {
+                            // Check if this is the brawler we're waiting for
+                            if (state.data.name.equals(brawlerName, ignoreCase = true)) {
+                                // Find the ability based on the type
+                                val ability = if (isGadget) {
+                                    state.data.gadgets.find { it.id == abilityId }
+                                } else {
+                                    state.data.starpowers.find { it.id == abilityId }
+                                }
+                                
+                                // Update dialog if ability found
+                                ability?.let {
+                                    loadingGroup.visibility = View.GONE
+                                    updateDialogWithAbility(it, abilityIcon, abilityName, abilityType, abilityDescription, loadingGroup, contentGroup)
+                                    // Cancel this coroutine since we've shown the content
+                                } ?: run {
+                                    // Ability not found
+                                    loadingGroup.visibility = View.GONE
+                                    errorGroup.visibility = View.VISIBLE
+                                    errorText.text = "Ability not found"
+                                    this.cancel()
+                                }
+                            }
+                        }
+                        is BrawlNinjaViewModel.BrawlNinjaState.Error -> {
+                            // Show error state
+                            loadingGroup.visibility = View.GONE
+                            errorGroup.visibility = View.VISIBLE
+                            errorText.text = "Error: ${state.message}"
+                            
+                            // Log the error
+                            Timber.tag("BrawlerAdapter").e("setupStateCollection: Failed to load brawler data: ${state.message}")
+                            
+                            // Cancel this coroutine since we've handled the error
+                        }
+                        is BrawlNinjaViewModel.BrawlNinjaState.Loading -> {
+
+                            Timber.tag("BrawlerAdapter").d("setupStateCollection: Loading brawler data")
+                            // Keep showing loading state
+                            loadingGroup.visibility = View.VISIBLE
+                            errorGroup.visibility = View.GONE
+                            contentGroup.visibility = View.GONE
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     companion object {
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Brawler>() {
             override fun areItemsTheSame(oldItem: Brawler, newItem: Brawler): Boolean {
