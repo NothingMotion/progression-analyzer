@@ -1,6 +1,7 @@
 package com.nothingmotion.brawlprogressionanalyzer.di
 
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.AccountRepositoryImpl
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.BrawlNinjaRepositoryImpl
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.BrawlerRepositoryImpl
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.BrawlerTableRepositoryImpl
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.NotMotRepositoryImpl
@@ -12,6 +13,7 @@ import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.Fa
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeBrawlerRepository
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeBrawlerTableRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.AccountRepository
+import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlNinjaRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerTableRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.NotMotRepository
@@ -82,4 +84,8 @@ abstract class RepositoryModuleBinding{
     @Binds
     @Singleton
     abstract fun bindNotMotRepository(notMotRepositoryImpl: NotMotRepositoryImpl): NotMotRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBrawlNinjaRepository(brawlNinjaRepositoryImpl: BrawlNinjaRepositoryImpl): BrawlNinjaRepository
 }
