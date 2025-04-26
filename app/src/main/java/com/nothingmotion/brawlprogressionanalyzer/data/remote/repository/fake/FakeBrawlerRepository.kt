@@ -71,7 +71,7 @@ class FakeBrawlerRepository {
                 GadgetData(
                     description = "Gadget $i",
                     descriptionHtml = "<p>Gadget $i</p>",
-                    id = i,
+                    id = i.toLong(),
                     imageUrl = "https://example.com/gadgets/$i.png",
                     name = "Gadget $i",
                     path = "/gadgets/$i",
