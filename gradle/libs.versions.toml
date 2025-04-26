@@ -11,6 +11,10 @@ activity = "1.8.0"
 constraintlayout = "2.2.0"
 navigationFragmentKtx = "2.8.9"
 navigationUiKtx = "2.8.9"
+firebaseCrashlytics = "19.4.2"
+gradle = "8.1.0"
+googleServices = "4.4.2"
+firebaseCrashlyticsGradle = "3.0.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -23,6 +27,10 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics", version.ref = "firebaseCrashlytics" }
+gradle = { group = "com.android.tools.build", name = "gradle", version.ref = "gradle" }
+google-services = { group = "com.google.gms", name = "google-services", version.ref = "googleServices" }
+firebase-crashlytics-gradle = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version.ref = "firebaseCrashlyticsGradle" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
