@@ -10,4 +10,9 @@ interface BrawlerRepository {
     suspend fun getBrawler(id: Long): Result<BrawlerData,DataError.NetworkError>
     suspend fun getBrawlers(): Flow<Result<List<BrawlerData>,DataError.NetworkError>>
     suspend fun getIcon(id: Long): Result<APIPlayerIcon,DataError.NetworkError>
+
+    suspend fun getGadget(id: Long): Result<ByteArray,DataError.NetworkError>
+    suspend fun getStarPower(id: Long): Result<ByteArray,DataError.NetworkError>
+    suspend fun getGear(id: Long): Result<ByteArray,DataError.NetworkError>
+    suspend fun getTier(id: Long): Result<ByteArray,DataError.NetworkError>
 }
