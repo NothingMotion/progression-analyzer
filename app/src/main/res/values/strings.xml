@@ -157,4 +157,7 @@
     <string name="f2p_player">F2P</string>
     <string name="p2w_player">P2W (Pass Plus)</string>
     <string name="credits_per_month">Credits Per Month</string>
+    <string name="back">Back</string>
+    <string name="read_description_player_status">TODO//</string>
+    <string name="read_description_brawlers">TODO//</string>
 </resources>
