@@ -2,23 +2,33 @@ package com.nothingmotion.brawlprogressionanalyzer.ui.newaccount
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeAccountRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Brawler
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.DataError
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Player
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Progress
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
+import com.nothingmotion.brawlprogressionanalyzer.domain.repository.AccountRepository
+import com.nothingmotion.brawlprogressionanalyzer.util.TokenManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.util.Date
 import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
 class NewAccountViewModel @Inject constructor(
-    private val accountRepository: FakeAccountRepository
+    private val accountRepository: AccountRepository,
+    private val preferencesManager: PreferencesManager,
+    private val tokenManager: TokenManager,
 ) : ViewModel() {
 
     // State to represent the account creation process
@@ -81,21 +91,88 @@ class NewAccountViewModel @Inject constructor(
                 _uiState.value = AccountCreationState.Loading
 
                 // Check if account already exists
-                val existingAccount = accountRepository.getAccount(formattedTag)
-                if (existingAccount != null) {
-                    _uiState.value = AccountCreationState.Error("Account with this tag already exists")
-                    return@launch
-                }
+//                when(val result =accountRepository.getCachedAccount(formattedTag)){
+//                    is Result.Error -> {
+//                        when(result.error){
+//                            else -> {
+//                                _uiState.value =
+//                                    AccountCreationState.Error("Database error: ${result.error.name}")
+//                                return@launch
+//                            }
+//                        }
+//                    }
+//                    is Result.Loading -> {}
+//                    is Result.Success -> {
+//                        if (result.data != null) {
+//                            _uiState.value = AccountCreationState.Error("Account with this tag already exists")
+//                            return@launch
+//                        }
+//                    }
+//                }
+//                if (existingAccount != null) {
+//                    _uiState.value = AccountCreationState.Error("Account with this tag already exists")
+//                    return@launch
+//                }
 
                 // In a real app, you would fetch player data from API here
                 // For now, simulate API call with delay
-                kotlinx.coroutines.delay(5000)
+//                kotlinx.coroutines.delay(5000)
 
+                preferencesManager.track?.let { track ->
+
+                    _uiState.update { AccountCreationState.Loading }
+                    tokenManager.collectAccessToken(track.uuid.toString())
+                    tokenManager.accessTokenState.collectLatest { state ->
+
+                        Timber.tag("AccountsViewModel").d(state.error, state.success)
+
+                        if (state.loading) {
+                            _uiState.update { AccountCreationState.Loading }
+
+                        } else if (state.error != null) {
+
+                            Timber.tag("AccountsViewModel").e(state.error)
+                            _uiState.update { AccountCreationState.Error(state.error) }
+
+                        }
+                        else {
+                            state.success?.let { token ->
+                                when(val result = accountRepository.getAccount(tag,token)){
+                                    is Result.Error -> {
+                                        when(result.error){
+                                            is DataError.NetworkError -> {
+                                                Timber.tag("AccountCreationViewModel").e(result.error.name)
+                                                _uiState.update { AccountCreationState.Error(result.error.name) }
+                                            }
+                                            is DataError.DatabaseError -> {
+                                                Timber.tag("AccountCreationViewModel").e(result.error.name)
+                                                _uiState.update { AccountCreationState.Error(result.error.name) }
+                                            }
+                                        }
+                                    }
+                                    is Result.Loading -> {
+                                        _uiState.update { AccountCreationState.Loading }
+                                    }
+                                    is Result.Success -> {
+
+                                        if (result.data != null) {
+                                            _uiState.value = AccountCreationState.Success(result.data)
+                                        } else {
+                                            _uiState.value = AccountCreationState.Error("Failed to fetch account data")
+                                        }
+                                    }
+                                }
+                                // Fetch account data from API
+//                                val account = fetchAccountData(formattedTag, token)
+                            }
+                        }
+                    }
                 // Create a new starter account
-                val newAccount = createNewAccountFromTag(formattedTag)
-                addAccount(newAccount)
+//                val newAccount = createNewAccountFromTag(formattedTag)
+//                addAccount(newAccount)
 
-                _uiState.value = AccountCreationState.Success(newAccount)
+//                _uiState.value = AccountCreationState.Success(newAccount)
+            }
             } catch (e: Exception) {
                 _uiState.value = AccountCreationState.Error("Failed to create account: ${e.message}")
             }
@@ -160,7 +237,7 @@ class NewAccountViewModel @Inject constructor(
             averageBrawlerTrophies = 0,
             isBoughtPass = false,
             isBoughtPassPlus = false,
-            isBoughRankedPass = false,
+            isBoughtRankedPass = false,
             duration = now
         )
         
