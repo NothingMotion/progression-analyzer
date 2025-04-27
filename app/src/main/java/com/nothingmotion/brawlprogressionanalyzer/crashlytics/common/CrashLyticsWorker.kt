@@ -67,6 +67,7 @@ class CrashLyticsWorker @AssistedInject constructor(
 
                         is com.nothingmotion.brawlprogressionanalyzer.domain.model.Result.Loading -> {return@withContext Result.failure()}
                         is com.nothingmotion.brawlprogressionanalyzer.domain.model.Result.Success -> {
+                            File(crashUri).delete()
                             Log.i("CrashLyticsWorker","Successfully reported crashlytics to api!")
                             return@withContext Result.success()
                         }
