@@ -15,7 +15,7 @@
         android:visibility="visible"
 
 
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
@@ -94,7 +94,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:paddingBottom="8dp"
-
                 app:layout_collapseMode="pin"
                 app:navigationIcon="@drawable/ic_back"
                 app:title="Account Details"
@@ -109,7 +108,19 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/share_account"
                     app:srcCompat="@drawable/ic_share"
-                    app:tint="?attr/colorOnPrimary" />
+                    app:tint="?attr/colorOnPrimary"
+                    android:clickable="true"/>
+                <ImageButton
+                    android:id="@+id/camera_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/share_account"
+                    app:srcCompat="@drawable/round_photo_camera"
+                    app:tint="?attr/colorOnPrimary"
+                    android:clickable="true"/>
 
             </androidx.appcompat.widget.Toolbar>
 

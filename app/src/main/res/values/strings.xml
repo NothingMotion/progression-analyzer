@@ -160,4 +160,6 @@
     <string name="back">Back</string>
     <string name="read_description_player_status">TODO//</string>
     <string name="read_description_brawlers">TODO//</string>
+    <string name="account_photo_message">This is your account photo</string>
+    <string name="photo_preview">preview</string>
 </resources>
