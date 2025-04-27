@@ -14,7 +14,8 @@ sealed interface DataError : Error {
         UNAUTHORIZED,
 
 
-
+        BAD_REQUEST,
+        UNPROCESSABLE_ENTITY,
         FORBIDDEN
     }
 
@@ -25,6 +26,11 @@ sealed interface DataError : Error {
         NO_DATA,
         FAILED_TO_SAVE,
         DATABASE_ERROR,
-        UNKNOWN
+        UNKNOWN,
+        DUPLICATE_ENTRY,
+        ABORT_TRANSACTION,
+        DISK_IO,
+
+        DATABASE_CONSTRAINT
     }
 }
