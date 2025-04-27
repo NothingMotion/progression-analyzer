@@ -50,7 +50,9 @@ class NewAccountFragment : Fragment() {
         binding.playerTagEditText.addTextChangedListener { text: Editable? ->
             // Clear errors when user starts typing
             binding.playerTagLayout.error = null
-            
+            if(binding.playerTagEditText.text?.contains("#") == true){
+                binding.playerTagEditText.setText(binding.playerTagEditText.text.toString().replace("#",""))
+            }
             // Add real-time validation if needed
             text?.toString()?.let { tagText ->
                 if (tagText.isNotEmpty()) {
