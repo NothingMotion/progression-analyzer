@@ -1,11 +1,17 @@
 package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nothingmotion.brawlprogressionanalyzer.crashlytics.common.CrashLytics
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeAccountRepository
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
+import com.nothingmotion.brawlprogressionanalyzer.data.db.ApplicationDatabase
+import com.nothingmotion.brawlprogressionanalyzer.data.db.models.AccountEntity
+import com.nothingmotion.brawlprogressionanalyzer.data.db.models.PlayerEntity
+import com.nothingmotion.brawlprogressionanalyzer.data.db.models.ProgressEntity
+import com.nothingmotion.brawlprogressionanalyzer.data.db.models.ProgressType
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Progress
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.AccountRepository
 import com.nothingmotion.brawlprogressionanalyzer.util.TokenManager
@@ -18,16 +24,17 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
 import java.util.Date
-import kotlin.random.Random
+import javax.inject.Inject
 
 @HiltViewModel
 class AccountsViewModel @Inject constructor(
     private val accountRepository: AccountRepository,
     private val fakeAccountRepository: FakeAccountRepository,
     private val preferencesManager: PreferencesManager,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val crashLytics: CrashLytics.ExceptionHandler,
+    private val db: ApplicationDatabase
 ) : ViewModel() {
 
 //    // Exposed accounts as StateFlow from repository
@@ -37,7 +44,7 @@ class AccountsViewModel @Inject constructor(
 //            started = SharingStarted.WhileSubscribed(5000),
 //            initialValue = emptyList()
 //        )
-        
+
     // Unified accounts state that includes loading, error, and data
     private val _accountsState = MutableStateFlow(AccountsState(isLoading = true))
     val accountsState = _accountsState.asStateFlow()
@@ -49,28 +56,36 @@ class AccountsViewModel @Inject constructor(
     init {
         // Load sort order from preferences if we wanted to
         // loadSortOrderPreference()
-        
+
         // Initial load of accounts
 //        refreshAccounts()
         loadAccounts()
 //        loadFakeAccounts()
     }
+
     fun loadFakeAccounts() {
-        viewModelScope.launch{
-            fakeAccountRepository.accounts.collectLatest {accounts->
+        viewModelScope.launch {
+            fakeAccountRepository.accounts.collectLatest { accounts ->
                 delay(5000)
 //                _accountsState.update { it.copy(error="An internal error occured",isLoading= false) }
-                _accountsState.update { it.copy(accounts = accounts,isLoading=false,error=null) }
+                _accountsState.update {
+                    it.copy(
+                        accounts = accounts,
+                        isLoading = false,
+                        error = null
+                    )
+                }
             }
         }
     }
-     fun loadAccounts(){
+
+    fun loadAccounts() {
         viewModelScope.launch {
 
-                preferencesManager.track?.let{track->
+                preferencesManager.track?.let { track ->
 
-                    _accountsState.update { it.copy(isLoading=true,error=null) }
-                    tokenManager.getAccessToken(track.uuid.toString())
+                    _accountsState.update { it.copy(isLoading = true, error = null) }
+                    tokenManager.collectAccessToken(track.uuid.toString())
                     tokenManager.accessTokenState.collectLatest { state ->
 
                         Timber.tag("AccountsViewModel").d(state.error, state.success)
@@ -81,7 +96,12 @@ class AccountsViewModel @Inject constructor(
                         } else if (state.error != null) {
 
                             Timber.tag("AccountsViewModel").e(state.error)
-                            _accountsState.update { it.copy(isLoading = false, error = state.error) }
+                            _accountsState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    error = state.error
+                                )
+                            }
 
                         } else {
                             state.success?.let {
@@ -104,23 +124,39 @@ class AccountsViewModel @Inject constructor(
                                                 )
                                             }
 
-                                            is Result.Success -> _accountsState.update {
-                                                it.copy(
-                                                    accounts = result.data,
-                                                    error = null,
-                                                    isLoading = false
-                                                )
+                                            is Result.Success -> {
+                                                result.data.forEach { account ->
+
+
+
+
+                                                }
+                                                _accountsState.update {
+                                                    it.copy(
+                                                        accounts = result.data,
+                                                        error = null,
+                                                        isLoading = false
+                                                    )
+                                                }
                                             }
                                         }
                                     }
                             }
                         }
+                    } ?: run {
+                        _accountsState.update {
+                            it.copy(
+                                error = "Restart Application to fix",
+                                isLoading = false
+                            )
+                        }
                     }
-                } ?: run {
-                    _accountsState.update { it.copy(error="Restart Application to fix",isLoading= false) }
                 }
-        }
+            }
+
+
     }
+
     /**
      * Refresh accounts from the repository
      */
@@ -129,22 +165,23 @@ class AccountsViewModel @Inject constructor(
             try {
                 // Set loading state
                 _accountsState.update { it.copy(isLoading = true, error = null) }
-                
+
                 // Load accounts from repository
 //                accountRepository.refreshAccounts()
-                
+
                 // Update state with loaded accounts
-                _accountsState.update { 
+                _accountsState.update {
                     it.copy(accounts = it.accounts, isLoading = false, error = null)
                 }
             } catch (e: Exception) {
                 // Update state with error
-                _accountsState.update { 
-                    it.copy(isLoading = false, error = e.message ?: "Failed to load accounts") 
+                _accountsState.update {
+                    it.copy(isLoading = false, error = e.message ?: "Failed to load accounts")
                 }
             }
         }
     }
+
     fun getAccount(tag: String): Account? {
         var account: Account? = null
         viewModelScope.launch {
@@ -153,6 +190,7 @@ class AccountsViewModel @Inject constructor(
         }
         return account;
     }
+
     /**
      * Add a new account
      */
@@ -169,11 +207,34 @@ class AccountsViewModel @Inject constructor(
 //            }
 //        }
     }
-    
+
     /**
      * Delete an account
      */
     fun deleteAccount(accountId: String) {
+        // Set loading state
+        _accountsState.update { it.copy(isLoading = true, error = null) }
+        viewModelScope.launch {
+            try {
+                // Delete account from repository
+                accountRepository.deleteCachedAccount(accountId)
+
+                // Update state to remove deleted account
+                _accountsState.update {
+                    it.copy(
+                        accounts = it.accounts.filter { account -> account.account.tag != accountId },
+                        isLoading = false,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                // Update state with error
+                _accountsState.update {
+                    it.copy(isLoading = false, error = e.message ?: "Failed to delete account")
+                }
+            }
+        }
+        // Delete account from repository
 //        viewModelScope.launch {
 //            try {
 //                accountRepository.deleteAccount(accountId)
@@ -186,7 +247,7 @@ class AccountsViewModel @Inject constructor(
 //            }
 //        }
     }
-    
+
     /**
      * Update account tag
      */
@@ -211,7 +272,7 @@ class AccountsViewModel @Inject constructor(
 //            }
 //        }
     }
-    
+
     /**
      * Change sort order of accounts
      */
@@ -222,7 +283,7 @@ class AccountsViewModel @Inject constructor(
             // preferencesManager.accountSortOrder = sortOrder.name
         }
     }
-    
+
     /**
      * Load saved sort order preference
      */
@@ -241,7 +302,7 @@ class AccountsViewModel @Inject constructor(
         }
         */
     }
-    
+
     /**
      * Represents sort options for account list
      */
