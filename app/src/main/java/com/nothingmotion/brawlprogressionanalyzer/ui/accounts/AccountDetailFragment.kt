@@ -1,5 +1,6 @@
 package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
 
+
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
@@ -13,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -26,6 +28,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.signature.ObjectKey
 import com.github.mikephil.charting.charts.BarChart
@@ -50,6 +54,7 @@ import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Language
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Progress
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
+import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlNinjaRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepository
 import com.nothingmotion.brawlprogressionanalyzer.util.AccountUtils
 import com.nothingmotion.brawlprogressionanalyzer.util.AssetUtils
@@ -77,12 +82,6 @@ class AccountDetailFragment : Fragment() {
     private val viewModel: AccountDetailViewModel by viewModels()
     private val numberFormat = DecimalFormat("#,###")
     private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
-
-
-
-
-
-
     private var jalaliUtils = JalaliDateUtils()
 
     private lateinit var account : Account
@@ -91,7 +90,10 @@ class AccountDetailFragment : Fragment() {
     private var iconLoadingJob: kotlinx.coroutines.Job? = null
 
     @Inject lateinit var brawlerRepository: BrawlerRepository
+    @Inject lateinit var brawlNinjaRepository: BrawlNinjaRepository
+
     @Inject lateinit var prefManager: PreferencesManager
+    private val brawlNinjaViewModel: BrawlNinjaViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -197,11 +199,55 @@ class AccountDetailFragment : Fragment() {
         binding.shareButton.setOnClickListener {
             shareAccountInfo()
         }
-        
+        binding.cameraButton.setOnClickListener {
+            photoAccountDialog()
+        }
         // Apply custom padding to toolbar
         adjustTitleAppearance()
     }
-    
+
+    private fun photoAccountDialog() {
+        val view = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_account_photo, null)
+        val imageView = view.findViewById<ImageView>(R.id.photo_preview)
+        val imageUrl = GlideUrl(
+            "https://img.sltbot.com/player/${account.account.tag.replace("#","").lowercase()}/brawlers?o=v",
+            LazyHeaders.Builder()
+                .addHeader("accept", "*/*")
+                .addHeader("accept-language", "en-US,en;q=0.9")
+                .addHeader("dnt", "1")
+                .addHeader("origin", "https://sltbot.com")
+                .addHeader("priority", "u=1, i")
+                .addHeader("referer", "https://sltbot.com/")
+                .addHeader("sec-ch-ua", "\"Chromium\";v=\"135\", \"Not-A.Brand\";v=\"8\"")
+                .addHeader("sec-ch-ua-mobile", "?0")
+                .addHeader("sec-ch-ua-platform", "\"Windows\"")
+                .addHeader("sec-fetch-dest", "empty")
+                .addHeader("sec-fetch-mode", "cors")
+                .addHeader("sec-fetch-site", "same-site")
+                .addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36")
+                .build()
+        )
+        Glide.with(imageView)
+            .load(imageUrl)
+            .apply(RequestOptions())
+            .into(imageView)
+
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Take a photo")
+            .setView(view)
+            .setPositiveButton("OK") { dialog, _ ->
+                // Handle OK button click
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                // Handle Cancel button click
+                dialog.dismiss()
+            }
+            .show()
+    }
+
     private fun adjustTitleAppearance() {
         // Just apply additional padding directly to the toolbar
         binding.toolbar.setPadding(
@@ -243,7 +289,7 @@ class AccountDetailFragment : Fragment() {
     }
     
     private fun setupBrawlersList() {
-        brawlerAdapter = BrawlerAdapter(brawlerRepository)
+        brawlerAdapter = BrawlerAdapter(brawlNinjaViewModel)
         binding.brawlersRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = brawlerAdapter
