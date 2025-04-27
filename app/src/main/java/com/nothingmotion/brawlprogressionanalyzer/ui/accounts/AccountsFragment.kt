@@ -146,12 +146,12 @@ class AccountsFragment : Fragment() {
     private fun handleTelegramClick() {
         try {
             // Try to open Telegram app
-            val telegramIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://t.me/brawlprogressionanalyzer"))
+            val telegramIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://t.me/NothingMotion"))
             telegramIntent.setPackage("org.telegram.messenger")
             startActivity(telegramIntent)
         } catch (e: Exception) {
             // If Telegram is not installed, open in browser
-            val webIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://t.me/brawlprogressionanalyzer"))
+            val webIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://t.me/NothingMotion"))
             startActivity(webIntent)
         }
     }
