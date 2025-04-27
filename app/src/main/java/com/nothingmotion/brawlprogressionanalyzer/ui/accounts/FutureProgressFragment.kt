@@ -167,7 +167,7 @@ class FutureProgressFragment : Fragment() {
 
     private fun observeAccount(accountId: String) {
         // Load account details
-        viewModel.getFakeAccount(accountId)
+        viewModel.getAccount(accountId)
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -264,7 +264,6 @@ class FutureProgressFragment : Fragment() {
                 val parentContainer = binding.starrdropsContainer
 
                 // Clear any existing views
-                parentContainer.removeAllViews()
                 val months = selectedTimeframeMonths * 30
                 val dailyDrops = (dropPerDay * months)
                 val passDrops = (passDrops * selectedTimeframeMonths)
@@ -272,6 +271,7 @@ class FutureProgressFragment : Fragment() {
                 binding.totalDropsText.text = "Total: ${totalDrops} ($passDrops Pass Drops)"
 
                 withContext(Dispatchers.Main) {
+                    parentContainer.removeAllViews()
                     // Create and add an accordion view for each rarity type
                     for (table in starrDropTable) {
                         val rarity = table.rarity
@@ -591,7 +591,6 @@ class FutureProgressFragment : Fragment() {
             }
         }
     }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
