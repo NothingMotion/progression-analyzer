@@ -120,7 +120,62 @@ class CrashLytics constructor(){
             this.uncaughtException(Thread.currentThread(),exception)
         }
 
-        
+
+        fun report(exception: Exception,type: String = "Normal Exception"){
+            try {
+                val deviceUtils = DeviceUtils(context)
+                val deviceInfo = DeviceInfo(
+                    appVersion = deviceUtils.getAppVersion(),
+                    deviceModel = Build.MODEL,
+                    deviceManufacturer = Build.MANUFACTURER,
+                    osVersion = Build.VERSION.RELEASE,
+                    batteryStatus = deviceUtils.getBatteryStatus(),
+                    batteryPercentage = deviceUtils.getBatteryPercentage(),
+                    totalStorage = deviceUtils.getTotalStorage(),
+                    freeStorage = deviceUtils.getFreeStorage(),
+                    storagePercentage = deviceUtils.getStoragePercentage(),
+                    totalMemoryUsage = deviceUtils.getTotalMemoryUsage(),
+                    freeMemoryUsage = deviceUtils.getFreeMemoryUsage(),
+                    memoryPercentage = deviceUtils.getMemoryPercentage(),
+                    networkInfo = deviceUtils.getNetworkInfo(),
+                    dataSyncStatus = deviceUtils.getDataSyncStatus(),
+                    healthStatus = deviceUtils.getDeviceHealth(),
+                    userActivity = deviceUtils.getUserActivity(),
+                    deviceIdentity = deviceUtils.getDeviceIdentity(),
+                    wifiSignalStrength = deviceUtils.getWifiSignalStrength(),
+                    cellularSignalStrength = null
+                )
+
+
+
+
+                val uuid = prefsManager.track?.uuid
+                val crashReport = CrashReport(
+                    uuid= uuid ?: UUID.randomUUID(),
+                    timestamp = Date(System.currentTimeMillis()),
+                    type = type,
+                    throwable = exception,
+                    message = exception.message,
+                    stackTrace = exception.stackTraceToString().toString(),
+                    deviceInfo = deviceInfo
+
+                )
+                CoroutineScope(Dispatchers.IO).launch {
+                    val filePath = saveCrashReport(crashReport)
+
+
+
+                    Timber.tag("CrashLytics").d("Crash report saved at: $filePath")
+                    val workRequest = getOneTimeRequestWorker(filePath)
+                    val workManager = WorkManager.getInstance(context)
+
+                    // This can remain on the IO thread
+                    workManager.enqueueUniqueWork(CRASHLYTICS_WORKER_TAG, ExistingWorkPolicy.KEEP, workRequest)
+                }
+            }catch(e: Exception) {
+                Timber.tag("CrashLytics").e("Error logging crash report: ${e.message}")
+            }
+        }
         suspend fun saveCrashReport(crashReport: CrashReport): String{
             return try{
                  withContext(Dispatchers.IO){
