@@ -4,6 +4,7 @@ import com.nothingmotion.brawlprogressionanalyzer.data.remote.BrawlifyApi
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIPlayerIcon
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerData
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.DataError
+import com.nothingmotion.brawlprogressionanalyzer.util.DataErrorUtils
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepository
 import kotlinx.coroutines.flow.Flow
@@ -19,21 +20,9 @@ class BrawlerRepositoryImpl @Inject constructor() : BrawlerRepository {
         try {
             return Result.Success(api.getBrawler(id))
         }
-        catch(e: IOException){
-            return Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION)
-        }
-        catch(e: HttpException){
-            return when (e.code()){
-                400 -> Result.Error(DataError.NetworkError.NETWORK_ERROR)
-                401 -> Result.Error(DataError.NetworkError.UNAUTHORIZED)
-                403 -> Result.Error(DataError.NetworkError.FORBIDDEN)
-                429 -> Result.Error(DataError.NetworkError.TOO_MANY_REQUESTS)
-                500 -> Result.Error(DataError.NetworkError.SERVER_ERROR)
-                else -> Result.Error(DataError.NetworkError.UNKNOWN)
-            }
-        }
+
         catch(e: Exception){
-            return Result.Error(DataError.NetworkError.UNKNOWN)
+            return Result.Error(DataErrorUtils.handleHttpException(e))
         }
     }
 
@@ -42,22 +31,9 @@ class BrawlerRepositoryImpl @Inject constructor() : BrawlerRepository {
             try {
                 emit(Result.Success(api.getBrawlers()))
             }
-            catch (e: IOException) {
-                emit(Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION))
-            } catch (e: HttpException) {
-                emit(
-                    when (e.code()) {
-                        400 -> Result.Error(DataError.NetworkError.NETWORK_ERROR)
-                        401 -> Result.Error(DataError.NetworkError.UNAUTHORIZED)
-                        403 -> Result.Error(DataError.NetworkError.FORBIDDEN)
-                        429 -> Result.Error(DataError.NetworkError.TOO_MANY_REQUESTS)
-                        500 -> Result.Error(DataError.NetworkError.SERVER_ERROR)
-                        else -> Result.Error(DataError.NetworkError.UNKNOWN)
-                    }
-                )
-            }
+
             catch(e:Exception){
-                emit(Result.Error(DataError.NetworkError.UNKNOWN))
+                emit(Result.Error(DataErrorUtils.handleHttpException(e)))
             }
         }
     }
