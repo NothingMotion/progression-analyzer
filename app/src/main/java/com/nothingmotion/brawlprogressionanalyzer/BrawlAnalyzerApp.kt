@@ -20,6 +20,7 @@ import com.nothingmotion.brawlprogressionanalyzer.crashlytics.common.CrashLytics
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerDataNinja
 import com.nothingmotion.brawlprogressionanalyzer.crashlytics.common.CrashLyticsWorkerFactory
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
+import com.nothingmotion.brawlprogressionanalyzer.util.DataErrorUtils
 import com.nothingmotion.brawlprogressionanalyzer.util.GlobalExceptionHandling
 import javax.inject.Inject
 
@@ -45,7 +46,7 @@ class BrawlAnalyzerApp : Application(), Configuration.Provider {
         GlobalExceptionHandling.setup(this.applicationContext)
         CrashLytics.ExceptionHandler.setup(this.applicationContext,preferencesManager)
         AndroidThreeTen.init(this)
-
+        DataErrorUtils.initialize(CrashLytics.ExceptionHandler(this.applicationContext,Thread.getDefaultUncaughtExceptionHandler(),preferencesManager))
         // Initialize Timber for logging
 //        if (BuildConfig.DEBUG) {
 //            Log.d("BrawlerAnalyzerApp","Setting up Timber library")
