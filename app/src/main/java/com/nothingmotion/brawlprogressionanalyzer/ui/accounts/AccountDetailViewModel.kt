@@ -3,8 +3,10 @@ package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.mappers.toPlayer
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeAccountRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.DataError
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.AccountRepository
 import com.nothingmotion.brawlprogressionanalyzer.util.TokenManager
@@ -53,7 +55,7 @@ class AccountDetailViewModel @Inject constructor(
         findAccountJob = viewModelScope.launch {
             preferencesManager.track?.let {
                 _state.update { it.copy(loading=true,error=null) }
-                tokenManager.getAccessToken(it.uuid.toString())
+                tokenManager.collectAccessToken(it.uuid.toString())
                 tokenManager.accessTokenState.collectLatest {state->
                     if(state.loading){
                         _state.update { it.copy(loading = true,error= null) }
@@ -63,16 +65,41 @@ class AccountDetailViewModel @Inject constructor(
                     }
                     else {
                         state.success?.let {
+                            var account : Account?=null
                             val result = accountRepository.getAccount(accountId.replace("#",""),it)
+//                            accountRepository.getAccountHistory(accountId.replace("#",""),it,0,0).collectLatest { result ->
+//                                Timber.tag("AccountDetailViewModel").d("Account history: $result")
+//                                when(result){
+//                                    is Result.Error -> {
+//
+//                                    }
+//                                    is Result.Loading -> {
+//
+//                                    }
+//                                    is Result.Success -> {
+//                                        account?.history = result.data.map { it.toPlayer() }
+//                                    }
+//                                }
+//                            }
                             when(result){
                                 is Result.Error -> {
-                                    Timber.tag("AccountDetailViewModel").e(result.error.name)
-                                    _state.update { it.copy(error=result.error.name,loading=false) }
+                                    when(result.error){
+                                        is DataError.NetworkError -> {
+                                            Timber.tag("AccountDetailViewModel").e(result.error.name)
+                                            _state.update { it.copy(error=result.error.name,loading=false) }
+                                        }
+                                        is DataError.DatabaseError -> {
+                                            Timber.tag("AccountDetailViewModel").e(result.error.name)
+                                            _state.update { it.copy(error=result.error.name,loading=false) }
+                                        }
+                                    }
                                 }
                                 is Result.Loading -> {
                                     _state.update { it.copy(loading = true,error=null) }
                                 }
-                                is Result.Success ->_state.update {  it.copy(account=result.data,error=null,loading=false)}
+                                is Result.Success -> {
+                                    _state.update {  it.copy(account=result.data,error=null,loading=false)}
+                                }
                             }
 
                         }
