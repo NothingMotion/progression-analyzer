@@ -378,7 +378,7 @@ class FakeAccountRepository @Inject constructor() {
                 averageBrawlerTrophies = Random.nextInt(300, 500),
                 isBoughtPass = i % 2 == 0, // Alternating
                 isBoughtPassPlus = i % 3 == 0, // Every third month
-                isBoughRankedPass = false, // Not bought in the past
+                isBoughtRankedPass = false, // Not bought in the past
                 duration = date
             )
 
@@ -410,7 +410,7 @@ class FakeAccountRepository @Inject constructor() {
             averageBrawlerTrophies = Random.nextInt(500, 700),
             isBoughtPass = true,
             isBoughtPassPlus = Random.nextBoolean(),
-            isBoughRankedPass = Random.nextBoolean(),
+            isBoughtRankedPass = Random.nextBoolean(),
             duration = date
         )
     }
