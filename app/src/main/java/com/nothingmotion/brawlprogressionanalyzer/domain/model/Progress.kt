@@ -15,7 +15,6 @@ data class Progress(
     val averageBrawlerTrophies: Int,
     val isBoughtPass: Boolean,
     val isBoughtPassPlus: Boolean,
-    val isBoughRankedPass: Boolean,
-
+    val isBoughtRankedPass: Boolean,
     val duration: Date
 )
