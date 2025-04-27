@@ -30,6 +30,7 @@ import com.bumptech.glide.signature.ObjectKey
 import com.nothingmotion.brawlprogressionanalyzer.BrawlAnalyzerApp
 import kotlinx.coroutines.isActive
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.nothingmotion.brawlprogressionanalyzer.BuildConfig
 import com.nothingmotion.brawlprogressionanalyzer.util.AssetUtils
 import kotlinx.coroutines.Job
 
@@ -146,7 +147,7 @@ class AccountsAdapter(
                 staticIconJobs.add(trophyIconJob)
                 staticIconJobs.add(brawlerIconJob)
                 // Clear any previous images first to prevent flashing of wrong images
-                Glide.with(itemView).clear(accountAvatar)
+//                Glide.with(itemView).clear(accountAvatar)
                 
                 // Define corner radius (in pixels)
                 val cornerRadius = itemView.context.resources.getDimensionPixelSize(R.dimen.avatar_corner_radius)
@@ -155,55 +156,22 @@ class AccountsAdapter(
                 val requestOptions = RequestOptions()
                     .diskCacheStrategy(DiskCacheStrategy.ALL) // Cache both original & resized image
                     .transform(RoundedCorners(cornerRadius)) // Apply rounded corners
-                
-                account.account.icon?.id?.let { iconId ->
-                    // Get the application instance to access the cache
-                    val app = binding.root.context.applicationContext as? BrawlAnalyzerApp
-                    
-                    // Check if this icon URL is already cached
-                    val cachedUrl = app?.iconCache?.get(iconId)
-                    
-                    if (cachedUrl != null) {
-                        // Use the cached URL
-                        Glide.with(itemView)
-                            .load(cachedUrl)
+                account.account.icon?.id?.let {
+
+                    val imageUrl = BuildConfig.BRAWLIFY_CDN_API_URL +"profile-icons/regular/${it}.png"
+                    Timber.tag("AccountAdapter").d("Image URL: $imageUrl")
+
+                    account.account.icon?.id?.let {
+                        Glide
+                            .with(itemView)
+                            .load(imageUrl)
                             .apply(requestOptions)
-                            .signature(ObjectKey(iconId.toString())) // Use the icon ID as a cache key
+                            .signature(ObjectKey(it))
                             .into(accountAvatar)
-                    } else {
-                        // Launch a coroutine to fetch the icon
-                        iconLoadingJob = CoroutineScope(Dispatchers.Main).launch {
-                            val iconResult = brawlerRepository.getIcon(iconId)
-                            when (iconResult) {
-                                is Result.Success -> {
-                                    val imageUrl = iconResult.data.imageUrl
-                                    Timber.tag("AccountsAdapter").d("Loaded icon URL: $imageUrl")
-                                    
-                                    // Cache this URL for future use
-                                    app?.iconCache?.put(iconId, imageUrl)
-                                    
-                                    // Load the icon image URL with Glide - only if our coroutine is still active
-                                    // and the ViewHolder hasn't been recycled for another item
-                                    if (isActive && adapterPosition != RecyclerView.NO_POSITION) {
-                                        Glide.with(itemView)
-                                            .load(imageUrl)
-                                            .apply(requestOptions)
-                                            .signature(ObjectKey(iconId.toString()))
-                                            .into(accountAvatar)
-                                    }
-                                }
-                                is Result.Error -> {
-                                    Timber.tag("AccountsAdapter").e("Error loading icon: ${iconResult.error.name}")
-                                    // Cache the failure so we don't keep retrying
-                                    app?.iconCache?.remove(iconId)
-                                }
-                                is Result.Loading -> {
-                                    // No action needed for loading state
-                                }
-                            }
-                        }
                     }
                 }
+
+
                 
                 // Format brawler stats
                 val brawlerCount = account.account.brawlers.size
