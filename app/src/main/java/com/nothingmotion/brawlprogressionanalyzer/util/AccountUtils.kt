@@ -28,7 +28,7 @@ class AccountUtils {
                         averageBrawlerTrophies = acc.averageBrawlerTrophies, // Average is not cumulative
                         isBoughtPass = acc.isBoughtPass,
                         isBoughtPassPlus = acc.isBoughtPassPlus,
-                        isBoughRankedPass = acc.isBoughRankedPass,
+                        isBoughtRankedPass = acc.isBoughtRankedPass,
                         duration = acc.duration
                     )
                 }
