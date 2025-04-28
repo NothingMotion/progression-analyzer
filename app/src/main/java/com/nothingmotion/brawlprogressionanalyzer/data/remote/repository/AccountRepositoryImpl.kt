@@ -161,7 +161,8 @@ class AccountRepositoryImpl @Inject constructor(
 
                 expiredAccounts.forEach {
                     withContext(Dispatchers.IO){
-                    val account = api.refreshAccount(it, token)
+                    val account = api.refreshAccount(it, "Bearer $token"
+                    )
                     accounts.add(account.toAccount())
                     db.cacheDao()
                         .insertCache(
