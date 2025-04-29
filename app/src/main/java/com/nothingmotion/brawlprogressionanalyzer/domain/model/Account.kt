@@ -34,7 +34,7 @@ data class Brawler(
     val trophies: Int,
     val highestTrophies: Int,
     val rank: Int,
-    val power: Int,
+    var power: Int,
     val gears: List<Gear>? = null,
     val starPowers: List<StarPower>? = null,
     val gadgets: List<Gadget>? = null
