@@ -1,5 +1,8 @@
 package com.nothingmotion.brawlprogressionanalyzer.data.remote.repository
 
+import com.nothingmotion.brawlprogressionanalyzer.data.db.ApplicationDatabase
+import com.nothingmotion.brawlprogressionanalyzer.data.db.models.toDomain
+import com.nothingmotion.brawlprogressionanalyzer.data.db.models.toEntity
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.BrawlifyApi
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIPlayerIcon
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerData
@@ -16,9 +19,19 @@ import javax.inject.Inject
 
 class BrawlerRepositoryImpl @Inject constructor() : BrawlerRepository {
     @Inject lateinit var api : BrawlifyApi
+    @Inject lateinit var db: ApplicationDatabase
     override suspend fun getBrawler(id: Long): Result<BrawlerData,DataError.NetworkError> {
         try {
-            return Result.Success(api.getBrawler(id))
+            db.brawlDataDao().getBrawlerDataById(id)?.let{
+                Timber.tag("BrawlerRepositoryImpl").d("Brawler data found in cache")
+                return Result.Success(it.toDomain())
+            } ?: run {
+                val brawler = api.getBrawler(id)
+                Timber.tag("BrawlerRepositoryImpl").d("Brawler data not found in cache")
+                db.brawlDataDao().insertBrawlerData(brawler.toEntity())
+                return Result.Success(brawler)
+
+            }
         }
 
         catch(e: Exception){
@@ -29,7 +42,22 @@ class BrawlerRepositoryImpl @Inject constructor() : BrawlerRepository {
     override suspend fun getBrawlers(): Flow<Result<List<BrawlerData>,DataError.NetworkError>> {
         return flow {
             try {
-                emit(Result.Success(api.getBrawlers().list))
+
+
+
+
+                db.brawlDataDao().getAllBrawlerData()?.let{
+                    Timber.tag("BrawlerRepositoryImpl").d("Brawler data found in cache")
+                    if(it.isNotEmpty())
+                        emit(Result.Success(it.map { it.toDomain() }))
+                    else
+                        null
+                } ?: run {
+                    Timber.tag("BrawlerRepositoryImpl").d("Brawler data not found in cache")
+                    val brawlers = api.getBrawlers().list
+                    db.brawlDataDao().insertBrawlerDataList(brawlers.map { it.toEntity() })
+                    emit(Result.Success(brawlers))
+                }
             }
 
             catch(e:Exception){
