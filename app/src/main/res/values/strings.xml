@@ -167,4 +167,5 @@
     <!-- Add the new string resource for What's Next section -->
     <string name="whats_next">What\'s Next?</string>
     <string name="loading_account_photo">Loading photo..</string>
+    <string name="rank_icon">rank</string>
 </resources>
