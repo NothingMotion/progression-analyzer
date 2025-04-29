@@ -109,7 +109,14 @@ class AccountDetailViewModel @Inject constructor(
         }
     }
     
+    fun toggleLoading(){
 
+
+
+
+
+        _state.update { it.copy(loading = !it.loading) }
+    }
 
     fun stop(){
         findAccountJob?.cancel()
@@ -156,9 +163,43 @@ class AccountDetailViewModel @Inject constructor(
             }
         }
     }
+
+    fun refreshAccount() {
+        viewModelScope.launch {
+            val tag =_state.value?.account?.account?.tag ?: return@launch
+            if(!accountRepository.isValidCache(tag)) {
+                val uuid = preferencesManager.track?.uuid ?: return@launch
+                val token = tokenManager.getAccessToken(uuid.toString()) ?: return@launch
+                when (val result = accountRepository.refreshAccount(tag,token)) {
+                    is Result.Error -> {
+                                Timber.tag("AccountDetailViewModel").e(result.error.name)
+                                _state.update {
+                                    it.copy(
+                                        error = result.error.name,
+                                        loading = false
+                                    )
+
+                            }
+                        }
+                    is Result.Loading -> {
+                        _state.update { it.copy(loading = true, error = null) }
+                    }
+                    is Result.Success -> {
+                        _state.update { it.copy(account= result.data,loading=false,error=null) }
+                    }
+                }
+            }else {
+                delay(2000)
+                _state.update { it.copy(refreshMessage = "Account is up to date",loading=false) }
+                _state.update { it.copy(refreshMessage=null,error=null) }
+            }
+        }
+    }
+
     data class AccountDetailState(
         val account: Account? = null,
         val error: String? = null,
-        val loading: Boolean = false
+        val loading: Boolean = false,
+        val refreshMessage: String? = null
     )
 } 
