@@ -7,14 +7,6 @@ data class Status(
 open class AbilityDataNinja(
     @Transient open val id: String,
     @Transient open val name: String,
-
-
-
-
-
-
-
-
     @Transient open val description: String,
 )
 data class GadgetDataNinja(
