@@ -91,7 +91,7 @@ class FakeBrawlerRepository {
                 StarPowerData(
                     description = "Star Power $i",
                     descriptionHtml = "<p>Star Power $i</p>",
-                    id = i,
+                    id = i.toLong(),
                     imageUrl = "https://example.com/starpowers/$i.png",
                     name = "Star Power $i",
                     path = "/starpowers/$i",
