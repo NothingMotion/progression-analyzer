@@ -40,9 +40,7 @@ import timber.log.Timber
 import java.util.Date
 
 @AndroidEntryPoint
-class
-
-MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var isReady = false
     private lateinit var navController: NavController
