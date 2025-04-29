@@ -35,6 +35,7 @@ import com.nothingmotion.brawlprogressionanalyzer.domain.model.GadgetDataNinja
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Player
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.StarPowerDataNinja
 import com.nothingmotion.brawlprogressionanalyzer.ui.accounts.BrawlNinjaViewModel
+import com.nothingmotion.brawlprogressionanalyzer.util.AssetUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -392,7 +393,8 @@ class BrawlerAdapter constructor(private val brawlNinjaViewModel: BrawlNinjaView
         private val brawlerPower: TextView = itemView.findViewById(R.id.brawler_power)
         private val brawlerRank: TextView = itemView.findViewById(R.id.brawler_rank)
         private val brawlerRankIcon: ImageView = itemView.findViewById(R.id.rank_icon)
-
+        private val trophiesIcon: ImageView = itemView.findViewById(R.id.trophies_icon)
+        private val highestTrophiesIcon: ImageView = itemView.findViewById(R.id.highest_trophies_icon)
         // Ability containers
         private val starPowersContainer: HorizontalScrollView =
             itemView.findViewById(R.id.star_powers_container)
@@ -427,6 +429,28 @@ class BrawlerAdapter constructor(private val brawlNinjaViewModel: BrawlNinjaView
             Glide.with(itemView)
                 .load(BuildConfig.BRAWLIFY_CDN_API_URL + "tiers/regular/${brawler.rank}.png")
                 .apply(RequestOptions()).into(brawlerRankIcon)
+
+            CoroutineScope(Dispatchers.Main).launch{
+
+                val trophies = AssetUtils.loadImageAsync(
+                    itemView.context,
+                    "images/icons/icon_trophy_medium.png"
+                )
+                val highest = AssetUtils.loadImageAsync(
+                    itemView.context,
+                    "images/icons/icon_leaderboards.png"
+                )
+
+                trophies?.let {
+                    trophiesIcon.setImageBitmap(it)
+                }
+
+                highest?.let {
+                    highestTrophiesIcon.setImageBitmap(it)
+                }
+            }
+
+
             // TODO: Add loading of brawler icon from a remote source or local resources
             brawlerIcon.setImageResource(R.color.ability_background)
             setupBrawlerIcon(brawler, itemView.context, itemView, brawlerIcon)
