@@ -105,7 +105,7 @@ class BrawlerUpgradeAdapter :
 
             // Load brawler image from Brawlify CDN
             val sanitizedName = upgradable.name.replace(" ", "_").lowercase()
-            val imageUrl = "${BuildConfig.BRAWLIFY_CDN_API_URL}brawlers/avatars/$sanitizedName.png"
+            val imageUrl = "${BuildConfig.BRAWLIFY_CDN_API_URL}brawlers/borderless/${upgradable.id}.png"
             
             Glide.with(context)
                 .load(imageUrl)
