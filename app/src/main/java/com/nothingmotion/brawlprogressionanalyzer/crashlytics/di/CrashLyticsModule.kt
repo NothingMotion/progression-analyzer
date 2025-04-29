@@ -39,11 +39,11 @@ object CrashLyticsModule {
             Thread.getDefaultUncaughtExceptionHandler(),prefManager)
     }
 
-
-    @Singleton
-    @Provides
-    fun provideCrashLyticsWorkerFactory(repository: NotMotRepository,tokenManager: TokenManager,prefManager: PreferencesManager): CrashLyticsWorkerFactory{
-        return CrashLyticsWorkerFactory(repository,tokenManager,prefManager)
-    }
+//
+//    @Singleton
+//    @Provides
+//    fun provideCrashLyticsWorkerFactory(repository: NotMotRepository,tokenManager: TokenManager,prefManager: PreferencesManager): CrashLyticsWorkerFactory{
+//        return CrashLyticsWorkerFactory(repository,tokenManager,prefManager)
+//    }
 
 }
