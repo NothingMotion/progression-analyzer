@@ -421,7 +421,7 @@ class AccountDetailFragment : Fragment() {
             account.account.icon?.id?.let { iconId ->
 
 
-                val imageUrl = BuildConfig.BRAWLIFY_CDN_API_URL + "profile-icons/regular/$iconId"
+                val imageUrl = BuildConfig.BRAWLIFY_CDN_API_URL + "profile-icons/regular/$iconId.png"
                 Glide.with(requireContext())
                     .load(imageUrl)
                     .apply(requestOptions)
