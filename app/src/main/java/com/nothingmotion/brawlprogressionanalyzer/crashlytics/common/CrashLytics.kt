@@ -46,44 +46,21 @@ import java.util.UUID
 import javax.inject.Inject
 
 
-class CrashLytics constructor(){
+class CrashLytics constructor() {
     class ExceptionHandler @Inject constructor(
         @ApplicationContext private val context: Context,
         private val defaultUncaughtExceptionHandler: Thread.UncaughtExceptionHandler,
         private val prefsManager: PreferencesManager
-    ): Thread.UncaughtExceptionHandler {
-        var savingCrashJob : Job? = null
+    ) : Thread.UncaughtExceptionHandler {
+        var savingCrashJob: Job? = null
         override fun uncaughtException(thread: Thread, throwable: Throwable) {
             try {
-                val deviceUtils = DeviceUtils(context)
-                val deviceInfo = DeviceInfo(
-                    appVersion = deviceUtils.getAppVersion(),
-                    deviceModel = Build.MODEL,
-                    deviceManufacturer = Build.MANUFACTURER,
-                    osVersion = Build.VERSION.RELEASE,
-                    batteryStatus = deviceUtils.getBatteryStatus(),
-                    batteryPercentage = deviceUtils.getBatteryPercentage(),
-                    totalStorage = deviceUtils.getTotalStorage(),
-                    freeStorage = deviceUtils.getFreeStorage(),
-                    storagePercentage = deviceUtils.getStoragePercentage(),
-                    totalMemoryUsage = deviceUtils.getTotalMemoryUsage(),
-                    freeMemoryUsage = deviceUtils.getFreeMemoryUsage(),
-                    memoryPercentage = deviceUtils.getMemoryPercentage(),
-                    networkInfo = deviceUtils.getNetworkInfo(),
-                    dataSyncStatus = deviceUtils.getDataSyncStatus(),
-                    healthStatus = deviceUtils.getDeviceHealth(),
-                    userActivity = deviceUtils.getUserActivity(),
-                    deviceIdentity = deviceUtils.getDeviceIdentity(),
-                    wifiSignalStrength = deviceUtils.getWifiSignalStrength(),
-                    cellularSignalStrength = null
-                )
-
-
+                val deviceInfo = getDeviceInfo(context)
 
 
                 val uuid = prefsManager.track?.uuid
                 val crashReport = CrashReport(
-                    uuid= uuid ?: UUID.randomUUID(),
+                    uuid = uuid ?: UUID.randomUUID(),
                     timestamp = Date(System.currentTimeMillis()),
                     type = "Uncaught Exception",
                     throwable = throwable,
@@ -94,64 +71,43 @@ class CrashLytics constructor(){
                 )
                 CoroutineScope(Dispatchers.IO).launch {
                     val filePath = saveCrashReport(crashReport)
-                    
-                    
-                    
+
+
+
                     Timber.tag("CrashLytics").d("Crash report saved at: $filePath")
                     val workRequest = getOneTimeRequestWorker(filePath)
                     val workManager = WorkManager.getInstance(context)
 
                     // This can remain on the IO thread
-                    workManager.enqueueUniqueWork(CRASHLYTICS_WORKER_TAG, ExistingWorkPolicy.KEEP, workRequest)
+                    workManager.enqueueUniqueWork(
+                        CRASHLYTICS_WORKER_TAG,
+                        ExistingWorkPolicy.KEEP,
+                        workRequest
+                    )
                 }
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 Timber.tag("CrashLytics").e("Error logging crash report: ${e.message}")
-            }
-            finally {
+            } finally {
                 // Call the default exception handler
                 defaultUncaughtExceptionHandler.uncaughtException(thread, throwable)
             }
         }
 
 
+        fun reportException(exception: Throwable) {
 
-        fun reportException(exception: Throwable){
-
-            this.uncaughtException(Thread.currentThread(),exception)
+            this.uncaughtException(Thread.currentThread(), exception)
         }
 
 
-        fun report(exception: Exception,type: String = "Normal Exception"){
+        fun report(exception: Exception, type: String = "Normal Exception") {
             try {
-                val deviceUtils = DeviceUtils(context)
-                val deviceInfo = DeviceInfo(
-                    appVersion = deviceUtils.getAppVersion(),
-                    deviceModel = Build.MODEL,
-                    deviceManufacturer = Build.MANUFACTURER,
-                    osVersion = Build.VERSION.RELEASE,
-                    batteryStatus = deviceUtils.getBatteryStatus(),
-                    batteryPercentage = deviceUtils.getBatteryPercentage(),
-                    totalStorage = deviceUtils.getTotalStorage(),
-                    freeStorage = deviceUtils.getFreeStorage(),
-                    storagePercentage = deviceUtils.getStoragePercentage(),
-                    totalMemoryUsage = deviceUtils.getTotalMemoryUsage(),
-                    freeMemoryUsage = deviceUtils.getFreeMemoryUsage(),
-                    memoryPercentage = deviceUtils.getMemoryPercentage(),
-                    networkInfo = deviceUtils.getNetworkInfo(),
-                    dataSyncStatus = deviceUtils.getDataSyncStatus(),
-                    healthStatus = deviceUtils.getDeviceHealth(),
-                    userActivity = deviceUtils.getUserActivity(),
-                    deviceIdentity = deviceUtils.getDeviceIdentity(),
-                    wifiSignalStrength = deviceUtils.getWifiSignalStrength(),
-                    cellularSignalStrength = null
-                )
 
 
-
-
+                val deviceInfo = getDeviceInfo(context)
                 val uuid = prefsManager.track?.uuid
                 val crashReport = CrashReport(
-                    uuid= uuid ?: UUID.randomUUID(),
+                    uuid = uuid ?: UUID.randomUUID(),
                     timestamp = Date(System.currentTimeMillis()),
                     type = type,
                     throwable = exception,
@@ -170,77 +126,125 @@ class CrashLytics constructor(){
                     val workManager = WorkManager.getInstance(context)
 
                     // This can remain on the IO thread
-                    workManager.enqueueUniqueWork(CRASHLYTICS_WORKER_TAG, ExistingWorkPolicy.KEEP, workRequest)
+                    workManager.enqueueUniqueWork(
+                        CRASHLYTICS_WORKER_TAG,
+                        ExistingWorkPolicy.KEEP,
+                        workRequest
+                    )
                 }
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 Timber.tag("CrashLytics").e("Error logging crash report: ${e.message}")
             }
         }
-        suspend fun saveCrashReport(crashReport: CrashReport): String{
-            return try{
-                 withContext(Dispatchers.IO){
-                val file = File(context.cacheDir,"crash_directory/crash_${crashReport.timestamp}.json")
-                // Create the parent directory if it doesn't exist
-                file.parentFile?.mkdirs()
-                file.writeText(GsonBuilder().create().toJson(crashReport))
-                return@withContext file.absolutePath
-            }
 
-            }catch(e:Exception){
+        private fun getDeviceInfo(context: Context): DeviceInfo {
+            val deviceUtils = DeviceUtils(context)
+            val deviceInfo = DeviceInfo(
+                appVersion = deviceUtils.getAppVersion(),
+                deviceModel = Build.MODEL,
+                deviceManufacturer = Build.MANUFACTURER,
+                osVersion = Build.VERSION.RELEASE,
+                batteryStatus = deviceUtils.getBatteryStatus(),
+                batteryPercentage = deviceUtils.getBatteryPercentage(),
+                totalStorage = deviceUtils.getTotalStorage(),
+                freeStorage = deviceUtils.getFreeStorage(),
+                storagePercentage = deviceUtils.getStoragePercentage(),
+                totalMemoryUsage = deviceUtils.getTotalMemoryUsage(),
+                freeMemoryUsage = deviceUtils.getFreeMemoryUsage(),
+                memoryPercentage = deviceUtils.getMemoryPercentage(),
+                networkInfo = deviceUtils.getNetworkInfo(),
+                dataSyncStatus = deviceUtils.getDataSyncStatus(),
+                healthStatus = deviceUtils.getDeviceHealth(),
+                userActivity = deviceUtils.getUserActivity(),
+                deviceIdentity = deviceUtils.getDeviceIdentity(),
+                wifiSignalStrength = deviceUtils.getWifiSignalStrength(),
+                cellularSignalStrength = null
+            )
+            return deviceInfo
+        }
+
+        private suspend fun saveCrashReport(crashReport: CrashReport): String {
+            return try {
+                withContext(Dispatchers.IO) {
+                    val file = File(
+                        context.cacheDir,
+                        "crash_directory/crash_${crashReport.timestamp}.json"
+                    )
+                    // Create the parent directory if it doesn't exist
+                    file.parentFile?.mkdirs()
+                    file.writeText(GsonBuilder().create().toJson(crashReport))
+                    return@withContext file.absolutePath
+                }
+
+            } catch (e: Exception) {
                 Timber.tag("CrashLytics").e("Error saving crash report: ${e.message}")
                 return ""
             }
         }
+
         companion object {
-            lateinit var instance : ExceptionHandler
+            lateinit var instance: ExceptionHandler
             private const val CRASHLYTICS_WORKER_TAG = "CrashLyticsWorker"
             const val CRASHLYTICS_CRASHREPORT_KEY = "crash_report"
-            fun setup(context: Context,prefsManager: PreferencesManager) {
+            fun setup(context: Context, prefsManager: PreferencesManager) {
                 val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
-                val exceptionHandler = ExceptionHandler(context,defaultHandler,prefsManager)
+                val exceptionHandler = ExceptionHandler(context, defaultHandler, prefsManager)
                 Thread.setDefaultUncaughtExceptionHandler(exceptionHandler)
                 if (!::instance.isInitialized) {
-                    instance = ExceptionHandler(context, Thread.getDefaultUncaughtExceptionHandler(),prefsManager)
+                    instance = ExceptionHandler(
+                        context,
+                        Thread.getDefaultUncaughtExceptionHandler(),
+                        prefsManager
+                    )
                 }
             }
 
-            fun getOneTimeRequestWorker(crashReportPath: String):OneTimeWorkRequest{
+            fun getOneTimeRequestWorker(crashReportPath: String): OneTimeWorkRequest {
 
                 return OneTimeWorkRequest.Builder(CrashLyticsWorker::class.java)
                     .setInitialDelay(5000, java.util.concurrent.TimeUnit.MILLISECONDS)
                     .setBackoffCriteria(
-                        BackoffPolicy.EXPONENTIAL,15000,
-                        java.util.concurrent.TimeUnit.MILLISECONDS)
-                    .setInputData(workDataOf(
-                        CRASHLYTICS_CRASHREPORT_KEY to crashReportPath
-                    ))
-                    .setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED, requiresBatteryNotLow = true, ))
+                        BackoffPolicy.EXPONENTIAL, 15000,
+                        java.util.concurrent.TimeUnit.MILLISECONDS
+                    )
+                    .setInputData(
+                        workDataOf(
+                            CRASHLYTICS_CRASHREPORT_KEY to crashReportPath
+                        )
+                    )
+                    .setConstraints(
+                        Constraints(
+                            requiredNetworkType = NetworkType.CONNECTED,
+                            requiresBatteryNotLow = true,
+                        )
+                    )
                     .build()
             }
         }
     }
 
     data class DeviceInfo(
-        val appVersion: String="",
-        val deviceModel: String="",
-        val deviceManufacturer: String="",
-        val osVersion: String="",
-        val batteryStatus: String="",
-        val batteryPercentage: String="",
-        val totalStorage: String="",
-        val freeStorage: String="",
-        val storagePercentage: Double=0.0,
-        val totalMemoryUsage: String="",
-        val freeMemoryUsage: String="",
-        val memoryPercentage: Double=0.0,
-        val networkInfo: String="",
-        val dataSyncStatus: String="",
-        val healthStatus: String="",
-        val userActivity: String="",
-        val deviceIdentity: String="",
-        val wifiSignalStrength: String="",
-        val cellularSignalStrength: Int?=null,
+        val appVersion: String = "",
+        val deviceModel: String = "",
+        val deviceManufacturer: String = "",
+        val osVersion: String = "",
+        val batteryStatus: String = "",
+        val batteryPercentage: String = "",
+        val totalStorage: String = "",
+        val freeStorage: String = "",
+        val storagePercentage: Double = 0.0,
+        val totalMemoryUsage: String = "",
+        val freeMemoryUsage: String = "",
+        val memoryPercentage: Double = 0.0,
+        val networkInfo: String = "",
+        val dataSyncStatus: String = "",
+        val healthStatus: String = "",
+        val userActivity: String = "",
+        val deviceIdentity: String = "",
+        val wifiSignalStrength: String = "",
+        val cellularSignalStrength: Int? = null,
     )
+
     data class CrashReport(
         val uuid: UUID,
         val timestamp: Date,
@@ -250,12 +254,15 @@ class CrashLytics constructor(){
         val stackTrace: String?,
         val deviceInfo: DeviceInfo,
     )
-    class DeviceUtils @Inject constructor(@ApplicationContext private val context: Context): IDeviceUtils{
+
+    class DeviceUtils @Inject constructor(@ApplicationContext private val context: Context) :
+        IDeviceUtils {
 
 
         var signalStrength: Int = 0;
         var signalStrengthPercentage: Int = 0;
-        private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        private val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
         override fun getBatteryStatus(): String {
@@ -274,9 +281,11 @@ class CrashLytics constructor(){
 
         @RequiresApi(Build.VERSION_CODES.M)
         override fun getNetworkType(): String {
-            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val connectivityManager =
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val network = connectivityManager.activeNetwork ?: return "No connection";
-            val netCapabilities = connectivityManager.getNetworkCapabilities(network) ?: return "No connection";
+            val netCapabilities =
+                connectivityManager.getNetworkCapabilities(network) ?: return "No connection";
             return when {
                 netCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "Mobile"
                 netCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "Wi-Fi"
@@ -313,14 +322,17 @@ class CrashLytics constructor(){
         }
 
         override fun getTotalMemoryUsage(): String {
-            val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val activityManager =
+                context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
             val memoryInfo = ActivityManager.MemoryInfo()
             activityManager.getMemoryInfo(memoryInfo)
             val totalMem = memoryInfo.totalMem / (1024 * 1024 * 1024)
             return "$totalMem GB"
         }
+
         override fun getFreeMemoryUsage(): String {
-            val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val activityManager =
+                context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
             val memoryInfo = ActivityManager.MemoryInfo()
             activityManager.getMemoryInfo(memoryInfo)
             val usedMem = (memoryInfo.totalMem - memoryInfo.availMem) / (1024 * 1024 * 1024)
@@ -330,7 +342,8 @@ class CrashLytics constructor(){
         }
 
         override fun getMemoryPercentage(): Double {
-            val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            val activityManager =
+                context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
             val memoryInfo = ActivityManager.MemoryInfo()
             activityManager.getMemoryInfo(memoryInfo)
             val totalMem = memoryInfo.totalMem.toDouble()
@@ -344,7 +357,8 @@ class CrashLytics constructor(){
         }
 
         override fun getNetworkInfo(): String {
-            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val connectivityManager =
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val networkInfo: NetworkInfo? = connectivityManager.activeNetworkInfo
             return when {
                 networkInfo?.isConnected == true && networkInfo.type == ConnectivityManager.TYPE_MOBILE -> "Connected to Cellular Mobile Data network"
@@ -359,7 +373,9 @@ class CrashLytics constructor(){
         }
 
         override fun getDataSyncStatus(): String {
-            val lastSyncTime = "2024-11-04T12:00:00Z" // Example value, replace with actual sync time
+            // TODO: Implementing this
+            val lastSyncTime =
+                "2024-11-04T12:00:00Z" // Example value, replace with actual sync time
             return "Last Sync: $lastSyncTime"
         }
 
@@ -369,6 +385,7 @@ class CrashLytics constructor(){
         }
 
         override fun getUserActivity(): String {
+            // TODO: Implementing this
             return "User logged in at 10:00 AM, last logout at 6:00 PM"
         }
 
@@ -379,11 +396,16 @@ class CrashLytics constructor(){
         }
 
         override fun getWifiSignalStrength(): String {
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 return "Location permission not granted"
             }
 
-            val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            val wifiManager =
+                context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
             val wifiInfo: WifiInfo? = wifiManager.connectionInfo
 
             if (wifiManager.isWifiEnabled) {
@@ -404,7 +426,8 @@ class CrashLytics constructor(){
         }
 
         override fun getCellularSignalStrength(callback: (String) -> Unit) {
-            val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            val telephonyManager =
+                context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
             telephonyManager.listen(object : PhoneStateListener() {
                 @RequiresApi(Build.VERSION_CODES.M)
@@ -418,7 +441,6 @@ class CrashLytics constructor(){
         }
 
 
-
         override fun getUptime(): String {
             val uptime = SystemClock.elapsedRealtime()
             val days = uptime / (1000 * 60 * 60 * 24)
@@ -426,9 +448,6 @@ class CrashLytics constructor(){
             val minutes = (uptime / (1000 * 60)) % 60
             return String.format("Uptime: %d Days, %02d Hours, %02d Minutes", days, hours, minutes)
         }
-
-
-
 
 
 //        override fun getDeviceId(): String {
@@ -439,7 +458,6 @@ class CrashLytics constructor(){
 //                telephonyManager.deviceId ?: "UNKNOWN_DEVICE_ID"
 //            }
 //        }
-
 
 
     }
