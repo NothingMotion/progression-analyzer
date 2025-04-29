@@ -29,7 +29,7 @@ class BrawlerRepositoryImpl @Inject constructor() : BrawlerRepository {
     override suspend fun getBrawlers(): Flow<Result<List<BrawlerData>,DataError.NetworkError>> {
         return flow {
             try {
-                emit(Result.Success(api.getBrawlers()))
+                emit(Result.Success(api.getBrawlers().list))
             }
 
             catch(e:Exception){
