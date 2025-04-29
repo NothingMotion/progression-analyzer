@@ -1,4 +1,4 @@
-package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
+package com.nothingmotion.brawlprogressionanalyzer.ui.account_detail
 
 
 import android.animation.Animator
@@ -66,6 +66,7 @@ import com.nothingmotion.brawlprogressionanalyzer.domain.model.Progress
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlNinjaRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepository
+import com.nothingmotion.brawlprogressionanalyzer.ui.accounts.BrawlNinjaViewModel
 import com.nothingmotion.brawlprogressionanalyzer.util.AccountUtils
 import com.nothingmotion.brawlprogressionanalyzer.util.AssetUtils
 import com.nothingmotion.brawlprogressionanalyzer.util.JalaliDateUtils

@@ -1,8 +1,5 @@
-package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
+package com.nothingmotion.brawlprogressionanalyzer.ui.future_account
 
-import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerTable
-import com.nothingmotion.brawlprogressionanalyzer.domain.model.UpgradeTable
-import timber.log.Timber
 import java.text.NumberFormat
 
 /**

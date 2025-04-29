@@ -1,4 +1,4 @@
-package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
+package com.nothingmotion.brawlprogressionanalyzer.ui.future_account
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -14,10 +14,8 @@ import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.card.MaterialCardView
 import com.nothingmotion.brawlprogressionanalyzer.BuildConfig
 import com.nothingmotion.brawlprogressionanalyzer.R
-import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlNinjaRepository
 import timber.log.Timber
 import java.text.NumberFormat
-import javax.inject.Inject
 
 /**
  * RecyclerView Adapter for displaying upgradable brawlers

@@ -1,4 +1,4 @@
-package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
+package com.nothingmotion.brawlprogressionanalyzer.ui.future_account
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

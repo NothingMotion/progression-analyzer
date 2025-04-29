@@ -56,7 +56,7 @@
 
     <fragment
         android:id="@+id/navigation_account_detail"
-        android:name="com.nothingmotion.brawlprogressionanalyzer.ui.accounts.AccountDetailFragment"
+        android:name="com.nothingmotion.brawlprogressionanalyzer.ui.account_detail.AccountDetailFragment"
         android:label="Account Details">
         <argument
             android:name="accountId"
@@ -75,7 +75,7 @@
 
     <fragment
         android:id="@+id/navigation_future_progress"
-        android:name="com.nothingmotion.brawlprogressionanalyzer.ui.accounts.FutureProgressFragment"
+        android:name="com.nothingmotion.brawlprogressionanalyzer.ui.future_account.FutureProgressFragment"
         android:label="Future Progress">
         <argument
             android:name="accountId"

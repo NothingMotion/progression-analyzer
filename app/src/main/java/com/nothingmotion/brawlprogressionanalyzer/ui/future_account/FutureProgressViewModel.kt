@@ -1,15 +1,13 @@
-package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
+package com.nothingmotion.brawlprogressionanalyzer.ui.future_account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeBrawlerRepository
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeBrawlerTableRepository
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakePassTableRepository
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeStarrDropTableRepository
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeUpgradeTableRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerData
-import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerDataNinja
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerTable
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Coin
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Credit
@@ -20,10 +18,7 @@ import com.nothingmotion.brawlprogressionanalyzer.domain.model.StarrDropRewards
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.UpgradeTable
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.toRarityData
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.AccountRepository
-import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlNinjaRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepository
-import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerTableRepository
-import com.nothingmotion.brawlprogressionanalyzer.domain.repository.PassRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -308,7 +303,8 @@ class FutureProgressViewModel @Inject constructor(
         )
         
         // Generate next steps advice
-        val nextStepsAdvice = NextStepsGenerator.generateAdvice(updatedState, selectedTimeframeMonths)
+        val nextStepsAdvice =
+            NextStepsGenerator.generateAdvice(updatedState, selectedTimeframeMonths)
         
         // Update state with projected resources and advice
         _state.update { 
@@ -461,7 +457,8 @@ class FutureProgressViewModel @Inject constructor(
         _state.update { 
             val updatedState = it.copy(upgradableBrawlers = upgradableBrawlers)
             // Generate updated next steps advice
-            val nextStepsAdvice = NextStepsGenerator.generateAdvice(updatedState, selectedTimeframeMonths)
+            val nextStepsAdvice =
+                NextStepsGenerator.generateAdvice(updatedState, selectedTimeframeMonths)
             updatedState.copy(nextStepsAdvice = nextStepsAdvice)
         }
     }
@@ -549,7 +546,7 @@ data class FutureProgressState(
     val lockedBrawlers: List<BrawlerData> = emptyList(),
 
     // Upgradable brawlers
-     val upgradableBrawlers: List<UpgradableBrawler> = emptyList(),
+    val upgradableBrawlers: List<UpgradableBrawler> = emptyList(),
 
     // Lazy loading properties
     val hasMoreBrawlers: Boolean = false,

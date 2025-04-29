@@ -1,4 +1,4 @@
-package com.nothingmotion.brawlprogressionanalyzer.ui.accounts
+package com.nothingmotion.brawlprogressionanalyzer.ui.future_account
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,14 +16,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.card.MaterialCardView
 import com.nothingmotion.brawlprogressionanalyzer.R
 import com.nothingmotion.brawlprogressionanalyzer.databinding.FragmentFutureProgressBinding
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.RarityData
-import com.nothingmotion.brawlprogressionanalyzer.domain.model.toRarityData
 import com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -255,7 +251,8 @@ class FutureProgressFragment : Fragment() {
         recyclerView.addItemDecoration(GridSpacingItemDecoration(2, spacingInPixels, true))
         
         // Set click listener to show upgrade details
-        brawlerUpgradeAdapter.setOnBrawlerUpgradeClickListener(object : BrawlerUpgradeAdapter.OnBrawlerUpgradeClickListener {
+        brawlerUpgradeAdapter.setOnBrawlerUpgradeClickListener(object :
+            BrawlerUpgradeAdapter.OnBrawlerUpgradeClickListener {
             override fun onBrawlerUpgradeClick(brawler: UpgradableBrawler) {
                 showUpgradeDetailsDialog(brawler)
             }
