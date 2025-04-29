@@ -9,11 +9,13 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -27,10 +29,15 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.HttpException
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
+import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.signature.ObjectKey
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
@@ -45,12 +52,15 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.nothingmotion.brawlprogressionanalyzer.BrawlAnalyzerApp
 import com.nothingmotion.brawlprogressionanalyzer.R
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.databinding.FragmentAccountDetailBinding
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.DataError
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Language
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Progress
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
@@ -66,6 +76,7 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.text.DecimalFormat
 import java.text.NumberFormat
@@ -78,21 +89,24 @@ import kotlin.math.abs
 class AccountDetailFragment : Fragment() {
     private var _binding: FragmentAccountDetailBinding? = null
     private val binding get() = _binding!!
-    
+
     private val viewModel: AccountDetailViewModel by viewModels()
     private val numberFormat = DecimalFormat("#,###")
     private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
     private var jalaliUtils = JalaliDateUtils()
 
-    private lateinit var account : Account
+    private lateinit var account: Account
     private lateinit var brawlerAdapter: BrawlerAdapter
 
     private var iconLoadingJob: kotlinx.coroutines.Job? = null
 
-    @Inject lateinit var brawlerRepository: BrawlerRepository
-    @Inject lateinit var brawlNinjaRepository: BrawlNinjaRepository
+    @Inject
+    lateinit var brawlerRepository: BrawlerRepository
+    @Inject
+    lateinit var brawlNinjaRepository: BrawlNinjaRepository
 
-    @Inject lateinit var prefManager: PreferencesManager
+    @Inject
+    lateinit var prefManager: PreferencesManager
     private val brawlNinjaViewModel: BrawlNinjaViewModel by viewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -102,10 +116,10 @@ class AccountDetailFragment : Fragment() {
         _binding = FragmentAccountDetailBinding.inflate(inflater, container, false)
         return binding.root
     }
-    
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
         setupToolbar()
         setupAppBarScrollBehavior()
         setupBrawlersList()
@@ -117,10 +131,10 @@ class AccountDetailFragment : Fragment() {
             observeAccount(accountId)
             setupRetryButton(accountId)
         }
-        
+
         setupEditButton()
         setupFutureProgressButton()
-
+        setupRefreshAccountButton()
         setupBackButtons()
     }
 
@@ -128,42 +142,53 @@ class AccountDetailFragment : Fragment() {
         binding.apply {
             lifecycleScope.launch {
 
-                val coin = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_coin.png")
-                val credit = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_credit.png")
-                val powerPoint = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_power_point.png")
-                val gadget = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_gadget.png")
-                val starPower = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_star_power.png")
-                val gear = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_gear.png")
+                val coin = AssetUtils.loadImageAsync(requireContext(), "images/icons/icon_coin.png")
+                val credit =
+                    AssetUtils.loadImageAsync(requireContext(), "images/icons/icon_credit.png")
+                val powerPoint =
+                    AssetUtils.loadImageAsync(requireContext(), "images/icons/icon_power_point.png")
+                val gadget =
+                    AssetUtils.loadImageAsync(requireContext(), "images/icons/icon_gadget.png")
+                val starPower =
+                    AssetUtils.loadImageAsync(requireContext(), "images/icons/icon_star_power.png")
+                val gear = AssetUtils.loadImageAsync(requireContext(), "images/icons/icon_gear.png")
 
-                val trophies = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_trophy_medium.png")
-                val highest = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_leaderboards.png")
-                val brawlers = AssetUtils.loadImageAsync(requireContext(),"images/icons/icon_brawlers.png")
-                coin?.let{
+                val trophies = AssetUtils.loadImageAsync(
+                    requireContext(),
+                    "images/icons/icon_trophy_medium.png"
+                )
+                val highest = AssetUtils.loadImageAsync(
+                    requireContext(),
+                    "images/icons/icon_leaderboards.png"
+                )
+                val brawlers =
+                    AssetUtils.loadImageAsync(requireContext(), "images/icons/icon_brawlers.png")
+                coin?.let {
                     coinsIcon.setImageBitmap(it)
                 }
-                credit?.let{
+                credit?.let {
                     creditsIcon.setImageBitmap(it)
                 }
-                powerPoint?.let{
+                powerPoint?.let {
                     powerPointsIcon.setImageBitmap(it)
                 }
-                gadget?.let{
+                gadget?.let {
                     gadgetsIcon.setImageBitmap(it)
                 }
-                starPower?.let{
+                starPower?.let {
                     starPowersIcon.setImageBitmap(it)
                 }
-                gear?.let{
+                gear?.let {
                     gearsIcon.setImageBitmap(it)
                 }
 
-                trophies?.let{
+                trophies?.let {
                     trophiesIcon.setImageBitmap(it)
                 }
-                highest?.let{
+                highest?.let {
                     highestTrophiesIcon.setImageBitmap(it)
                 }
-                brawlers?.let{
+                brawlers?.let {
                     brawlersIcon.setImageBitmap(it)
                     maxedBrawlersIcon.setImageBitmap(it)
                 }
@@ -173,28 +198,27 @@ class AccountDetailFragment : Fragment() {
     }
 
     private fun setupBackButtons() {
-        val stopAccountJob = {viewModel.stop()}
-        binding.backButton.setOnClickListener {stopAccountJob(); findNavController().popBackStack() }
-        binding.backLoadingButton.setOnClickListener {stopAccountJob(); findNavController().popBackStack() }
+        val stopAccountJob = { viewModel.stop() }
+        binding.backButton.setOnClickListener { stopAccountJob(); findNavController().popBackStack() }
+        binding.backLoadingButton.setOnClickListener { stopAccountJob(); findNavController().popBackStack() }
     }
 
 
-
-
-    private fun setupRetryButton(accountId: String){
+    private fun setupRetryButton(accountId: String) {
         binding.retryButton.setOnClickListener {
             viewModel.getAccount(accountId)
         }
     }
+
     private fun setupToolbar() {
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigate(R.id.action_account_detail_to_accounts)
         }
-        
+
         // Set CollapsedTitleTextAppearance to control text visibility
         binding.collapsingToolbar.setCollapsedTitleTextAppearance(R.style.TextAppearance_App_CollapsingToolbar_Collapsed)
         binding.collapsingToolbar.setExpandedTitleTextAppearance(R.style.TextAppearance_App_CollapsingToolbar_Expanded)
-        
+
         // Set up share button
         binding.shareButton.setOnClickListener {
             shareAccountInfo()
@@ -209,40 +233,297 @@ class AccountDetailFragment : Fragment() {
     private fun photoAccountDialog() {
         val view = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_account_photo, null)
+
         val imageView = view.findViewById<ImageView>(R.id.photo_preview)
-        val imageUrl = GlideUrl(
-            "https://img.sltbot.com/player/${account.account.tag.replace("#","").lowercase()}/brawlers?o=v",
-            LazyHeaders.Builder()
-                .addHeader("accept", "*/*")
-                .addHeader("accept-language", "en-US,en;q=0.9")
-                .addHeader("dnt", "1")
-                .addHeader("origin", "https://sltbot.com")
-                .addHeader("priority", "u=1, i")
-                .addHeader("referer", "https://sltbot.com/")
-                .addHeader("sec-ch-ua", "\"Chromium\";v=\"135\", \"Not-A.Brand\";v=\"8\"")
-                .addHeader("sec-ch-ua-mobile", "?0")
-                .addHeader("sec-ch-ua-platform", "\"Windows\"")
-                .addHeader("sec-fetch-dest", "empty")
-                .addHeader("sec-fetch-mode", "cors")
-                .addHeader("sec-fetch-site", "same-site")
-                .addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36")
-                .build()
-        )
-        Glide.with(imageView)
-            .load(imageUrl)
-            .apply(RequestOptions())
-            .into(imageView)
+        val chipGroup = view.findViewById<ChipGroup>(R.id.photo_type_chip_group)
+        val errorStateGroup = view.findViewById<View>(R.id.error_state_group)
+        val loadingStateGroup = view.findViewById<View>(R.id.loading_photo_group)
+        val retryButton = view.findViewById<Button>(R.id.retry_button)
+        val backButton = view.findViewById<Button>(R.id.back_button)
+        val backLoadingButton = view.findViewById<Button>(R.id.back_loading_button)
+        val loadingText = view.findViewById<TextView>(R.id.loading_text)
+        
+        var imageType: String = "brawlers"
+        
+        // Configure loading text
+        loadingText.text = getString(R.string.loading_account_photo)
+        
+        // Reset initial visibility states
+        errorStateGroup.visibility = View.GONE
+        loadingStateGroup.visibility = View.GONE
+        
+        // Create a fixed animation handler instead of mixing direct visibility changes with animations
+        val showLoading = {
+            // Always cancel any ongoing animations first
+            errorStateGroup.animate().cancel()
+            loadingStateGroup.animate().cancel()
+            
+            if (errorStateGroup.isVisible) {
+                // First hide error, then show loading
+                errorStateGroup.apply {
+                    animate()
+                        .alpha(0f)
+                        .translationY(50f)
+                        .setDuration(300)
+                        .withEndAction {
+                            visibility = View.GONE
+                            
+                            // Now show loading with animation
+                            loadingStateGroup.apply {
+                                alpha = 0f
+                                translationY = -50f
+                                visibility = View.VISIBLE
+                                animate()
+                                    .alpha(1f)
+                                    .translationY(0f)
+                                    .setDuration(300)
+                                    .start()
+                            }
+                        }
+                        .start()
+                }
+            } else {
+                // Just show loading
+                loadingStateGroup.apply {
+                    alpha = 0f
+                    translationY = -50f
+                    visibility = View.VISIBLE
+                    animate()
+                        .alpha(1f)
+                        .translationY(0f)
+                        .setDuration(300)
+                        .start()
+                }
+            }
+        }
+        
+        val showError = {
+            // Always cancel any ongoing animations first
+            errorStateGroup.animate().cancel()
+            loadingStateGroup.animate().cancel()
+            
+            if (loadingStateGroup.isVisible) {
+                // First hide loading, then show error
+                loadingStateGroup.apply {
+                    animate()
+                        .alpha(0f)
+                        .translationY(50f)
+                        .setDuration(300)
+                        .withEndAction {
+                            visibility = View.GONE
+                            
+                            // Now show error with animation
+                            errorStateGroup.apply {
+                                alpha = 0f
+                                translationY = -50f
+                                visibility = View.VISIBLE
+                                animate()
+                                    .alpha(1f)
+                                    .translationY(0f)
+                                    .setDuration(300)
+                                    .start()
+                            }
+                        }
+                        .start()
+                }
+            } else {
+                // Just show error
+                errorStateGroup.apply {
+                    alpha = 0f
+                    translationY = -50f
+                    visibility = View.VISIBLE
+                    animate()
+                        .alpha(1f)
+                        .translationY(0f)
+                        .setDuration(300)
+                        .start()
+                }
+            }
+        }
+        
+        val hideStates = {
+            // Always cancel any ongoing animations first
+            errorStateGroup.animate().cancel()
+            loadingStateGroup.animate().cancel()
+            
+            // Hide error if visible
+            if (errorStateGroup.isVisible) {
+                errorStateGroup.apply {
+                    animate()
+                        .alpha(0f)
+                        .translationY(50f)
+                        .setDuration(300)
+                        .withEndAction {
+                            visibility = View.GONE
+                        }
+                        .start()
+                }
+            }
+            
+            // Hide loading if visible
+            if (loadingStateGroup.isVisible) {
+                loadingStateGroup.apply {
+                    animate()
+                        .alpha(0f)
+                        .translationY(50f)
+                        .setDuration(300)
+                        .withEndAction {
+                            visibility = View.GONE
+                        }
+                        .start()
+                }
+            }
+        }
+        
+        val fetchImage = {
+            // Show loading state
+            showLoading()
+            
+            val accountTag = account.account.tag.replace("#", "").lowercase()
+            val imageUrl = GlideUrl(
+                "https://img.sltbot.com/player/${accountTag}/${imageType}?o=v",
+                LazyHeaders.Builder()
+                    .addHeader("accept", "*/*")
+                    .addHeader("accept-language", "en-US,en;q=0.9")
+                    .addHeader("dnt", "1")
+                    .addHeader("origin", "https://sltbot.com")
+                    .addHeader("priority", "u=1, i")
+                    .addHeader("referer", "https://sltbot.com/")
+                    .addHeader("sec-ch-ua", "\"Chromium\";v=\"135\", \"Not-A.Brand\";v=\"8\"")
+                    .addHeader("sec-ch-ua-mobile", "?0")
+                    .addHeader("sec-ch-ua-platform", "\"Windows\"")
+                    .addHeader("sec-fetch-dest", "empty")
+                    .addHeader("sec-fetch-mode", "cors")
+                    .addHeader("sec-fetch-site", "same-site")
+                    .addHeader(
+                        "user-agent",
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
+                    )
+                    .build()
+            )
+            
+            Glide.with(imageView)
+                .load(imageUrl)
+                .apply(RequestOptions())
+                .timeout(10000)
+                .listener(object: RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        // Determine error message
+                        var errorText: String? = null
+                        val rootCause = e?.rootCauses?.firstOrNull()
+                        if (rootCause is HttpException) {
+                            Timber.tag("AccountsAdapter").e("Error loading image: ${rootCause.statusCode}")
+                            val networkError = when(rootCause.statusCode) {
+                                400 -> DataError.NetworkError.BAD_REQUEST
+                                401 -> DataError.NetworkError.UNAUTHORIZED
+                                429 -> DataError.NetworkError.TOO_MANY_REQUESTS
+                                403 -> DataError.NetworkError.FORBIDDEN
+                                404 -> DataError.NetworkError.NOT_FOUND
+                                500 -> DataError.NetworkError.NETWORK_ERROR
+                                else -> DataError.NetworkError.NETWORK_ERROR
+                            }
+                            errorText = networkError.name
+                        }
+                        
+                        // Update error message text
+                        val errorTextView = errorStateGroup.findViewById<TextView>(R.id.error_message_text)
+                        errorTextView.text = errorText ?: e?.localizedMessage ?: "Failed to load account data"
+                        
+                        // Show error state
+                        showError()
+                        
+                        return true
+                    }
 
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        model: Any,
+                        target: Target<Drawable>?,
+                        dataSource: DataSource,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        // Hide both states
+                        hideStates()
+                        
+                        return false
+                    }
+                })
+                .into(imageView)
+        }
+        
+        // Setup chip group listener
+        chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
+            if (checkedIds.isNotEmpty()) {
+                val checked = checkedIds[0]
+                when (checked) {
+                    R.id.chip_brawlers -> {
+                        imageType = "brawlers"
+                        fetchImage()
+                    }
+                    R.id.chip_trophies -> {
+                        imageType = "trophies"
+                        fetchImage()
+                    }
+                    R.id.chip_ranks -> {
+                        imageType = "ranks"
+                        fetchImage()
+                    }
+                    R.id.chip_masteries -> {
+                        imageType = "mastery_points"
+                        fetchImage()
+                    }
+                }
+            }
+        }
+        
+        // Setup retry button
+        retryButton.setOnClickListener {
+            fetchImage()
+        }
+        
+        // Setup back buttons (both in error and loading states)
+        backButton.setOnClickListener {
+            errorStateGroup.apply {
+                animate()
+                    .alpha(0f)
+                    .translationY(50f)
+                    .setDuration(300)
+                    .withEndAction {
+                        visibility = View.GONE
+                    }
+                    .start()
+            }
+        }
+        
+        backLoadingButton.setOnClickListener {
+            loadingStateGroup.apply {
+                animate()
+                    .alpha(0f)
+                    .translationY(50f)
+                    .setDuration(300)
+                    .withEndAction {
+                        visibility = View.GONE
+                    }
+                    .start()
+            }
+        }
+        
+        // Initial fetch
+        fetchImage()
 
+        // Show dialog
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Take a photo")
             .setView(view)
             .setPositiveButton("OK") { dialog, _ ->
-                // Handle OK button click
                 dialog.dismiss()
             }
             .setNegativeButton("Cancel") { dialog, _ ->
-                // Handle Cancel button click
                 dialog.dismiss()
             }
             .show()
@@ -256,7 +537,7 @@ class AccountDetailFragment : Fragment() {
             binding.toolbar.paddingRight,
             resources.getDimensionPixelSize(R.dimen.toolbar_title_bottom_padding)
         )
-        
+
         // Set extra bottom margin on the collapsing toolbar title
         binding.collapsingToolbar.setExpandedTitleMargin(
             binding.collapsingToolbar.expandedTitleMarginStart,
@@ -265,18 +546,18 @@ class AccountDetailFragment : Fragment() {
             resources.getDimensionPixelSize(R.dimen.toolbar_bottom_margin)
         )
     }
-    
+
     private fun setupAppBarScrollBehavior() {
         binding.appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
             val scrollRange = appBarLayout.totalScrollRange
             val percentage = abs(verticalOffset).toFloat() / scrollRange.toFloat()
-            
+
             // When less than 50% collapsed, hide the title
             if (percentage < 0.5) {
                 if (binding.collapsingToolbar.title != null) {
                     binding.collapsingToolbar.title = null
                 }
-            } 
+            }
             // Otherwise show the title
             else {
                 if (binding.collapsingToolbar.title == null) {
@@ -287,7 +568,7 @@ class AccountDetailFragment : Fragment() {
             }
         })
     }
-    
+
     private fun setupBrawlersList() {
         brawlerAdapter = BrawlerAdapter(brawlNinjaViewModel)
         binding.brawlersRecyclerView.apply {
@@ -295,40 +576,40 @@ class AccountDetailFragment : Fragment() {
             adapter = brawlerAdapter
             isNestedScrollingEnabled = true
             setHasFixedSize(true)
-            
+
             // Set RecyclerView to handle its own scrolling
             isFocusable = false
             overScrollMode = View.OVER_SCROLL_NEVER
         }
-        
+
         // Set up listener to scroll to the top when list is updated
         brawlerAdapter.setOnListUpdatedListener(object : BrawlerAdapter.OnListUpdatedListener {
             override fun onListUpdated() {
                 binding.brawlersRecyclerView.scrollToPosition(0)
             }
         })
-        
+
         // Setup search and sort functionality
         setupBrawlerSearch()
         setupBrawlerSort()
     }
-    
+
     private fun setupBrawlerSearch() {
         // Use a debounce for search to prevent rapid filtering on every keystroke
         var searchJob: kotlinx.coroutines.Job? = null
-        
+
         binding.searchBrawlersInput.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 // Cancel previous job if it exists
                 searchJob?.cancel()
-                
+
                 // Create a new job with 300ms delay to prevent rapid filtering
                 searchJob = viewLifecycleOwner.lifecycleScope.launch {
                     kotlinx.coroutines.delay(300) // 300ms debounce
                     brawlerAdapter.filterByName(s.toString())
-                    
+
                     // Check if we have no results to display the empty state
                     binding.noBrawlersFound.visibility = if (brawlerAdapter.hasNoResults()) {
                         View.VISIBLE
@@ -337,15 +618,15 @@ class AccountDetailFragment : Fragment() {
                     }
                 }
             }
-            
+
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
     }
-    
+
     private fun setupBrawlerSort() {
         // Set initial selection
         binding.chipTrophies.isChecked = true
-        
+
         // Handle chip selection for sorting
         binding.sortChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
             if (checkedIds.isNotEmpty()) {
@@ -355,27 +636,27 @@ class AccountDetailFragment : Fragment() {
                     R.id.chip_rank -> brawlerAdapter.sortBy(BrawlerAdapter.SortType.RANK)
                     R.id.chip_name -> brawlerAdapter.sortBy(BrawlerAdapter.SortType.NAME)
                 }
-                
+
                 // Reset search input when sorting
                 binding.searchBrawlersInput.setText("")
-                
+
                 // Use smooth scrolling for a better UX when sort button is clicked
                 binding.brawlersRecyclerView.smoothScrollToPosition(0)
-                
+
                 // Hide no results view
                 binding.noBrawlersFound.visibility = View.GONE
             }
         }
     }
-    
+
     private fun observeAccount(accountId: String) {
         // Load account details
         viewModel.getAccount(accountId)
-        
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collectLatest { state ->
-                    if(state.loading){
+                    if (state.loading) {
                         binding.loadingText.text = "Loading $accountId.."
 
                         binding.fabFutureProgress.visibility = View.GONE
@@ -384,18 +665,25 @@ class AccountDetailFragment : Fragment() {
                         binding.errorStateGroup.visibility = View.GONE
 
                         binding.loadingAccountsGroup.apply {
-                            if (binding.errorStateGroup.isVisible){
+                            if (binding.errorStateGroup.isVisible) {
                                 binding.errorStateGroup.apply {
-                                    applyAnimation(this,false, Runnable { applyAnimation(binding.loadingAccountsGroup,true) })
+                                    applyAnimation(
+                                        this,
+                                        false,
+                                        Runnable {
+                                            applyAnimation(
+                                                binding.loadingAccountsGroup,
+                                                true
+                                            )
+                                        })
                                 }
-                            }else {
+                            } else {
 
-                                applyAnimation(this,true)
+                                applyAnimation(this, true)
                             }
 
                         }
-                    }
-                    else if(state.error != null) {
+                    } else if (state.error != null) {
                         binding.errorMessageText.text = state.error
 
                         binding.loadingAccountsGroup.visibility = View.GONE
@@ -404,26 +692,45 @@ class AccountDetailFragment : Fragment() {
                         binding.fabFutureProgress.visibility = View.GONE
 
                         binding.errorStateGroup.apply {
-                            if(binding.loadingAccountsGroup.isVisible){
+                            if (binding.loadingAccountsGroup.isVisible) {
                                 binding.loadingAccountsGroup.apply {
-                                    applyAnimation(this,false, Runnable { applyAnimation(binding.errorStateGroup,true) })
+                                    applyAnimation(
+                                        this,
+                                        false,
+                                        Runnable { applyAnimation(binding.errorStateGroup, true) })
                                 }
-                            }else {
-                                applyAnimation(this,true)
+                            } else {
+                                applyAnimation(this, true)
 
                             }
                         }
-                    }
-                    else {
+                    } else if (state.refreshMessage != null) {
+                        Snackbar.make(
+                            requireContext(),
+                            binding.root,
+                            state.refreshMessage,
+                            Snackbar.LENGTH_SHORT
+                        )
+                            .setAction("OK") { }
+                            .show()
+                    } else {
                         state.account?.let {
 //                            binding.loadingAccountsGroup.visibility = View.GONE
                             binding.errorStateGroup.visibility = View.GONE
 
-                            binding.loadingAccountsGroup.apply { applyAnimation(this,false, Runnable {
+                            if (binding.loadingAccountsGroup.isVisible)
+                                binding.loadingAccountsGroup.apply {
+                                    applyAnimation(this, false, Runnable {
 
-                                binding.appBar.apply { applyAnimation(this,true) }
-                                binding.accountDetailsGroup.apply { applyAnimation(this,true) }
-                            }) }
+                                        binding.appBar.apply { applyAnimation(this, true) }
+                                        binding.accountDetailsGroup.apply {
+                                            applyAnimation(
+                                                this,
+                                                true
+                                            )
+                                        }
+                                    })
+                                }
                             binding.fabFutureProgress.visibility = View.VISIBLE
                             account = it
                             updateUI(it)
@@ -433,20 +740,30 @@ class AccountDetailFragment : Fragment() {
             }
         }
     }
-    private fun applyAnimation(view: View, isIn: Boolean = true,withEndAction:Runnable = Runnable {  }){
+
+    private fun applyAnimation(
+        view: View,
+        isIn: Boolean = true,
+        withEndAction: Runnable = Runnable { }
+    ) {
         view.apply {
-            alpha = if(isIn) 0f else 1f;
-            translationY = if(isIn) -50f else 50f;
-            visibility= View.VISIBLE
+            alpha = if (isIn) 0f else 1f;
+            translationY = if (isIn) -50f else 50f;
+            visibility = View.VISIBLE
             animate()
-                .alpha(if(isIn) 1f else 0f)
-                .translationY(if(isIn) 50f else -50f)
+                .alpha(if (isIn) 1f else 0f)
+                .translationY(if (isIn) 50f else -50f)
                 .setDuration(300)
-                .withEndAction { if(!isIn){visibility = View.GONE} }
+                .withEndAction {
+                    if (!isIn) {
+                        visibility = View.GONE
+                    }
+                }
                 .withEndAction(withEndAction)
                 .start()
         }
     }
+
     private fun updateUI(account: Account) {
         with(binding) {
             iconLoadingJob?.cancel()
@@ -497,11 +814,14 @@ class AccountDetailFragment : Fragment() {
                                         .signature(ObjectKey(iconId.toString()))
                                         .into(accountAvatar)
                             }
+
                             is Result.Error -> {
-                                Timber.tag("AccountsAdapter").e("Error loading icon: ${iconResult.error.name}")
+                                Timber.tag("AccountsAdapter")
+                                    .e("Error loading icon: ${iconResult.error.name}")
                                 // Cache the failure so we don't keep retrying
                                 app?.iconCache?.remove(iconId)
                             }
+
                             is Result.Loading -> {
                                 // No action needed for loading state
                             }
@@ -512,15 +832,15 @@ class AccountDetailFragment : Fragment() {
             // Stats card
             accountTrophies.text = AccountUtils.formatNumber(account.account.trophies)
             accountHighestTrophies.text = AccountUtils.formatNumber(account.account.highestTrophies)
-            
+
             // Calculate brawler counts from the brawlers list
             val brawlerCount = account.account.brawlers.size
             accountBrawlers.text = brawlerCount.toString()
-            
+
             // Count maxed brawlers (power level 11)
             val maxedBrawlers = AccountUtils.calculateMaxedBrawlers(account)
             accountMaxedBrawlers.text = maxedBrawlers.toString()
-            
+
             // Check if all brawlers are maxed and show the how to max out text if not
             if (maxedBrawlers < brawlerCount) {
                 howToMaxOut.visibility = View.VISIBLE
@@ -531,25 +851,26 @@ class AccountDetailFragment : Fragment() {
             } else {
                 howToMaxOut.visibility = View.GONE
             }
-            
+
             // Progress
             val progressPercentage = AccountUtils.calculateMaxedPercentage(account)
-            
+
             maxedProgress.progress = progressPercentage.toInt()
             progressionPercentage.text = getString(
                 R.string.maxed_percentage_format,
                 progressPercentage.toInt()
             )
 
-            var lastUpdate : String = "";
-            prefManager.language?.let{
-                when(it){
+            var lastUpdate: String = "";
+            prefManager.language?.let {
+                when (it) {
                     Language.ENGLISH -> {
                         lastUpdate = getString(
                             R.string.last_updated_format,
                             dateFormat.format(account.updatedAt)
                         )
                     }
+
                     Language.PERSIAN -> {
                         lastUpdate = getString(
                             R.string.last_updated_format,
@@ -560,32 +881,32 @@ class AccountDetailFragment : Fragment() {
             }
             // Last updated
             lastUpdated.text = lastUpdate
-            
+
             // Pass account history to adapter for trophy history charts
             brawlerAdapter.setAccountHistory(account.history)
-            
+
             // Update brawlers list
             brawlerAdapter.submitSortedList(account.account.brawlers)
-            
+
             // Ensure no results view is hidden on initial load
             noBrawlersFound.visibility = View.GONE
-            
+
             // Progression history charts
             setupProgressionCharts(account)
             setupProgressSummary(account)
-            
+
             // Update resources accordion with current progress
             updateResourcesValues(account.currentProgress)
-            
+
             // Set toolbar title only when collapsed, handled by AppBarLayout.OnOffsetChangedListener
         }
     }
-    
+
     private fun setupProgressionCharts(account: Account) {
         // Check if we have history data
         val historyData = account.history
         val progressHistory = account.previousProgresses.orEmpty()
-        
+
         if (historyData.isNullOrEmpty() && progressHistory.isEmpty()) {
             // If no history, show empty state
             binding.noHistoryText.visibility = View.VISIBLE
@@ -595,24 +916,24 @@ class AccountDetailFragment : Fragment() {
             // We have history, setup charts
             binding.noHistoryText.visibility = View.GONE
             binding.chartsContainer.visibility = View.VISIBLE
-            
+
             // Setup all charts
             if (!historyData.isNullOrEmpty()) {
                 binding.trophyChartContainer.visibility = View.VISIBLE
                 setupTrophyChart(account)
-                
+
                 binding.brawlerChartContainer.visibility = View.VISIBLE
                 setupBrawlerCountChart(account)
             } else {
                 binding.trophyChartContainer.visibility = View.GONE
                 binding.brawlerChartContainer.visibility = View.GONE
             }
-            
+
             if (progressHistory.isNotEmpty()) {
                 binding.creditsChartContainer.visibility = View.VISIBLE
                 binding.coinsChartContainer.visibility = View.VISIBLE
                 binding.powerPointsChartContainer.visibility = View.VISIBLE
-                
+
                 setupCreditsChart(account)
                 setupCoinsChart(account)
                 setupPowerPointsChart(account)
@@ -621,44 +942,44 @@ class AccountDetailFragment : Fragment() {
                 binding.coinsChartContainer.visibility = View.GONE
                 binding.powerPointsChartContainer.visibility = View.GONE
             }
-            
+
             // Hide the track button since we already have data
             binding.trackProgressionButton.visibility = View.GONE
         }
-        
+
         // Setup track progression button
         binding.trackProgressionButton.setOnClickListener {
             Toast.makeText(context, "Tracking progression...", Toast.LENGTH_SHORT).show()
             // TODO: Implement tracking progression functionality
         }
     }
-    
+
     // 1. Trophy History Chart
     private fun setupTrophyChart(account: Account) {
         val chart = binding.trophyHistoryChart
-        
+
         // Clear any existing data
         chart.clear()
-        
+
         // Get history data labels and values
         val xLabels = AccountUtils.getHistoryDateLabels(account)
         val values = AccountUtils.getTrophyHistoryValues(account)
-        
+
         // Create entries for trophy history
         val entries = mutableListOf<Entry>()
-        
+
         // Add data points
         values.forEachIndexed { index, value ->
             entries.add(Entry(index.toFloat(), value))
         }
-        
+
         // Find min and max values for better Y axis scaling
         val minTrophies = values.minOrNull() ?: 0f
         val maxTrophies = values.maxOrNull() ?: account.account.trophies.toFloat()
         val yAxisRange = maxTrophies - minTrophies
         val yAxisMin = maxOf(0f, minTrophies - (yAxisRange * 0.1f)) // 10% padding below
         val yAxisMax = maxTrophies + (yAxisRange * 0.1f) // 10% padding above
-        
+
         // Create dataset
         val dataSet = LineDataSet(entries, getString(R.string.trophy_history)).apply {
             color = ContextCompat.getColor(requireContext(), R.color.chart_line)
@@ -668,7 +989,7 @@ class AccountDetailFragment : Fragment() {
             circleRadius = 4f
             circleHoleRadius = 2f
             circleHoleColor = Color.WHITE
-            
+
             // Values above data points
             setDrawValues(true)
             valueTextSize = 9f
@@ -678,52 +999,52 @@ class AccountDetailFragment : Fragment() {
                     return AccountUtils.formatNumber(value.toInt())
                 }
             }
-            
+
             // Smooth curve and fill
             mode = LineDataSet.Mode.CUBIC_BEZIER
             fillColor = ContextCompat.getColor(requireContext(), R.color.chart_line_fill)
             fillAlpha = 85
             setDrawFilled(true)
-            
+
             // Highlight
             highLightColor = ContextCompat.getColor(requireContext(), R.color.chart_point)
             highlightLineWidth = 1.5f
         }
-        
+
         // Create and set line data
         val lineData = LineData(dataSet)
         chart.data = lineData
-        
+
         // Customize chart appearance
         setupLineChart(chart, xLabels, yAxisMin, yAxisMax)
     }
-    
+
     // 2. Brawlers Amount Chart
     private fun setupBrawlerCountChart(account: Account) {
         val chart = binding.brawlerCountChart
-        
+
         // Clear any existing data
         chart.clear()
-        
+
         // Get history data labels and values
         val xLabels = AccountUtils.getHistoryDateLabels(account)
         val values = AccountUtils.getBrawlerCountHistoryValues(account)
-        
+
         // Create entries for brawler count history
         val entries = mutableListOf<Entry>()
-        
+
         // Add data points
         values.forEachIndexed { index, value ->
             entries.add(Entry(index.toFloat(), value))
         }
-        
+
         // Find min and max values for better Y axis scaling
         val maxBrawlers = values.maxOrNull() ?: account.account.brawlers.size.toFloat()
         val minBrawlers = values.minOrNull() ?: 0f
         val yAxisRange = maxBrawlers - minBrawlers
         val yAxisMin = maxOf(0f, minBrawlers - (yAxisRange * 0.1f)) // 10% padding below
         val yAxisMax = maxBrawlers + (yAxisRange * 0.1f) // 10% padding above
-        
+
         // Create dataset
         val dataSet = LineDataSet(entries, getString(R.string.brawler_count)).apply {
             color = ContextCompat.getColor(requireContext(), R.color.chart_bar_1)
@@ -733,7 +1054,7 @@ class AccountDetailFragment : Fragment() {
             circleRadius = 4f
             circleHoleRadius = 2f
             circleHoleColor = Color.WHITE
-            
+
             // Values above data points
             setDrawValues(true)
             valueTextSize = 9f
@@ -743,55 +1064,55 @@ class AccountDetailFragment : Fragment() {
                     return value.toInt().toString()
                 }
             }
-            
+
             // Smooth curve and fill
             mode = LineDataSet.Mode.CUBIC_BEZIER
             fillColor = ContextCompat.getColor(requireContext(), R.color.chart_bar_1)
             fillAlpha = 85
             setDrawFilled(true)
-            
+
             // Highlight
             highLightColor = ContextCompat.getColor(requireContext(), R.color.chart_bar_1)
             highlightLineWidth = 1.5f
         }
-        
+
         // Create and set line data
         val lineData = LineData(dataSet)
         chart.data = lineData
-        
+
         // Customize chart appearance
         setupLineChart(chart, xLabels, yAxisMin, yAxisMax)
     }
-    
+
     // 3. Credits Gained Chart
     private fun setupCreditsChart(account: Account) {
         val chart = binding.creditsChart
-        
+
         // Clear any existing data
         chart.clear()
-        
+
         // Get progress history data
         val progressHistory = account.previousProgresses.orEmpty().sortedBy { it.duration.time }
         if (progressHistory.isEmpty()) {
             binding.creditsChartContainer.visibility = View.GONE
             return
         }
-        
+
         // Create entries for credits history
         val entries = mutableListOf<BarEntry>()
         val xLabels = mutableListOf<String>()
         val dateFormat = SimpleDateFormat("MMM yy", Locale.getDefault())
-        
+
         // Add data points
         progressHistory.forEachIndexed { index, progress ->
             entries.add(BarEntry(index.toFloat(), progress.credits.toFloat()))
             xLabels.add(dateFormat.format(progress.duration))
         }
-        
+
         // Find max value for better Y axis scaling
         val maxCredits = entries.maxByOrNull { it.y }?.y ?: 0f
         val yAxisMax = maxCredits * 1.15f // 15% padding
-        
+
         // Create dataset
         val dataSet = BarDataSet(entries, getString(R.string.credits_gained)).apply {
             color = ContextCompat.getColor(requireContext(), R.color.chart_bar_2)
@@ -805,46 +1126,46 @@ class AccountDetailFragment : Fragment() {
             // Highlight color
             highLightColor = ContextCompat.getColor(requireContext(), R.color.chart_point)
         }
-        
+
         // Create bar data
         val barData = BarData(dataSet)
         barData.barWidth = 0.7f
-        
+
         chart.data = barData
-        
+
         // Customize chart appearance
         setupBarChart(chart, xLabels, 0f, yAxisMax)
     }
-    
+
     // 4. Coins Gained Chart
     private fun setupCoinsChart(account: Account) {
         val chart = binding.coinsChart
-        
+
         // Clear any existing data
         chart.clear()
-        
+
         // Get progress history data
         val progressHistory = account.previousProgresses.orEmpty().sortedBy { it.duration.time }
         if (progressHistory.isEmpty()) {
             binding.coinsChartContainer.visibility = View.GONE
             return
         }
-        
+
         // Create entries for coins history
         val entries = mutableListOf<BarEntry>()
         val xLabels = mutableListOf<String>()
         val dateFormat = SimpleDateFormat("MMM yy", Locale.getDefault())
-        
+
         // Add data points
         progressHistory.forEachIndexed { index, progress ->
             entries.add(BarEntry(index.toFloat(), progress.coins.toFloat()))
             xLabels.add(dateFormat.format(progress.duration))
         }
-        
+
         // Find max value for better Y axis scaling
         val maxCoins = entries.maxByOrNull { it.y }?.y ?: 0f
         val yAxisMax = maxCoins * 1.15f // 15% padding
-        
+
         // Create dataset
         val dataSet = BarDataSet(entries, getString(R.string.coins_gained)).apply {
             color = ContextCompat.getColor(requireContext(), R.color.chart_bar_1)
@@ -858,46 +1179,46 @@ class AccountDetailFragment : Fragment() {
             // Highlight color
             highLightColor = ContextCompat.getColor(requireContext(), R.color.chart_point)
         }
-        
+
         // Create bar data
         val barData = BarData(dataSet)
         barData.barWidth = 0.7f
-        
+
         chart.data = barData
-        
+
         // Customize chart appearance
         setupBarChart(chart, xLabels, 0f, yAxisMax)
     }
-    
+
     // 5. Power Points Gained Chart
     private fun setupPowerPointsChart(account: Account) {
         val chart = binding.powerPointsChart
-        
+
         // Clear any existing data
         chart.clear()
-        
+
         // Get progress history data
         val progressHistory = account.previousProgresses.orEmpty().sortedBy { it.duration.time }
         if (progressHistory.isEmpty()) {
             binding.powerPointsChartContainer.visibility = View.GONE
             return
         }
-        
+
         // Create entries for power points history
         val entries = mutableListOf<BarEntry>()
         val xLabels = mutableListOf<String>()
         val dateFormat = SimpleDateFormat("MMM yy", Locale.getDefault())
-        
+
         // Add data points
         progressHistory.forEachIndexed { index, progress ->
             entries.add(BarEntry(index.toFloat(), progress.powerPoints.toFloat()))
             xLabels.add(dateFormat.format(progress.duration))
         }
-        
+
         // Find max value for better Y axis scaling
         val maxPowerPoints = entries.maxByOrNull { it.y }?.y ?: 0f
         val yAxisMax = maxPowerPoints * 1.15f // 15% padding
-        
+
         // Create dataset
         val dataSet = BarDataSet(entries, getString(R.string.power_points_gained)).apply {
             color = ContextCompat.getColor(requireContext(), R.color.purple_500)
@@ -911,22 +1232,27 @@ class AccountDetailFragment : Fragment() {
             // Highlight color
             highLightColor = ContextCompat.getColor(requireContext(), R.color.chart_point)
         }
-        
+
         // Create bar data
         val barData = BarData(dataSet)
         barData.barWidth = 0.7f
-        
+
         chart.data = barData
-        
+
         // Customize chart appearance
         setupBarChart(chart, xLabels, 0f, yAxisMax)
     }
-    
+
     // Helper method to set up common line chart properties
-    private fun setupLineChart(chart: LineChart, xLabels: List<String>, yAxisMin: Float, yAxisMax: Float) {
+    private fun setupLineChart(
+        chart: LineChart,
+        xLabels: List<String>,
+        yAxisMin: Float,
+        yAxisMax: Float
+    ) {
         chart.apply {
             description.isEnabled = false
-            
+
             // X-axis setup
             xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.setDrawGridLines(false)
@@ -939,7 +1265,7 @@ class AccountDetailFragment : Fragment() {
             xAxis.axisLineWidth = 1.5f
             xAxis.axisLineColor = ContextCompat.getColor(requireContext(), R.color.chart_grid)
             xAxis.yOffset = 10f
-            
+
             // Left Y-axis setup
             axisLeft.setDrawGridLines(true)
             axisLeft.gridColor = ContextCompat.getColor(requireContext(), R.color.chart_grid)
@@ -956,35 +1282,40 @@ class AccountDetailFragment : Fragment() {
                     return NumberFormat.getIntegerInstance().format(value.toLong())
                 }
             }
-            
+
             // Right Y-axis setup
             axisRight.isEnabled = false
-            
+
             // Legend setup
             legend.isEnabled = false
-            
+
             // Interactions
             isDoubleTapToZoomEnabled = true
             isDragEnabled = true
             setScaleEnabled(true)
             setVisibleXRangeMaximum(6f) // Show max 6 data points at a time for better visibility
-            
+
             // Extra space
             extraBottomOffset = 10f
-            
+
             // Animation
             animateY(700)
         }
-        
+
         // Refresh chart
         chart.invalidate()
     }
-    
+
     // Helper method to set up common bar chart properties
-    private fun setupBarChart(chart: BarChart, xLabels: List<String>, yAxisMin: Float, yAxisMax: Float) {
+    private fun setupBarChart(
+        chart: BarChart,
+        xLabels: List<String>,
+        yAxisMin: Float,
+        yAxisMax: Float
+    ) {
         chart.apply {
             description.isEnabled = false
-            
+
             // X-axis setup
             xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.setDrawGridLines(false)
@@ -997,7 +1328,7 @@ class AccountDetailFragment : Fragment() {
             xAxis.axisLineWidth = 1.5f
             xAxis.axisLineColor = ContextCompat.getColor(requireContext(), R.color.chart_grid)
             xAxis.yOffset = 10f
-            
+
             // Left Y-axis setup
             axisLeft.setDrawGridLines(true)
             axisLeft.gridColor = ContextCompat.getColor(requireContext(), R.color.chart_grid)
@@ -1009,30 +1340,30 @@ class AccountDetailFragment : Fragment() {
             axisLeft.setDrawZeroLine(true)
             axisLeft.zeroLineWidth = 1.5f
             axisLeft.zeroLineColor = ContextCompat.getColor(requireContext(), R.color.chart_grid)
-            
+
             // Right Y-axis setup
             axisRight.isEnabled = false
-            
+
             // Legend setup
             legend.isEnabled = false
-            
+
             // Interactions
             isDoubleTapToZoomEnabled = true
             isDragEnabled = true
             setScaleEnabled(true)
             setVisibleXRangeMaximum(6f) // Show max 6 data points at a time for better visibility
-            
+
             // Extra space
             extraBottomOffset = 10f
-            
+
             // Animation
             animateY(700)
         }
-        
+
         // Refresh chart
         chart.invalidate()
     }
-    
+
     private fun setupEditButton() {
         binding.fabFutureProgress.setOnClickListener {
             // Get the current account ID from the ViewModel
@@ -1046,7 +1377,7 @@ class AccountDetailFragment : Fragment() {
             }
         }
     }
-    
+
     private fun shareAccountInfo() {
         val shareText = buildString {
             append("Brawl Stars Player Info:\n\n")
@@ -1055,32 +1386,32 @@ class AccountDetailFragment : Fragment() {
             append("Level: ${account.account.level}\n")
             append("Trophies: ${AccountUtils.formatNumber(account.account.trophies)}\n")
             append("Highest Trophies: ${AccountUtils.formatNumber(account.account.highestTrophies)}\n")
-            
+
             // Calculate brawlers and maxed brawlers counts
             val brawlerCount = account.account.brawlers.size
             val maxedBrawlers = AccountUtils.calculateMaxedBrawlers(account)
             append("Brawlers: $brawlerCount ($maxedBrawlers maxed)\n")
             append("\nShared from Brawl Progression Analyzer")
         }
-        
+
         // Show share dialog with copy and share options
         showShareDialog(shareText)
     }
-    
+
     private fun showShareDialog(shareText: String) {
         val dialogView = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_share_account, null)
-        
+
         // Set account details in the dialog
         val accountDetails = dialogView.findViewById<TextView>(R.id.account_details)
         accountDetails.text = shareText
-        
+
         // Setup copy button
         val copyButton = dialogView.findViewById<MaterialButton>(R.id.copy_button)
         copyButton.setOnClickListener {
             copyToClipboard(shareText)
         }
-        
+
         // Setup share button
         val shareButton = dialogView.findViewById<MaterialButton>(R.id.share_button)
         shareButton.setOnClickListener {
@@ -1089,21 +1420,21 @@ class AccountDetailFragment : Fragment() {
                 putExtra(Intent.EXTRA_TEXT, shareText)
                 type = "text/plain"
             }
-            
+
             startActivity(Intent.createChooser(shareIntent, getString(R.string.share_account)))
         }
-        
+
         // Ensure consistent button appearance
         configureButtonTextEllipsize(copyButton)
         configureButtonTextEllipsize(shareButton)
-        
+
         // Show dialog
         MaterialAlertDialogBuilder(requireContext())
             .setView(dialogView)
             .setNegativeButton(R.string.cancel, null)
             .show()
     }
-    
+
     /**
      * Configure button text to use ellipsis in case of overflow
      */
@@ -1111,16 +1442,17 @@ class AccountDetailFragment : Fragment() {
         button.maxLines = 1
         button.ellipsize = android.text.TextUtils.TruncateAt.END
     }
-    
+
     private fun copyToClipboard(text: String) {
-        val clipboardManager = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipboardManager =
+            requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clipData = ClipData.newPlainText("Account Info", text)
         clipboardManager.setPrimaryClip(clipData)
-        
+
         // Show confirmation
         Toast.makeText(context, getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show()
     }
-    
+
     private fun setupUI(account: Account) {
         // Bind account data
         with(binding) {
@@ -1128,167 +1460,236 @@ class AccountDetailFragment : Fragment() {
             accountName.text = account.account.name
             accountTag.text = account.account.tag
             accountLevel.text = getString(R.string.level_format, account.account.level)
-            
+
             // Account stats
             accountTrophies.text = AccountUtils.formatNumber(account.account.trophies)
             accountHighestTrophies.text = AccountUtils.formatNumber(account.account.highestTrophies)
-            
+
             // Calculate brawler counts from the brawlers list
             val brawlerCount = account.account.brawlers.size
             val maxedBrawlers = AccountUtils.calculateMaxedBrawlers(account)
-            
+
             accountBrawlers.text = brawlerCount.toString()
             accountMaxedBrawlers.text = maxedBrawlers.toString()
-            
+
             // Calculate max percentage
             val maxPercentage = AccountUtils.calculateMaxedPercentage(account)
-            
+
             maxedProgress.progress = maxPercentage.toInt()
             progressionPercentage.text = getString(R.string.maxed_percentage_format, maxPercentage)
-            
+
             // Setup progress summary
             setupProgressSummary(account)
-            
+
             // Setup progression charts
             setupProgressionCharts(account)
-            
+
             // Show last update time
             val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-            lastUpdated.text = getString(R.string.last_updated_format, 
-                dateFormat.format(account.updatedAt))
-                
+            lastUpdated.text = getString(
+                R.string.last_updated_format,
+                dateFormat.format(account.updatedAt)
+            )
+
             // Callback for avatar loading
             // TODO: Replace with actual avatar loading
         }
     }
-    
+
     private fun setupProgressSummary(account: Account) {
         // Check if we have history data for calculating progress
         val historyData = account.history.orEmpty()
         val progressHistory = account.previousProgresses.orEmpty()
-        
+
         if (historyData.isEmpty() && progressHistory.isEmpty()) {
             // Hide the progress summary if no history data available
             binding.progressHistoryCard.visibility = View.GONE
             return
         }
-        
+
         binding.progressHistoryCard.visibility = View.VISIBLE
-        
+
         // Calculate trophy progression
         if (historyData.isNotEmpty()) {
-            val (totalTrophiesGained, trophiesPercentage) = AccountUtils.calculateTrophyProgress(account)
-            
+            val (totalTrophiesGained, trophiesPercentage) = AccountUtils.calculateTrophyProgress(
+                account
+            )
+
             // Set trophy values
             binding.trophiesGainedValue.text = AccountUtils.formatLargeChange(totalTrophiesGained)
-            binding.trophiesGainedPercentage.text = AccountUtils.formatPercentage(trophiesPercentage)
-            
+            binding.trophiesGainedPercentage.text =
+                AccountUtils.formatPercentage(trophiesPercentage)
+
             // Calculate net gain/loss for color
-            val netTrophiesGained = account.account.trophies - historyData.minByOrNull { it.createdAt.time }!!.trophies
-            
+            val netTrophiesGained =
+                account.account.trophies - historyData.minByOrNull { it.createdAt.time }!!.trophies
+
             // Color based on net gain/loss
             binding.trophiesGainedPercentage.setTextColor(
-                ContextCompat.getColor(requireContext(), 
-                    if (netTrophiesGained >= 0) R.color.chart_line else R.color.delete_background)
+                ContextCompat.getColor(
+                    requireContext(),
+                    if (netTrophiesGained >= 0) R.color.chart_line else R.color.delete_background
+                )
             )
-            
+
             // Calculate brawler progression
             val (brawlersGained, brawlersPercentage) = AccountUtils.calculateBrawlerProgress(account)
-            
+
             // Set brawler values
             binding.brawlersGainedValue.text = AccountUtils.formatChange(brawlersGained)
-            binding.brawlersGainedPercentage.text = AccountUtils.formatPercentage(brawlersPercentage)
+            binding.brawlersGainedPercentage.text =
+                AccountUtils.formatPercentage(brawlersPercentage)
             binding.brawlersGainedPercentage.setTextColor(
-                ContextCompat.getColor(requireContext(), 
-                    if (brawlersGained >= 0) R.color.chart_line else R.color.delete_background)
+                ContextCompat.getColor(
+                    requireContext(),
+                    if (brawlersGained >= 0) R.color.chart_line else R.color.delete_background
+                )
             )
         } else {
             // Hide trophy and brawlers sections if no player history
             binding.trophiesGainedLabel.visibility = View.GONE
             binding.trophiesGainedValue.visibility = View.GONE
             binding.trophiesGainedPercentage.visibility = View.GONE
-            
+
             binding.brawlersGainedLabel.visibility = View.GONE
             binding.brawlersGainedValue.visibility = View.GONE
             binding.brawlersGainedPercentage.visibility = View.GONE
         }
-        
+
         // Calculate progression from Progress history
         if (progressHistory.isNotEmpty()) {
             // Credits
             val (creditsGained, creditsPercentage) = AccountUtils.calculateCreditsProgress(account)
-            
+
             binding.creditsGainedValue.text = AccountUtils.formatChange(creditsGained)
             binding.creditsGainedPercentage.text = AccountUtils.formatPercentage(creditsPercentage)
             binding.creditsGainedPercentage.setTextColor(
-                ContextCompat.getColor(requireContext(), 
-                    if (creditsGained >= 0) R.color.chart_line else R.color.delete_background)
+                ContextCompat.getColor(
+                    requireContext(),
+                    if (creditsGained >= 0) R.color.chart_line else R.color.delete_background
+                )
             )
-            
+
             // Coins
             val (coinsGained, coinsPercentage) = AccountUtils.calculateCoinsProgress(account)
-            
+
             binding.coinsGainedValue.text = AccountUtils.formatLargeChange(coinsGained)
             binding.coinsGainedPercentage.text = AccountUtils.formatPercentage(coinsPercentage)
             binding.coinsGainedPercentage.setTextColor(
-                ContextCompat.getColor(requireContext(), 
-                    if (coinsGained >= 0) R.color.chart_line else R.color.delete_background)
+                ContextCompat.getColor(
+                    requireContext(),
+                    if (coinsGained >= 0) R.color.chart_line else R.color.delete_background
+                )
             )
-            
+
             // Power Points
-            val (powerPointsGained, powerPointsPercentage) = AccountUtils.calculatePowerPointsProgress(account)
-            
+            val (powerPointsGained, powerPointsPercentage) = AccountUtils.calculatePowerPointsProgress(
+                account
+            )
+
             binding.powerPointsGainedValue.text = AccountUtils.formatLargeChange(powerPointsGained)
-            binding.powerPointsGainedPercentage.text = AccountUtils.formatPercentage(powerPointsPercentage)
+            binding.powerPointsGainedPercentage.text =
+                AccountUtils.formatPercentage(powerPointsPercentage)
             binding.powerPointsGainedPercentage.setTextColor(
-                ContextCompat.getColor(requireContext(), 
-                    if (powerPointsGained >= 0) R.color.chart_line else R.color.delete_background)
+                ContextCompat.getColor(
+                    requireContext(),
+                    if (powerPointsGained >= 0) R.color.chart_line else R.color.delete_background
+                )
             )
         } else {
             // Hide progression sections if no progress history
             binding.creditsGainedLabel.visibility = View.GONE
             binding.creditsGainedValue.visibility = View.GONE
             binding.creditsGainedPercentage.visibility = View.GONE
-            
+
             binding.coinsGainedLabel.visibility = View.GONE
             binding.coinsGainedValue.visibility = View.GONE
             binding.coinsGainedPercentage.visibility = View.GONE
-            
+
             binding.powerPointsGainedLabel.visibility = View.GONE
             binding.powerPointsGainedValue.visibility = View.GONE
             binding.powerPointsGainedPercentage.visibility = View.GONE
         }
     }
-    
+
     private fun setupFutureProgressButton() {
         binding.futureProgressButton.setOnClickListener {
             navigateToFutureProgress()
         }
     }
-    
-    private fun navigateToFutureProgress() {
-        arguments?.getString("accountId")?.let { accountId ->
-            val action = AccountDetailFragmentDirections.actionAccountDetailToFutureProgress(accountId)
-            findNavController().navigate(action)
+
+    private fun setupRefreshAccountButton() {
+        binding.fabRefreshAccount.setOnClickListener {
+            Toast.makeText(
+                requireContext(),
+                "Refreshin ${account.account.tag}..",
+                Toast.LENGTH_SHORT
+            ).show()
+            viewModel.refreshAccount()
         }
     }
-    
+
+    private fun navigateToFutureProgress() {
+        arguments?.getString("accountId")?.let { accountId ->
+            // Fade out the main content before navigation
+            binding.apply {
+                // Disable the future progress button to prevent multiple clicks
+                fabFutureProgress.isEnabled = false
+                Toast.makeText(requireContext(), "Loading..", Toast.LENGTH_SHORT).show()
+                // Create a smooth fade transition instead of toggling loading state
+                val fadeOut =
+                    android.animation.ObjectAnimator.ofFloat(accountDetailsGroup, "alpha", 1f, 0.6f)
+                        .apply {
+                            duration = 300
+                            interpolator = android.view.animation.AccelerateInterpolator()
+                        }
+
+                fadeOut.addListener(object : android.animation.AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: android.animation.Animator) {
+                        // Navigate after the fade completes
+                        val action =
+                            AccountDetailFragmentDirections.actionAccountDetailToFutureProgress(
+                                accountId
+                            )
+                        lifecycleScope.launch {
+                            withContext(Dispatchers.Main) {
+                                // Navigate to future progress screen
+                                Timber.tag("AccountDetailFragment")
+                                    .d("Navigating to Future Progress")
+                                findNavController().navigate(action)
+                            }
+                        }.invokeOnCompletion {
+
+                            accountDetailsGroup.alpha = 1f
+                            fabFutureProgress.isEnabled = true
+                        }
+
+
+                        // Reset alpha after navigation is complete (it will be restored when we return)
+                    }
+                })
+
+                fadeOut.start()
+            }
+        }
+    }
+
     private fun setupRaritiesAccordion() {
         val raritiesHeader = binding.raritiesHeader
         val raritiesContent = binding.raritiesContent
         val expandIcon = binding.raritiesExpandIcon
-        
+
         // Set initial state
         raritiesContent.visibility = View.GONE
         expandIcon.setImageResource(R.drawable.ic_expand_more)
-        
+
         // Set click listener for the header
         raritiesHeader.setOnClickListener {
             // Toggle visibility with animation
             if (raritiesContent.visibility == View.VISIBLE) {
                 // Collapse with animation
                 val initialHeight = raritiesContent.height
-                
+
                 // Animation to collapse from current height to 0
                 val collapseAnimation = ValueAnimator.ofInt(initialHeight, 0).apply {
                     duration = 300
@@ -1302,11 +1703,12 @@ class AccountDetailFragment : Fragment() {
                     addListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animator: Animator) {
                             raritiesContent.visibility = View.GONE
-                            raritiesContent.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                            raritiesContent.layoutParams.height =
+                                ViewGroup.LayoutParams.WRAP_CONTENT
                         }
                     })
                 }
-                
+
                 // Animate icon rotation
                 val rotateAnimation = ValueAnimator.ofFloat(180f, 0f).apply {
                     duration = 300
@@ -1321,7 +1723,7 @@ class AccountDetailFragment : Fragment() {
                         }
                     })
                 }
-                
+
                 collapseAnimation.start()
                 rotateAnimation.start()
             } else {
@@ -1329,14 +1731,17 @@ class AccountDetailFragment : Fragment() {
                 // First make it visible but with 0 height
                 raritiesContent.visibility = View.VISIBLE
                 raritiesContent.measure(
-                    View.MeasureSpec.makeMeasureSpec(raritiesContent.width, View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(
+                        raritiesContent.width,
+                        View.MeasureSpec.EXACTLY
+                    ),
                     View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
                 )
                 val targetHeight = raritiesContent.measuredHeight
-                
+
                 // Start with 0 height
                 raritiesContent.layoutParams.height = 0
-                
+
                 // Animation to expand from 0 to target height
                 val expandAnimation = ValueAnimator.ofInt(0, targetHeight).apply {
                     duration = 300
@@ -1349,11 +1754,12 @@ class AccountDetailFragment : Fragment() {
                     }
                     addListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animator: Animator) {
-                            raritiesContent.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                            raritiesContent.layoutParams.height =
+                                ViewGroup.LayoutParams.WRAP_CONTENT
                         }
                     })
                 }
-                
+
                 // Animate icon rotation
                 val rotateAnimation = ValueAnimator.ofFloat(0f, 180f).apply {
                     duration = 300
@@ -1368,31 +1774,31 @@ class AccountDetailFragment : Fragment() {
                         }
                     })
                 }
-                
+
                 expandAnimation.start()
                 rotateAnimation.start()
             }
         }
-        
+
 
     }
-    
+
     private fun setupResourcesAccordion() {
         val resourcesHeader = binding.resourcesHeader
         val resourcesContent = binding.resourcesContent
         val expandIcon = binding.resourcesExpandIcon
-        
+
         // Set initial state
         resourcesContent.visibility = View.GONE
         expandIcon.setImageResource(R.drawable.ic_expand_more)
-        
+
         // Set click listener for the header
         resourcesHeader.setOnClickListener {
             // Toggle visibility with animation
             if (resourcesContent.visibility == View.VISIBLE) {
                 // Collapse with animation
                 val initialHeight = resourcesContent.height
-                
+
                 // Animation to collapse from current height to 0
                 val collapseAnimation = ValueAnimator.ofInt(initialHeight, 0).apply {
                     duration = 300
@@ -1406,11 +1812,12 @@ class AccountDetailFragment : Fragment() {
                     addListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animator: Animator) {
                             resourcesContent.visibility = View.GONE
-                            resourcesContent.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                            resourcesContent.layoutParams.height =
+                                ViewGroup.LayoutParams.WRAP_CONTENT
                         }
                     })
                 }
-                
+
                 // Animate icon rotation
                 val rotateAnimation = ValueAnimator.ofFloat(180f, 0f).apply {
                     duration = 300
@@ -1425,7 +1832,7 @@ class AccountDetailFragment : Fragment() {
                         }
                     })
                 }
-                
+
                 collapseAnimation.start()
                 rotateAnimation.start()
             } else {
@@ -1433,14 +1840,17 @@ class AccountDetailFragment : Fragment() {
                 // First make it visible but with 0 height
                 resourcesContent.visibility = View.VISIBLE
                 resourcesContent.measure(
-                    View.MeasureSpec.makeMeasureSpec(resourcesContent.width, View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(
+                        resourcesContent.width,
+                        View.MeasureSpec.EXACTLY
+                    ),
                     View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
                 )
                 val targetHeight = resourcesContent.measuredHeight
-                
+
                 // Start with 0 height
                 resourcesContent.layoutParams.height = 0
-                
+
                 // Animation to expand from 0 to target height
                 val expandAnimation = ValueAnimator.ofInt(0, targetHeight).apply {
                     duration = 300
@@ -1453,11 +1863,12 @@ class AccountDetailFragment : Fragment() {
                     }
                     addListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animator: Animator) {
-                            resourcesContent.layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                            resourcesContent.layoutParams.height =
+                                ViewGroup.LayoutParams.WRAP_CONTENT
                         }
                     })
                 }
-                
+
                 // Animate icon rotation
                 val rotateAnimation = ValueAnimator.ofFloat(0f, 180f).apply {
                     duration = 300
@@ -1472,13 +1883,13 @@ class AccountDetailFragment : Fragment() {
                         }
                     })
                 }
-                
+
                 expandAnimation.start()
                 rotateAnimation.start()
             }
         }
     }
-    
+
     private fun updateResourcesValues(progress: Progress) {
         // Update resource values from the current progress
         binding.creditsCount.text = progress.credits.toString()
@@ -1488,7 +1899,7 @@ class AccountDetailFragment : Fragment() {
         binding.starPowersCount.text = progress.starPowers.toString()
         binding.gearsCount.text = progress.gears.toString()
     }
-    
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
