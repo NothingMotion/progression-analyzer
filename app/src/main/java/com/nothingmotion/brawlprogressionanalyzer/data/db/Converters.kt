@@ -9,6 +9,7 @@ import com.nothingmotion.brawlprogressionanalyzer.domain.model.Gadget
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.GadgetDataNinja
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Gear
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.StarPower
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.StarPowerDataNinja
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -77,11 +78,20 @@ class Converters {
     }
 
     @TypeConverter
-    fun fromGadgetDataNinjaList(value: List<AbilityDataNinja>):String {
+    fun fromGadgetDataNinjaList(value: List<GadgetDataNinja>):String {
         return GsonBuilder().create().toJson(value)
     }
     @TypeConverter
-    fun toGadgetDataNinjaList(value: String): List<AbilityDataNinja> {
-        return GsonBuilder().create().fromJson(value, Array<AbilityDataNinja>::class.java).toList()
+    fun toGadgetDataNinjaList(value: String): List<GadgetDataNinja> {
+        return GsonBuilder().create().fromJson(value, Array<GadgetDataNinja>::class.java).toList()
+    }
+    @TypeConverter
+    fun fromStarPowerDataNinjaList(value: List<StarPowerDataNinja>):String {
+        return GsonBuilder().create().toJson(value)
+    }
+
+    @TypeConverter
+    fun toStarPowerDataNinjaList(value: String): List<StarPowerDataNinja> {
+        return GsonBuilder().create().fromJson(value, Array<StarPowerDataNinja>::class.java).toList()
     }
 }
