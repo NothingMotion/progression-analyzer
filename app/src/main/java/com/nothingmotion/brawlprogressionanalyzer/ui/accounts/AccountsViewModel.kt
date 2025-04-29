@@ -143,16 +143,16 @@ class AccountsViewModel @Inject constructor(
                                     }
                             }
                         }
-                    } ?: run {
-                        _accountsState.update {
-                            it.copy(
-                                error = "Restart Application to fix",
-                                isLoading = false
-                            )
-                        }
+                    }
+                }?: run {
+                    _accountsState.update {
+                        it.copy(
+                            error = "Restart Application to fix",
+                            isLoading = false
+                        )
                     }
                 }
-            }
+        }
 
 
     }
