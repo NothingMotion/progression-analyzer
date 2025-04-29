@@ -89,10 +89,10 @@ enum class ProgressType {
 /**
  * Combined class for progress with its type
  */
-data class ProgressWithType(
-    @Embedded val progress: ProgressEntity,
-    @ColumnInfo(name = "progress_type") val type: ProgressType
-)
+//data class ProgressWithType(
+//    @Embedded val progress: ProgressEntity,
+//    @ColumnInfo(name = "progress_type") val type: ProgressType
+//)
 
 /**
  * Data class containing all the Account data with relations
