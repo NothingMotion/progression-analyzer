@@ -46,7 +46,7 @@ class AccountRepositoryImpl @Inject constructor(
         try {
 
             if (isValidCache("#$tag")) {
-                Timber.tag("AccountRepositoryImpl").d("Cache is invalid, refreshing account")
+                Timber.tag("AccountRepositoryImpl").d("Cache is valid, refreshing account")
                 return getCachedAccount("#$tag")
             }
             val account = api.getAccount(tag, "Bearer $token").toAccount()
