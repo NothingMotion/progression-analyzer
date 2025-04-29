@@ -1,13 +1,14 @@
 package com.nothingmotion.brawlprogressionanalyzer.data.db.models
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerData
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Class
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Rarity
 
 @Entity(tableName = "brawl_data")
 data class BrawlDataEntity(
-    val id: Int,
+    @PrimaryKey val id: Int,
     val avatarId: Int,
     val className: String,
     val description: String,
