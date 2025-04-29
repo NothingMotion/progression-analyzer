@@ -131,7 +131,7 @@ class AccountRepositoryImpl @Inject constructor(
                 val accounts = mutableListOf<Account>()
 
                 caches.forEach {
-                    if (it.validFor < Date()) {
+                    if (isValidCache(it.playerTag)) {
                         expiredAccounts.add(it.playerTag)
                     }
                 }
@@ -451,7 +451,9 @@ class AccountRepositoryImpl @Inject constructor(
     override suspend fun isValidCache(tag: String): Boolean {
         return try {
             db.cacheDao().getCacheByPlayerTag(tag)?.let {
-                return it.validFor > Date()
+            val cacheAge = Date().time - it.validFor.time
+            val cacheExpirationDate = 24 * 60 * 60 * 1000
+                return cacheAge < cacheExpirationDate
             } ?: run {
                 return@run false
             }
