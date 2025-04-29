@@ -58,7 +58,7 @@ class BrawlNinjaViewModel @Inject constructor(private val repository: BrawlNinja
         }
 
         viewModelScope.launch(Dispatchers.IO) {
-            delay(1000)
+//            delay(1000)
             val parsedName = name
                 .lowercase()
                 .replace("retry_", "")
