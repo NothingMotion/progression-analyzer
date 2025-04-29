@@ -1693,4 +1693,16 @@
         android:contentDescription="@string/edit_account"
         app:srcCompat="@drawable/ic_calendar" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_refresh_account"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="96dp"
+        android:clickable="true"
+        app:srcCompat="@drawable/ic_refresh" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout> 
