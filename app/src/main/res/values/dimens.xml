@@ -15,4 +15,7 @@
     
     <!-- Account list dimensions -->
     <dimen name="avatar_corner_radius">12dp</dimen>
+    
+    <!-- Grid spacing -->
+    <dimen name="grid_spacing">8dp</dimen>
 </resources> 
