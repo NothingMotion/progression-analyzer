@@ -13,12 +13,12 @@ sealed class PassRewards (
 ) : Rewards(id,name)
 data class BrawlPassRewards(
     override val id: Int,
-    override val name: String,
+    override val name: String = "PassPremiumReward",
     override val resources: List<Resource>
 ) : PassRewards(id,name,resources)
 data class BrawlPassPlusRewards(
     override val id: Int,
-    override val name: String,
+    override val name: String = "PassPlusReward",
     override val resources: List<Resource>
 ) : PassRewards(id,name,resources)
 data class StarrDropReward(
