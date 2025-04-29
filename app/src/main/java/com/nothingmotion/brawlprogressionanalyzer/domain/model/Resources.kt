@@ -2,8 +2,8 @@ package com.nothingmotion.brawlprogressionanalyzer.domain.model
 
 
 sealed class Resource(
-    open val name: String,
-    open val amount: Int,
+   @Transient open val name: String,
+   @Transient open val amount: Int,
 )
 
 data class Coin(
