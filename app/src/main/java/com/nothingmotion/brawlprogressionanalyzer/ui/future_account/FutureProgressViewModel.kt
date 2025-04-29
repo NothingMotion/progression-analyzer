@@ -450,7 +450,7 @@ class FutureProgressViewModel @Inject constructor(
             
             // Only add to upgradable list if the brawler was actually upgraded
             if (currentPower > initialPower) {
-                upgradableBrawlers.add(UpgradableBrawler(brawler.name, initialPower, currentPower))
+                upgradableBrawlers.add(UpgradableBrawler(brawler.id,brawler.name, initialPower, currentPower))
             }
         }
 
@@ -512,6 +512,7 @@ data class UnlockableBrawler(
 )
 
 data class UpgradableBrawler(
+    val id: Long,
     val name: String,
     val from: Int,
     val to: Int
