@@ -3,12 +3,13 @@ package com.nothingmotion.brawlprogressionanalyzer.data.remote
 import android.graphics.Bitmap
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIIcons
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerData
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlersDataResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 
 interface BrawlifyApi {
     @GET("brawlers")
-    suspend fun getBrawlers() : List<BrawlerData>
+    suspend fun getBrawlers() : BrawlersDataResponse
 
     @GET("brawlers/{id}")
     suspend fun getBrawler(@Path("id") id: Long) : BrawlerData

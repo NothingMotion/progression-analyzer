@@ -1,18 +1,20 @@
 package com.nothingmotion.brawlprogressionanalyzer.domain.model
 
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.RarityData.LEGENDARY
+
 data class Class(
     val id: Int,
     val name: String
 )
 open class AbilityData(
-    open val description: String,
-    open val descriptionHtml: String,
-    open val id: Long,
-    open val imageUrl: String,
-    open val name: String,
-    open val path: String,
-    open val released: Boolean,
-    open val version: Int
+    @Transient open val description: String,
+    @Transient open val descriptionHtml: String,
+    @Transient open val id: Long,
+    @Transient open val imageUrl: String,
+    @Transient open val name: String,
+    @Transient open val path: String,
+    @Transient open val released: Boolean,
+    @Transient open val version: Int
 )
 data class GadgetData(
     override val description: String,
@@ -50,6 +52,18 @@ data class Rarity(
     val id: Int,
     val name: String
 )
+
+fun Rarity.toRarityData(): RarityData{
+    return when(this.name){
+        "Common" -> RarityData.COMMON
+        "Rare" -> RarityData.RARE
+        "Super Rare" -> RarityData.SUPER_RARE
+        "Epic" -> RarityData.EPIC
+        "Mythic" -> RarityData.MYTHIC
+        "Legendary" -> LEGENDARY
+        else -> RarityData.COMMON
+    }
+}
 data class BrawlerData(
     val id: Int,
     val avatarId: Int,
@@ -71,4 +85,14 @@ data class BrawlerData(
     val unlock: Any,
     val version: Int,
     val videos: List<Any>
+)
+
+
+
+
+
+
+
+data class BrawlersDataResponse(
+    val list: List<BrawlerData>
 )
