@@ -162,4 +162,9 @@
     <string name="read_description_brawlers">TODO//</string>
     <string name="account_photo_message">This is your account photo</string>
     <string name="photo_preview">preview</string>
+    <string name="brawler_icon">Brawler Icon</string>
+
+    <!-- Add the new string resource for What's Next section -->
+    <string name="whats_next">What\'s Next?</string>
+    <string name="loading_account_photo">Loading photo..</string>
 </resources>
