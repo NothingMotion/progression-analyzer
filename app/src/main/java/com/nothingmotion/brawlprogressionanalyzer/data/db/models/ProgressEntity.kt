@@ -8,23 +8,32 @@ import androidx.room.PrimaryKey
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Progress
 import java.util.Date
 
-
-@Entity(tableName = "progress",
-    indices = [Index(value = ["id","account_tag"], unique = true)],
+/**
+ * Database entity for Progress in Brawl Stars
+ */
+@Entity(
+    tableName = "progress",
+    indices = [Index(value = ["account_id", "id"], unique = true)],
     foreignKeys = [
         ForeignKey(
             entity = AccountEntity::class,
-            parentColumns = ["player_tag"],
-            childColumns=["account_tag"],
-            onDelete = ForeignKey.CASCADE
+            parentColumns = ["id"],
+            childColumns = ["account_id"],
+            onDelete = ForeignKey.CASCADE,
+            onUpdate = ForeignKey.CASCADE
         )
     ]
 )
 data class ProgressEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
-    @ColumnInfo(name = "account_tag")
-    val accountTag: String,
+    var id: Int = 0,
+    
+    @ColumnInfo(name = "account_id")
+    val accountId: Int,
+    
+    @ColumnInfo(name = "player_tag")
+    val playerTag: String,
+    
     val coins: Int,
     val powerPoints: Int,
     val credits: Int,
@@ -38,6 +47,7 @@ data class ProgressEntity(
     val isBoughtPassPlus: Boolean,
     val isBoughtRankedPass: Boolean,
     var type: ProgressType = ProgressType.PREVIOUS,
+    
     @ColumnInfo(name = "created_at")
     val createdAt: Date
 ) {
@@ -60,10 +70,11 @@ data class ProgressEntity(
     }
 
     companion object {
-        fun fromDomain(progress: Progress, accountId: String): ProgressEntity {
+        fun fromDomain(progress: Progress, accountId: Int, playerTag: String): ProgressEntity {
             return ProgressEntity(
                 id = 0,
-                accountTag = accountId,
+                accountId = accountId,
+                playerTag = playerTag,
                 coins = progress.coins,
                 powerPoints = progress.powerPoints,
                 credits = progress.credits,
