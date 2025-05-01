@@ -16,32 +16,25 @@ import com.nothingmotion.brawlprogressionanalyzer.domain.model.Progress
 import java.util.Date
 
 /**
- * Database entity for a Player in Brawl Stars
- */
-
-
-/**
- * Database entity for Progress in Brawl Stars
- */
-
-/**
  * Database entity for Account in Brawl Stars
+ * This is the main entity that owns all relationships
  */
-@Entity(tableName = "account",
-        indices = [
-            Index(value = ["id"], unique = true),
-            Index(value=["player_tag"],unique=true)
-],
-    primaryKeys = ["id","player_tag"]
-    )
+@Entity(
+    tableName = "account",
+    indices = [
+        Index(value = ["player_tag"], unique = true)
+    ]
+)
 data class AccountEntity(
-    val id: Int=0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+    
     @ColumnInfo(name = "player_tag")
     val playerTag: String,
-//    @ColumnInfo(name = "current_progress_id")
-//    val currentProgressId: Int,
+    
     @ColumnInfo(name = "created_at")
     val createdAt: Date,
+    
     @ColumnInfo(name = "updated_at")
     val updatedAt: Date
 )
@@ -49,29 +42,34 @@ data class AccountEntity(
 /**
  * Database entity for history player entities for an account
  */
-@Entity(tableName = "player_history",
-        primaryKeys = ["account_tag", "player_tag"],
-        foreignKeys = [
-            ForeignKey(
-                entity = AccountEntity::class,
-                parentColumns = ["id"],
-                childColumns = ["account_tag"],
-                onDelete = ForeignKey.CASCADE
-            ),
-            ForeignKey(
-                entity = PlayerEntity::class,
-                parentColumns = ["tag"],
-                childColumns = ["player_tag"],
-                onDelete = ForeignKey.CASCADE
-            )
-        ],
-        indices = [
-            Index(value = ["account_tag"]),
-            Index(value = ["player_tag"])
-        ])
+@Entity(
+    tableName = "player_history",
+    primaryKeys = ["account_id", "player_tag"],
+    foreignKeys = [
+        ForeignKey(
+            entity = AccountEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["account_id"],
+            onDelete = ForeignKey.CASCADE,
+            onUpdate = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = PlayerEntity::class,
+            parentColumns = ["tag"],
+            childColumns = ["player_tag"],
+            onDelete = ForeignKey.CASCADE,
+            onUpdate = ForeignKey.CASCADE
+        )
+    ],
+    indices = [
+        Index(value = ["account_id"]),
+        Index(value = ["player_tag"])
+    ]
+)
 data class PlayerHistoryEntity(
-    @ColumnInfo(name = "account_tag")
-    val accountId: String,
+    @ColumnInfo(name = "account_id")
+    val accountId: Int,
+    
     @ColumnInfo(name = "player_tag")
     val playerTag: String
 )
@@ -81,18 +79,6 @@ enum class ProgressType {
     FUTURE,
     CURRENT
 }
-
-/**
- * Database entity for progress history for an account
- */
-
-/**
- * Combined class for progress with its type
- */
-//data class ProgressWithType(
-//    @Embedded val progress: ProgressEntity,
-//    @ColumnInfo(name = "progress_type") val type: ProgressType
-//)
 
 /**
  * Data class containing all the Account data with relations
@@ -108,11 +94,11 @@ data class AccountWithRelations(
 
     @Relation(
         entity = PlayerEntity::class,
-        parentColumn = "player_tag",
+        parentColumn = "id",
         entityColumn = "tag",
         associateBy = Junction(
             value = PlayerHistoryEntity::class,
-            parentColumn = "account_tag",
+            parentColumn = "account_id",
             entityColumn = "player_tag"
         )
     )
@@ -120,8 +106,8 @@ data class AccountWithRelations(
     
     @Relation(
         entity = ProgressEntity::class,
-        parentColumn = "player_tag",
-        entityColumn = "account_tag"
+        parentColumn = "id",
+        entityColumn = "account_id"
     )
     val progressHistories: List<ProgressEntity>
 ) {
@@ -163,15 +149,3 @@ data class AccountWithRelations(
         )
     }
 }
-
-/**
- * Helper class to join progress history with progress entities
- */
-//data class ProgressWithProgress(
-//    @Embedded val progressHistory: ProgressHistoryEntity,
-//    @Relation(
-//        parentColumn = "progress_id",
-//        entityColumn = "id"
-//    )
-//    val progress: ProgressEntity
-//)
