@@ -31,10 +31,16 @@ class TokenManager @Inject constructor(){
     }
     fun decode(token: String) : DecodedJWT?{
         val algorithm = Algorithm.HMAC256(BuildConfig.APPLICATION_FRONTEND_API_KEY)
-        return try {JWT.require(algorithm)
+        return try {
+            JWT.require(algorithm)
             .withIssuer("progression-analyzer")
+
+
+//            .acceptExpiresAt(1000 * 60 * 60 * 24)
             .build()
-            .verify(token)}
+            .verify(token)
+
+        }
         catch(e: Exception){
             null
         }
@@ -69,32 +75,44 @@ class TokenManager @Inject constructor(){
         if (accessToken != null && accessToken != ""){
             // Validate access token and if was ok return it
             if(validateAccessToken(accessToken)) {
+                Timber.tag("TokenManager").d("Access token is valid: $accessToken")
                 _accessTokenState.update { it.copy(success= accessToken,error=null,loading= false) }
                 return
             }
             else {
+                Timber.tag("TokenManager").d("Access token is not valid: $accessToken")
                 // If access token is not valid, generate a new one
                 // Check if frontEndToken exists
                 if (frontEndToken != null && frontEndToken != "") {
+                    Timber.tag("TokenManager").d("FrontEnd token is not null")
+
                     // Decode the frontEndToken to check if it is valid
                     val decodedToken = decode(frontEndToken)
                     val decodedUserId = decodedToken?.getClaim("userId")?.asString()
-                    if (decodedUserId != userId) {
+
+                    val expirationDate = decodedToken?.expiresAt
+                    Timber.tag("TokenManager").d("expiration date is: $expirationDate")
+                    if (decodedToken == null || expirationDate == null || expirationDate.before(Date())) {
+
+                        Timber.tag("TokenManager").d("FrontEnd token is not valid")
                         // If the user ID does not match, generate a new frontEndToken
                         val newFrontEndToken = generate(userId)
                         prefsManager.frontEndToken = newFrontEndToken
                     }
                 } else {
+                    Timber.tag("TokenManager").d("FrontEnd token is null")
                     // If frontEndToken does not exist, generate a new one
                     prefsManager.frontEndToken = generate(userId)
                     frontEndToken = prefsManager.frontEndToken
                 }
+                Timber.tag("TokenManager").d("Moving to generating access token")
                 val newAccessToken = generateAccessToken(frontEndToken!!)
                 newAccessToken?.let {token->
-
+                    Timber.tag("TokenManager").d("New access token is: $token")
                     prefsManager.accessToken = token
                     _accessTokenState.update { it.copy(success= token,error=null,loading=false) }
                 }
+                return;
             }
         }else {
             // If access token does not exist, generate a new one
@@ -139,8 +157,9 @@ class TokenManager @Inject constructor(){
                 if (frontEndToken != null) {
                     // Decode the frontEndToken to check if it is valid
                     val decodedToken = decode(frontEndToken)
+                    val expirationDate = decodedToken?.expiresAt
                     val decodedUserId = decodedToken?.getClaim("userId")?.asString()
-                    if (decodedUserId != uuid) {
+                    if (decodedUserId != uuid || expirationDate == null || expirationDate.before(Date())) {
                         // If the user ID does not match, generate a new frontEndToken
                         val newFrontEndToken = generate(uuid)
                         prefsManager.frontEndToken = newFrontEndToken
