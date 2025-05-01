@@ -2,8 +2,8 @@ package com.nothingmotion.brawlprogressionanalyzer.domain.model
 
 
 sealed class Rewards (
-    open val id : Int,
-    open val name: String,
+   @Transient open val id : Int,
+   @Transient open val name: String,
 )
 
 sealed class PassRewards (
