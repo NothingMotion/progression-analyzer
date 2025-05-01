@@ -326,43 +326,143 @@ class AccountRepositoryImpl @Inject constructor(
     override suspend fun insertCachedAccount(account: Account): Result<Unit, DataError.DatabaseError> {
         return withContext(Dispatchers.IO) {
             try {
-                // Insert the account first to establish the primary entity
-                db.accountDao().insertAccount(AccountEntity(
-                    playerTag = account.account.tag,
-                    createdAt = account.createdAt,
-                    updatedAt = account.updatedAt
-                ))
-
-                // Insert the player entity second
-                db.playerDao().insertPlayer(PlayerEntity.fromDomain(account.account))
-
-                // Insert the cache entry 
-                db.cacheDao().insertCache(
-                    com.nothingmotion.brawlprogressionanalyzer.data.db.models.CacheEntity(
-                        id=0,
+                Timber.tag("AccountRepositoryImpl").d("Inserting account: ${account.account.tag}")
+                
+                // First check if this account already exists
+                val existingAccount = db.accountDao().getAccountByPlayerTag(account.account.tag)
+                
+                if (existingAccount == null) {
+                    Timber.tag("AccountRepositoryImpl").d("Creating new account: ${account.account.tag}")
+                    
+                    // Always start by inserting/updating the PlayerEntity which has no foreign key constraints
+                    val playerEntity = PlayerEntity.fromDomain(account.account)
+                    db.playerDao().insertPlayer(playerEntity)
+                    
+                    // Insert the AccountEntity which has a reference to PlayerEntity's tag
+                    val accountEntity = AccountEntity(
+                        id = 0,
                         playerTag = account.account.tag,
-                        createdAt = Date(System.currentTimeMillis()),
-                        validFor = Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)
+                        createdAt = account.createdAt,
+                        updatedAt = account.updatedAt ?: Date()
                     )
-                )
-                
-                // Insert current progress
-                db.progressDao().insertProgress(
-                    ProgressEntity.fromDomain(account.currentProgress,
-                        account.account.tag).apply {
-                        type = ProgressType.CURRENT
-                    }
-                )
-                
-                // Insert previous progresses if any
-                account.previousProgresses?.map {
-                    ProgressEntity.fromDomain(it, account.account.tag).apply {
-                        type = ProgressType.PREVIOUS
-                    }
-                }?.let { progress ->
-                    db.progressDao().insertProgresses(
-                        progress
+                    val accountId = db.accountDao().insertAccount(accountEntity).toInt()
+                    Timber.tag("AccountRepositoryImpl").d("Created new account with ID: $accountId")
+                    
+                    // Insert cache after PlayerEntity and AccountEntity exist
+                    db.cacheDao().insertCache(
+                        CacheEntity(
+                            id = 0,
+                            playerTag = account.account.tag,
+                            createdAt = Date(),
+                            validFor = Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)
+                        )
                     )
+                    
+                    // Now we can insert progress which depends on AccountEntity
+                    val progressEntity = ProgressEntity.fromDomain(
+                        progress = account.currentProgress,
+                        accountId = accountId,
+                        playerTag = account.account.tag
+                    ).apply { 
+                        type = ProgressType.CURRENT 
+                    }
+                    
+                    db.progressDao().insertProgress(progressEntity)
+                    
+                    // Finally add any previous progress histories
+                    account.previousProgresses?.let { previousProgresses ->
+                        if (previousProgresses.isNotEmpty()) {
+                            val progressEntities = previousProgresses.map {
+                                ProgressEntity.fromDomain(
+                                    progress = it,
+                                    accountId = accountId,
+                                    playerTag = account.account.tag
+                                ).apply {
+                                    type = ProgressType.PREVIOUS
+                                }
+                            }
+                            db.progressDao().insertProgresses(progressEntities)
+                        }
+                    }
+                } else {
+                    // Update existing account
+                    Timber.tag("AccountRepositoryImpl").d("Updating existing account: ${account.account.tag}")
+                    
+                    // First update Player which has no dependencies
+                    val playerEntity = PlayerEntity.fromDomain(account.account)
+                    db.playerDao().upsertPlayer(playerEntity)
+                    
+                    // Then update Account
+                    val accountEntity = AccountEntity(
+                        id = existingAccount.id,
+                        playerTag = account.account.tag,
+                        createdAt = existingAccount.createdAt,
+                        updatedAt = account.updatedAt ?: Date()
+                    )
+                    db.accountDao().updateAccount(accountEntity)
+                    
+                    // Update cache if exists or create new
+                    val existingCache = db.cacheDao().getCacheByPlayerTag(account.account.tag)
+                    if (existingCache != null) {
+                        db.cacheDao().updateCache(
+                            existingCache.copy(
+                                validFor = Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)
+                            )
+                        )
+                    } else {
+                        db.cacheDao().insertCache(
+                            CacheEntity(
+                                id = 0,
+                                playerTag = account.account.tag,
+                                createdAt = Date(),
+                                validFor = Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)
+                            )
+                        )
+                    }
+                    
+                    // Update or insert progress
+                    val currentProgressEntity = db.progressDao().getProgressByAccountTagAndType(
+                        account.account.tag, 
+                        ProgressType.CURRENT
+                    )
+                    
+                    if (currentProgressEntity != null) {
+                        val updatedProgress = ProgressEntity.fromDomain(
+                            progress = account.currentProgress,
+                            accountId = existingAccount.id,
+                            playerTag = account.account.tag
+                        ).apply {
+                            id = currentProgressEntity.id
+                            type = ProgressType.CURRENT
+                        }
+                        db.progressDao().updateProgress(updatedProgress)
+                    } else {
+                        db.progressDao().insertProgress(
+                            ProgressEntity.fromDomain(
+                                progress = account.currentProgress,
+                                accountId = existingAccount.id,
+                                playerTag = account.account.tag
+                            ).apply {
+                                type = ProgressType.CURRENT
+                            }
+                        )
+                    }
+                    
+                    // Add previous progress histories
+                    account.previousProgresses?.let { previousProgresses ->
+                        if (previousProgresses.isNotEmpty()) {
+                            val progressEntities = previousProgresses.map {
+                                ProgressEntity.fromDomain(
+                                    progress = it,
+                                    accountId = existingAccount.id,
+                                    playerTag = account.account.tag
+                                ).apply {
+                                    type = ProgressType.PREVIOUS
+                                }
+                            }
+                            db.progressDao().insertProgresses(progressEntities)
+                        }
+                    }
                 }
                 
                 return@withContext Result.Success(Unit)
@@ -377,7 +477,6 @@ class AccountRepositoryImpl @Inject constructor(
                 if (e.message?.contains("UNIQUE constraint failed") == true) {
                     return@withContext Result.Error(DataError.DatabaseError.DUPLICATE_ENTRY)
                 } else if (e.message?.contains("FOREIGN KEY constraint failed") == true) {
-                    // Try to provide more context about which entity caused the foreign key violation
                     val errorMessage = "Foreign key constraint failed. Check if referenced entities exist: ${e.message}"
                     Timber.tag("AccountRepositoryImpl").e(errorMessage)
                     return@withContext Result.Error(DataError.DatabaseError.DATABASE_CONSTRAINT)
@@ -388,6 +487,7 @@ class AccountRepositoryImpl @Inject constructor(
                 Timber.tag("AccountRepositoryImpl").e("SQLite error during insert: ${e.message}", e)
                 return@withContext Result.Error(DataError.DatabaseError.DATABASE_ERROR)
             } catch (e: Exception) {
+                Timber.tag("AccountRepositoryImpl").e("Unexpected error: ${e.message}", e)
                 return@withContext Result.Error(DataErrorUtils.handleDatabaseException(e, "insertCachedAccount"))
             }
         }
@@ -428,7 +528,10 @@ class AccountRepositoryImpl @Inject constructor(
             try {
                 // Using transaction to ensure atomicity
                     db.accountDao().deleteAccountWithRelationsByPlayerTag(tag)
+                    db.playerDao().deletePlayerByTag(tag)
+
                     db.cacheDao().deleteCache(tag)
+
                 return@withContext Result.Success(Unit)
             } catch (e: SQLiteDiskIOException) {
                 Timber.tag("AccountRepositoryImpl").e("Disk I/O error during delete: ${e.message}", e)
@@ -453,7 +556,7 @@ class AccountRepositoryImpl @Inject constructor(
             db.cacheDao().getCacheByPlayerTag(tag)?.let {
             val cacheAge = Date().time - it.validFor.time
             val cacheExpirationDate = 24 * 60 * 60 * 1000
-                return cacheAge < cacheExpirationDate
+            return cacheAge < cacheExpirationDate
             } ?: run {
                 return@run false
             }
