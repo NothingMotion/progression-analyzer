@@ -3,14 +3,14 @@ package com.nothingmotion.brawlprogressionanalyzer.data.remote
 import com.nothingmotion.brawlprogressionanalyzer.crashlytics.common.CrashLytics
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIAccount
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIAccountsResult
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIBrawlerTableResponse
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIHistoryResult
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIToken
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIUpdate
-import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerTable
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIUpgradeTable
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.PassRewards
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.StarrDropRewards
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Track
-import com.nothingmotion.brawlprogressionanalyzer.domain.model.UpgradeTable
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -54,10 +54,10 @@ interface ProgressionAnalyzerAPI {
     suspend fun validateAccessToken(@Header("Authorization") authHeader: String) : Any
     ///////////////////////
     @GET("table/brawler/rarity")
-    suspend fun getBrawlerTable(@Header("Authorization") authHeader: String): List<BrawlerTable>
+    suspend fun getBrawlerTable(@Header("Authorization") authHeader: String): APIBrawlerTableResponse
 
     @GET("table/brawler/upgrade")
-    suspend fun getUpgradeTable(@Header("Authorization") authHeader: String) : UpgradeTable
+    suspend fun getUpgradeTable(@Header("Authorization") authHeader: String) : APIUpgradeTable
     ////////////////////
 
     @GET("rewards/pass/free")
