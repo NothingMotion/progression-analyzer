@@ -10,6 +10,9 @@ interface CacheDao {
     @androidx.room.Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
     suspend fun insertCache(cache: com.nothingmotion.brawlprogressionanalyzer.data.db.models.CacheEntity): Long
 
+    @androidx.room.Update
+    suspend fun updateCache(cache: com.nothingmotion.brawlprogressionanalyzer.data.db.models.CacheEntity): Int
+
     @androidx.room.Query("SELECT * FROM cache WHERE player_tag = :playerTag LIMIT 1")
     suspend fun getCacheByPlayerTag(playerTag: String): com.nothingmotion.brawlprogressionanalyzer.data.db.models.CacheEntity?
 

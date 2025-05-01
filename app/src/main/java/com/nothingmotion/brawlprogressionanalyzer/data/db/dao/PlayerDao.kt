@@ -26,6 +26,9 @@ interface PlayerDao {
     @Delete
     suspend fun deletePlayer(player: PlayerEntity): Int
 
+
+    @Query("DELETE FROM player WHERE tag = :tag")
+    suspend fun deletePlayerByTag(tag:String):Int
     @Query("SELECT * FROM player WHERE tag = :tag LIMIT 1")
     suspend fun getPlayerByTag(tag: String): PlayerEntity?
 

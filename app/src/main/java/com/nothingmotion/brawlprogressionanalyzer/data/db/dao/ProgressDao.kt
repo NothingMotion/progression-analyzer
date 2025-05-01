@@ -26,13 +26,21 @@ interface ProgressDao {
     @Query("SELECT * FROM progress WHERE id = :id LIMIT 1")
     suspend fun getProgressById(id: Int): ProgressEntity?
 
-    @Query("SELECT * FROM progress WHERE account_tag = :accountTag")
-    suspend fun getProgressesByAccountTag(accountTag: String): List<ProgressEntity>
+    @Query("SELECT * FROM progress WHERE account_id = :accountId")
+    suspend fun getProgressesByAccountId(accountId: Int): List<ProgressEntity>
+    
+    @Query("SELECT * FROM progress WHERE player_tag = :playerTag")
+    suspend fun getProgressesByPlayerTag(playerTag: String): List<ProgressEntity>
 
+    @Query("DELETE FROM progress WHERE player_tag = :playerTag AND type = :progressType")
+    suspend fun deleteProgressesByPlayerTagAndType(playerTag: String, progressType: ProgressType): Int
+    
+    @Query("DELETE FROM progress WHERE account_id = :accountId AND type = :progressType")
+    suspend fun deleteProgressesByAccountIdAndType(accountId: Int, progressType: ProgressType): Int
 
-
-
-
-    @Query("SELECT * FROM progress WHERE account_tag = :accountTag AND type= :progressType LIMIT 1")
-    suspend fun getProgressByAccountTagAndType(accountTag: String, progressType: ProgressType= ProgressType.CURRENT): ProgressEntity?
+    @Query("SELECT * FROM progress WHERE player_tag = :playerTag AND type = :progressType LIMIT 1")
+    suspend fun getProgressByAccountTagAndType(playerTag: String, progressType: ProgressType = ProgressType.CURRENT): ProgressEntity?
+    
+    @Query("SELECT * FROM progress WHERE account_id = :accountId AND type = :progressType LIMIT 1")
+    suspend fun getProgressByAccountIdAndType(accountId: Int, progressType: ProgressType = ProgressType.CURRENT): ProgressEntity?
 }
