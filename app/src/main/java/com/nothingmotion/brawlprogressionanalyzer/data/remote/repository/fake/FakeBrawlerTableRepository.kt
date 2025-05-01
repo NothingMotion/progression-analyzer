@@ -15,27 +15,27 @@ class FakeBrawlerTableRepository {
         return listOf(
             BrawlerTable(
                 rarity = RarityData.COMMON,
-                creditsNeeded = 0
+                value = 0
             ),
             BrawlerTable(
                 RarityData.RARE,
-                creditsNeeded = 200
+                value = 200
             ),
             BrawlerTable(
                 RarityData.SUPER_RARE,
-                creditsNeeded = 400
+                value = 400
             ),
             BrawlerTable(
                 RarityData.EPIC,
-                creditsNeeded = 950
+                value = 950
             ),
             BrawlerTable(
                 RarityData.MYTHIC,
-                creditsNeeded = 1900
+                value = 1900
             ),
             BrawlerTable(
                 RarityData.LEGENDARY,
-                creditsNeeded = 3800
+                value = 3800
             ),
         )
     }

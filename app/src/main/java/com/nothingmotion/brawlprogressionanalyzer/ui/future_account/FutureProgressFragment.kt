@@ -329,7 +329,7 @@ class FutureProgressFragment : Fragment() {
             }
 
             row.findViewById<TextView>(R.id.rarity_text).text = table.rarity.name
-            row.findViewById<TextView>(R.id.credits_text).text = table.creditsNeeded.toString()
+            row.findViewById<TextView>(R.id.credits_text).text = table.value.toString()
 
             tableLayout.addView(row)
         }

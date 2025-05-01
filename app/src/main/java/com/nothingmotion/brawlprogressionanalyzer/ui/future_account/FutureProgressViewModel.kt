@@ -333,7 +333,7 @@ class FutureProgressViewModel @Inject constructor(
         val lockedBrawlers = brawlersData.filter { it.name.uppercase() !in currentBrawlers }
             .sortedByDescending { brawler ->
                 // Find credit cost by rarity
-                brawlerTable.find { it.rarity == brawler.rarity.toRarityData() }?.creditsNeeded ?: 0
+                brawlerTable.find { it.rarity == brawler.rarity.toRarityData() }?.value ?: 0
             }
         Timber.tag("FutureProgressViewModel").d("Locked Brawlers: ${lockedBrawlers.map { it.name }}")
 
@@ -342,7 +342,7 @@ class FutureProgressViewModel @Inject constructor(
         val unlockableBrawlers = mutableListOf<UnlockableBrawler>()
 
         for (brawler in lockedBrawlers) {
-            val cost = brawlerTable.find { it.rarity == brawler.rarity.toRarityData() }?.creditsNeeded ?: continue
+            val cost = brawlerTable.find { it.rarity == brawler.rarity.toRarityData() }?.value ?: continue
 
             Timber.tag("FutureProgressViewModel").d("Brawler: ${brawler.name}, Cost: $cost, Remaining Credits: $remainingCredits")
             if (remainingCredits >= cost) {
