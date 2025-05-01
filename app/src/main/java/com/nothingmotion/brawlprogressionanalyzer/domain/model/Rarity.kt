@@ -7,7 +7,6 @@ enum class RarityData {
     SUPER_RARE,
     EPIC,
     MYTHIC,
-
     LEGENDARY
 }
 
