@@ -22,8 +22,10 @@ import com.nothingmotion.brawlprogressionanalyzer.databinding.FragmentFutureProg
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.RarityData
 import com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.text.NumberFormat
 
@@ -62,7 +64,11 @@ class FutureProgressFragment : Fragment() {
             Timber.tag("FutureProgressFragment").d(accountId)
             viewModel.getAccount(accountId)
         }
-
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO){
+                viewModel.loadData()
+            }
+        }
         // Observe state updates
         observeViewModel()
     }
@@ -118,7 +124,7 @@ class FutureProgressFragment : Fragment() {
         }
 
         // Update upgrade table if available
-        if (state.upgradeTable != null) {
+        if (state.upgradeTable != null && !state.upgradeTable.levels.isNullOrEmpty()) {
             populateUpgradeTable(state.upgradeTable)
         }
 
