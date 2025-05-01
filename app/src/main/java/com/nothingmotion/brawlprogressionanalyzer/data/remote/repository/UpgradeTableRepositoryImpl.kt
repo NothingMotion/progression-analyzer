@@ -13,7 +13,7 @@ class UpgradeTableRepositoryImpl @Inject constructor(): UpgradeTableRepository {
     @Inject lateinit var api: ProgressionAnalyzerAPI
     override suspend fun getUpgradeTable(token: String): Result<UpgradeTable, DataError.NetworkError> {
         try {
-            return Result.Success(api.getUpgradeTable("Bearer $token"))
+            return Result.Success(api.getUpgradeTable("Bearer $token").table)
         }
         catch(e: IOException){
             return Result.Error(DataError.NetworkError.NO_INTERNET_CONNECTION)
