@@ -2,7 +2,6 @@ package com.nothingmotion.brawlprogressionanalyzer.data.db.models
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Brawler
@@ -10,28 +9,28 @@ import com.nothingmotion.brawlprogressionanalyzer.domain.model.Icon
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Player
 import java.util.Date
 
+/**
+ * Database entity for a Player in Brawl Stars
+ * This entity is independent and has no foreign keys to other entities
+ */
 @Entity(
     tableName = "player",
-    indices = [Index(value = ["tag"], unique = true)],
-    foreignKeys = [
-        ForeignKey(
-            entity = AccountEntity::class,
-            parentColumns = ["player_tag"],
-            childColumns=["tag"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ]
+    indices = [Index(value = ["tag"], unique = true)]
 )
 data class PlayerEntity(
     @PrimaryKey
     val tag: String,
+    
     val name: String,
     val trophies: Int,
     val highestTrophies: Int,
     val level: Int,
+    
     @ColumnInfo(name = "icon_id")
     val iconId: Long?,
+    
     val brawlers: List<Brawler>,
+    
     @ColumnInfo(name = "created_at")
     val createdAt: Date
 ) {
