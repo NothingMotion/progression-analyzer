@@ -2,6 +2,7 @@ package com.nothingmotion.brawlprogressionanalyzer.ui.future_account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeBrawlerTableRepository
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakePassTableRepository
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeStarrDropTableRepository
@@ -19,6 +20,9 @@ import com.nothingmotion.brawlprogressionanalyzer.domain.model.UpgradeTable
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.toRarityData
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.AccountRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepository
+import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerTableRepository
+import com.nothingmotion.brawlprogressionanalyzer.domain.repository.UpgradeTableRepository
+import com.nothingmotion.brawlprogressionanalyzer.util.TokenManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,15 +39,17 @@ import kotlin.math.floor
 
 @HiltViewModel
 class FutureProgressViewModel @Inject constructor(
-    private val brawlerTableRepository: FakeBrawlerTableRepository,
-    private val upgradeTableRepository: FakeUpgradeTableRepository,
+    private val brawlerTableRepository: BrawlerTableRepository,
+    private val upgradeTableRepository: UpgradeTableRepository,
     private val passRepository: FakePassTableRepository,
     private val starrDropRepository: FakeStarrDropTableRepository,
     private val brawlerDataRepository: BrawlerRepository,
-    private val accountRepository: AccountRepository
+    private val accountRepository: AccountRepository,
+    private val prefManager: PreferencesManager,
+    private val tokenManager: TokenManager
 ) : ViewModel() {
 
-//    private val accountDetailViewModel: AccountDetailViewModel
+    //    private val accountDetailViewModel: AccountDetailViewModel
     private val _state = MutableStateFlow(FutureProgressState())
     val state: StateFlow<FutureProgressState> = _state
 
@@ -63,26 +69,76 @@ class FutureProgressViewModel @Inject constructor(
     private val numberFormat = NumberFormat.getIntegerInstance()
 
     init {
-        loadData()
+        viewModelScope.launch{
+
+            withContext(Dispatchers.IO){
+
+//                loadData()
+            }
+        }
     }
 
-    private fun loadData() {
+    fun loadData() {
         viewModelScope.launch {
-            // Load upgrade table
-            upgradeTableRepository.upgradeTable.collectLatest { upgradeTable ->
-                _state.update { it.copy(upgradeTable = upgradeTable) }
-                calculateResourcesNeeded()
-                updateFutureResources()
-                calculateUpgradableBrawlers()
+            withContext(Dispatchers.IO) {
+                // Load upgrade table
+                val token = getAccessToken()?.let {
 
+                    when (val result = upgradeTableRepository.getUpgradeTable(it)) {
+                        is Result.Error -> {
+                            Timber.e("Error fetching upgrade table: ${result.error}")
+                            _state.update { it.copy(upgradeTable = null) }
+                        }
+
+                        is Result.Loading -> {
+                            Timber.d("Loading upgrade table...")
+                            _state.update { it.copy(upgradeTable = null) }
+                        }
+
+                        is Result.Success -> {
+                            Timber.d("Upgrade table loaded: ${result.data}")
+                            val upgradeTable = result.data
+                            _state.update { it.copy(upgradeTable = upgradeTable) }
+                            calculateResourcesNeeded()
+                            updateFutureResources()
+                            calculateUpgradableBrawlers()
+                        }
+                    }
+
+
+                }
             }
         }
 
         viewModelScope.launch {
-            // Load brawler table
-            brawlerTableRepository.brawlerTable.collectLatest { brawlerTable ->
-                _state.update { it.copy(brawlerTable = brawlerTable) }
-                calculateUnlockableBrawlers()
+            withContext(Dispatchers.IO) {
+                // Load brawler table
+                val token = getAccessToken()
+                token?.let {
+
+                    brawlerTableRepository.getBrawlerTable(it).collectLatest { result ->
+
+                        when (result) {
+                            is Result.Error -> {
+                                Timber.e("Error fetching brawler table: ${result.error}")
+                                _state.update { it.copy(brawlerTable = emptyList()) }
+                            }
+
+                            is Result.Loading -> {
+                                Timber.d("Loading brawler table...")
+                                _state.update { it.copy(brawlerTable = emptyList()) }
+                            }
+
+                            is Result.Success -> {
+                                val brawlerTable = result.data
+                                _state.update { it.copy(brawlerTable = brawlerTable) }
+                                calculateUnlockableBrawlers()
+                                Timber.d("Brawler table loaded: $brawlerTable")
+                            }
+                        }
+
+                    }
+                }
             }
         }
 
@@ -99,18 +155,19 @@ class FutureProgressViewModel @Inject constructor(
         viewModelScope.launch {
 
 
-
-            withContext(Dispatchers.IO){
+            withContext(Dispatchers.IO) {
                 brawlerDataRepository.getBrawlers().collectLatest { result ->
-                    when(result){
+                    when (result) {
                         is Result.Error -> {
                             Timber.e("Error fetching brawlers: ${result.error}")
                             _state.update { it.copy(brawlersData = emptyList()) }
                         }
+
                         is Result.Loading -> {
                             Timber.d("Loading brawlers data...")
                             _state.update { it.copy(brawlersData = emptyList()) }
                         }
+
                         is Result.Success -> {
                             _state.update { it.copy(brawlersData = result.data) }
                             calculateUnlockableBrawlers()
@@ -128,41 +185,58 @@ class FutureProgressViewModel @Inject constructor(
 
     fun getAccount(accountId: String) {
         viewModelScope.launch {
-            withContext(Dispatchers.IO){
-                when(val result = accountRepository.getAccount(accountId,"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4M2E0Y2M3YS01OTdiLTQ1YWEtYjg0Ny0yOTg3MjVmYWEwZDkiLCJpYXQiOjE3NDU4MTkzMjgsImV4cCI6MTc0NTkwNTcyOH0.-QfXTb0sF8eqgu_m-SajtCcCsPSR3X_mvvzh4VoeGTs")){
-                    is Result.Error -> {
+            withContext(Dispatchers.IO) {
+                prefManager.track?.uuid?.let {
+                    tokenManager.getAccessToken(it.toString())?.let {
+                        when (val result = accountRepository.getAccount(accountId, it)) {
+                            is Result.Error -> {
 
-                        Timber.e("Error fetching account: ${result.error}")
-                        _state.update { it.copy(account = null) }
-                    }
-                    is Result.Loading -> {
-                        Timber.d("Loading account data...")
-                        _state.update { it.copy(account = null) }
-                    }
-                    is Result.Success -> {
+                                Timber.e("Error fetching account: ${result.error}")
+                                _state.update { it.copy(account = null) }
+                            }
 
-                        result.data.account?.let { account ->
-                            _state.update { it.copy(account = result.data) }
-                            calculateResourcesNeeded()
-                            updateFutureResources()
-                            calculateUnlockableBrawlers()
-                            calculateUpgradableBrawlers()
+                            is Result.Loading -> {
+                                Timber.d("Loading account data...")
+                                _state.update { it.copy(account = null) }
+                            }
 
+                            is Result.Success -> {
+
+                                result.data.account?.let { account ->
+                                    _state.update { it.copy(account = result.data) }
+                                    calculateResourcesNeeded()
+                                    updateFutureResources()
+                                    calculateUnlockableBrawlers()
+                                    calculateUpgradableBrawlers()
+
+                                }
+                            }
                         }
+                    } ?: run {
+                        Timber.e("Error fetching account: Token is null")
+                        _state.update { it.copy(account = null) }
                     }
+                } ?: run {
+                    Timber.e("Error fetching account: Track is null")
+                    _state.update { it.copy(account = null) }
                 }
 
             }
         }
     }
 
+    private suspend fun getAccessToken() : String?{
+        return prefManager.track?.uuid?.let {
+            tokenManager.getAccessToken(it.toString())
+        }
+    }
     /**
      * Calculate power points and coins needed to max out all brawlers
      */
     private fun calculateResourcesNeeded() {
         val account = _state.value.account ?: return
         val upgradeTable = _state.value.upgradeTable ?: return
-
+        if(upgradeTable.levels.isNullOrEmpty()) return
         // Calculate brawler counts from the brawlers list
         val brawlerCount = account.account.brawlers.size
         val maxedBrawlers = account.account.brawlers.count { it.power >= 11 }
@@ -217,7 +291,7 @@ class FutureProgressViewModel @Inject constructor(
         val passDrops = (this.passDrops * selectedTimeframeMonths)
         val totalDrops = dailyDrops + passDrops
 
-        _state.value.passFreeRewards?.resources?.forEach{
+        _state.value.passFreeRewards?.resources?.forEach {
             if (it is Coin) {
                 totalCoins += it.amount * selectedTimeframeMonths
             }
@@ -229,7 +303,7 @@ class FutureProgressViewModel @Inject constructor(
             }
         }
 
-        if(isP2WPlayer) {
+        if (isP2WPlayer) {
             _state.value.passPremiumRewards?.resources?.forEach {
                 if (it is Coin) {
                     totalCoins += it.amount * selectedTimeframeMonths
@@ -301,13 +375,13 @@ class FutureProgressViewModel @Inject constructor(
             monthsToMaxPowerPoints = monthsToMaxPowerPoints,
             monthsToMaxCoins = monthsToMaxCoins
         )
-        
+
         // Generate next steps advice
         val nextStepsAdvice =
             NextStepsGenerator.generateAdvice(updatedState, selectedTimeframeMonths)
-        
+
         // Update state with projected resources and advice
-        _state.update { 
+        _state.update {
             updatedState.copy(nextStepsAdvice = nextStepsAdvice)
         }
 
@@ -335,16 +409,19 @@ class FutureProgressViewModel @Inject constructor(
                 // Find credit cost by rarity
                 brawlerTable.find { it.rarity == brawler.rarity.toRarityData() }?.value ?: 0
             }
-        Timber.tag("FutureProgressViewModel").d("Locked Brawlers: ${lockedBrawlers.map { it.name }}")
+        Timber.tag("FutureProgressViewModel")
+            .d("Locked Brawlers: ${lockedBrawlers.map { it.name }}")
 
         // Calculate how many brawlers can be unlocked with projected credits
         var remainingCredits = projectedCredits
         val unlockableBrawlers = mutableListOf<UnlockableBrawler>()
 
         for (brawler in lockedBrawlers) {
-            val cost = brawlerTable.find { it.rarity == brawler.rarity.toRarityData() }?.value ?: continue
+            val cost =
+                brawlerTable.find { it.rarity == brawler.rarity.toRarityData() }?.value ?: continue
 
-            Timber.tag("FutureProgressViewModel").d("Brawler: ${brawler.name}, Cost: $cost, Remaining Credits: $remainingCredits")
+            Timber.tag("FutureProgressViewModel")
+                .d("Brawler: ${brawler.name}, Cost: $cost, Remaining Credits: $remainingCredits")
             if (remainingCredits >= cost) {
                 unlockableBrawlers.add(
                     UnlockableBrawler(
@@ -354,7 +431,8 @@ class FutureProgressViewModel @Inject constructor(
                 )
                 remainingCredits -= cost
             } else {
-                Timber.tag("FutureProgressViewModel").d("Not enough credits to unlock ${brawler.name}. Remaining Credits: $remainingCredits")
+                Timber.tag("FutureProgressViewModel")
+                    .d("Not enough credits to unlock ${brawler.name}. Remaining Credits: $remainingCredits")
                 continue
             }
         }
@@ -383,7 +461,8 @@ class FutureProgressViewModel @Inject constructor(
             unlockableBrawlers
         }
 
-        Timber.tag("FutureProgressViewModel").d("Showing ${limitedBrawlers.size} of ${unlockableBrawlers.size} unlockable brawlers")
+        Timber.tag("FutureProgressViewModel")
+            .d("Showing ${limitedBrawlers.size} of ${unlockableBrawlers.size} unlockable brawlers")
 
         _state.update {
             it.copy(
@@ -393,12 +472,12 @@ class FutureProgressViewModel @Inject constructor(
         }
     }
 
-    fun calculateUpgradableBrawlers(){
+    fun calculateUpgradableBrawlers() {
         val coins = _state.value.projectedCoins
         val powerPoints = _state.value.projectedPowerPoints
 
         val upgradeTable = _state.value.upgradeTable ?: return
-
+        if (upgradeTable.levels.isNullOrEmpty()) return
         val accountState = _state.value.account?.account ?: return
         val account = accountState
         val maxedBrawlers = account.brawlers.filter { it.power >= 11 }
@@ -415,30 +494,30 @@ class FutureProgressViewModel @Inject constructor(
         for (brawler in sortedBrawlers) {
             // Stop processing if we're out of resources
             if (remainingCoins <= 0 || remainingPowerPoints <= 0) break
-            
+
             // Skip brawlers already at max level
             if (brawler.power >= 11) continue
-            
+
             val initialPower = brawler.power
             var currentPower = initialPower
-            
+
             // Upgrade until we run out of resources or reach max level
             while (currentPower < 11) {
                 // Find the cost to upgrade to the next level
                 val nextLevel = currentPower + 1
                 val upgradeLevel = upgradeTable.levels.find { it.level == nextLevel }
-                
+
                 // If we can't find the upgrade level data, break out of the loop
                 if (upgradeLevel == null) {
                     break
                 }
-                
+
                 // Check if we have enough resources to upgrade
                 if (remainingCoins >= upgradeLevel.coins && remainingPowerPoints >= upgradeLevel.powerPoints) {
                     // Deduct resources
                     remainingCoins -= upgradeLevel.coins
                     remainingPowerPoints -= upgradeLevel.powerPoints
-                    
+
                     // Upgrade the brawler
                     currentPower = nextLevel
                 } else {
@@ -447,14 +526,21 @@ class FutureProgressViewModel @Inject constructor(
                     break
                 }
             }
-            
+
             // Only add to upgradable list if the brawler was actually upgraded
             if (currentPower > initialPower) {
-                upgradableBrawlers.add(UpgradableBrawler(brawler.id,brawler.name, initialPower, currentPower))
+                upgradableBrawlers.add(
+                    UpgradableBrawler(
+                        brawler.id,
+                        brawler.name,
+                        initialPower,
+                        currentPower
+                    )
+                )
             }
         }
 
-        _state.update { 
+        _state.update {
             val updatedState = it.copy(upgradableBrawlers = upgradableBrawlers)
             // Generate updated next steps advice
             val nextStepsAdvice =
@@ -485,7 +571,8 @@ class FutureProgressViewModel @Inject constructor(
             )
         }
 
-        Timber.tag("FutureProgressViewModel").d("Loaded more brawlers. Now showing ${newList.size} of ${allBrawlers.size}")
+        Timber.tag("FutureProgressViewModel")
+            .d("Loaded more brawlers. Now showing ${newList.size} of ${allBrawlers.size}")
     }
 
     fun setTimeframe(months: Int) {
@@ -517,6 +604,7 @@ data class UpgradableBrawler(
     val from: Int,
     val to: Int
 )
+
 data class FutureProgressState(
     val account: Account? = null,
     val brawlerTable: List<BrawlerTable> = emptyList(),
@@ -553,7 +641,7 @@ data class FutureProgressState(
     val hasMoreBrawlers: Boolean = false,
     val totalUnlockableBrawlers: Int = 0,
     val allUnlockableBrawlers: List<UnlockableBrawler> = emptyList(),
-    
+
     // Next steps advice
     val nextStepsAdvice: String = ""
 )
