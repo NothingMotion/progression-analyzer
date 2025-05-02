@@ -3,10 +3,10 @@
     <!-- Splash Screen Theme -->
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         <!-- Set the splash screen background color -->
-        <item name="windowSplashScreenBackground">@color/purple_700</item>
+        <item name="windowSplashScreenBackground">@color/black</item>
         
         <!-- Use windowSplashScreenAnimatedIcon to add either a drawable or an animated drawable -->
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/nothing_motion_transparent</item>
         
         <!-- Set the theme of the Activity that follows your splash screen -->
         <item name="postSplashScreenTheme">@style/Theme.BrawlProgressionAnalyzer</item>
