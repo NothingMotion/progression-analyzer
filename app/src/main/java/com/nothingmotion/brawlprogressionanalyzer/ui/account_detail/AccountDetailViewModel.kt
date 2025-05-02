@@ -5,9 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.repository.fake.FakeAccountRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Brawler
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.BrawlerData
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.DataError
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.RarityData
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.toRarityData
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.AccountRepository
+import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepository
 import com.nothingmotion.brawlprogressionanalyzer.util.TokenManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -25,9 +30,10 @@ class AccountDetailViewModel @Inject constructor(
     private val accountRepository: AccountRepository,
     private val fakeAccountRepository: FakeAccountRepository,
     private val preferencesManager: PreferencesManager,
-    private val tokenManager: TokenManager
+    private val brawlerDataRepository: BrawlerRepository,
+    private val tokenManager: TokenManager,
 ) : ViewModel() {
-    
+
     private val _state = MutableStateFlow<AccountDetailState>(AccountDetailState(loading=true))
     val state: StateFlow<AccountDetailState> = _state
 
@@ -39,7 +45,9 @@ class AccountDetailViewModel @Inject constructor(
 
 
 
+    init{
 
+    }
 
     fun getFakeAccount(accountId: String){
         viewModelScope.launch {
@@ -98,6 +106,39 @@ class AccountDetailViewModel @Inject constructor(
                                 }
                                 is Result.Success -> {
                                     _state.update {  it.copy(account=result.data,error=null,loading=false)}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                    loadBrawlersData()
                                 }
                             }
 
@@ -107,13 +148,48 @@ class AccountDetailViewModel @Inject constructor(
             }
         }
     }
-    
+
+
+
+
+
+    private fun loadBrawlersData(){
+        Timber.tag("AccountDetailViewModel").d("Calling loadBrawlersData")
+        viewModelScope.launch {
+            brawlerDataRepository.getBrawlers().collectLatest {result->
+                when(result){
+                    is Result.Error -> {}
+                    is Result.Loading -> {}
+                    is Result.Success -> {
+                        _state.update { it.copy(brawlerData = result.data) }
+                        sortBrawlersByRarity()
+                    }
+                }
+            }
+        }
+    }
+    fun sortBrawlersByRarity(){
+        Timber.tag("AccountDetailViewModel").d("Calling sortBrawlersByRarity")
+        val account = _state.value.account ?: return
+        val brawlers = account.account.brawlers
+        val brawlerData = _state.value.brawlerData
+        if(brawlerData.isNullOrEmpty()) return
+        Timber.tag("AccountDetailViewModel").d("brawlerData: $brawlerData")
+        Timber.tag("AccountDetailViewModel").d("brawlers: ${brawlers.map{it.name}}")
+        val sortedBrawlers = mutableMapOf<RarityData,MutableList<Brawler>>()
+        brawlers.forEach { brawler->
+            Timber.tag("AccountDetailViewModel").d("running or forEach${brawler.name}")
+            brawlerData.find { it.name.equals(brawler.name,ignoreCase=true)}?.let{
+            Timber.tag("AccountDetailViewModel").d("found brawlerData ${it.name}")
+                val rarity= it.rarity.toRarityData()
+                sortedBrawlers.getOrPut(rarity){ mutableListOf()}.add(brawler)
+                }
+            }
+
+        Timber.tag("AccountDetailViewModel").d("Brawlers Rarity: $sortedBrawlers")
+        _state.update { it.copy(filteredBrawlerRarity = sortedBrawlers.toList()) }
+    }
     fun toggleLoading(){
-
-
-
-
-
         _state.update { it.copy(loading = !it.loading) }
     }
 
@@ -132,7 +208,7 @@ class AccountDetailViewModel @Inject constructor(
 //            _state.value = account
         }
     }
-    
+
     /**
      * Update an account tag
      */
@@ -150,7 +226,7 @@ class AccountDetailViewModel @Inject constructor(
             }
         }
     }
-    
+
     /**
      * Delete the current account
      */
@@ -197,6 +273,8 @@ class AccountDetailViewModel @Inject constructor(
 
     data class AccountDetailState(
         val account: Account? = null,
+        val brawlerData: List<BrawlerData> = emptyList(),
+        val filteredBrawlerRarity: List<Pair<RarityData,List<Brawler>>>?=null,
         val error: String? = null,
         val loading: Boolean = false,
         val refreshMessage: String? = null
