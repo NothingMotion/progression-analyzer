@@ -8,6 +8,7 @@ import com.nothingmotion.brawlprogressionanalyzer.data.db.ApplicationDatabase
 import com.nothingmotion.brawlprogressionanalyzer.data.db.models.AccountEntity
 import com.nothingmotion.brawlprogressionanalyzer.data.db.models.CacheEntity
 import com.nothingmotion.brawlprogressionanalyzer.data.db.models.PlayerEntity
+import com.nothingmotion.brawlprogressionanalyzer.data.db.models.PlayerHistoryEntity
 import com.nothingmotion.brawlprogressionanalyzer.data.db.models.ProgressEntity
 import com.nothingmotion.brawlprogressionanalyzer.data.db.models.ProgressType
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.ProgressionAnalyzerAPI
@@ -54,6 +55,10 @@ class AccountRepositoryImpl @Inject constructor(
             try {
                 val history = api.getAccountHistory(tag, 10, 0, "Bearer $token")
                 account.history = history.history.map { it.toPlayer() }
+
+
+
+                Timber.tag("AccountRepositoryImpl").d("Account history: ${account.history}")
             }catch(e:Exception){
                 Timber.tag("AccountRepositoryImpl").e(e)
 
@@ -242,17 +247,19 @@ class AccountRepositoryImpl @Inject constructor(
                 val previousProgress =
                     it.progressHistories.filter { prog -> prog.type == ProgressType.PREVIOUS }
                         .map { prog -> prog.toDomain() }
-                        
+                val dbAccount = Account(
+                    account = player,
+                    currentProgress = currentProgress,
+                    previousProgresses = previousProgress,
+                    futureProgresses = emptyList(),
+                    history = it.historyPlayers.map { it.toDomain() },
+                    updatedAt = account.updatedAt,
+                    createdAt = account.createdAt
+                )
+
+                Timber.tag("AccountRepositoryImpl").d("Cached account: ${dbAccount}")
                 return Result.Success(
-                    Account(
-                        account = player,
-                        currentProgress = currentProgress,
-                        previousProgresses = previousProgress,
-                        futureProgresses = emptyList(),
-                        history = emptyList(),
-                        updatedAt = account.updatedAt,
-                        createdAt = account.createdAt
-                    )
+                 dbAccount
                 )
             } ?: run {
                 return Result.Error(DataError.DatabaseError.NO_DATA)
@@ -289,18 +296,19 @@ class AccountRepositoryImpl @Inject constructor(
                             val previousProgress =
                                 account.progressHistories.filter { prog -> prog.type == ProgressType.PREVIOUS }
                                     .map { prog -> prog.toDomain() }
-                                    
+
                             accounts.add(
                                 Account(
                                     account = player,
                                     currentProgress = currentProgress,
                                     previousProgresses = previousProgress,
                                     futureProgresses = emptyList(),
-                                    history = emptyList(),
+                                    history = account.historyPlayers.map { it.toDomain() },
                                     updatedAt = account.account.updatedAt,
                                     createdAt = account.account.createdAt
                                 )
                             )
+
                         }
                 }.let {
                     emit(Result.Success(accounts))
@@ -383,6 +391,17 @@ class AccountRepositoryImpl @Inject constructor(
                             }
                             db.progressDao().insertProgresses(progressEntities)
                         }
+                    }
+                    account.history?.forEach {
+                        val playerEntity= PlayerEntity.fromDomain(it).apply { tag = account.account.tag }
+                        db.accountDao().insertPlayerHistory(
+                            PlayerHistoryEntity(
+                                id =0,
+                                playerTag = account.account.tag,
+                                playerEntity= playerEntity,
+                            )
+
+                        )
                     }
                 } else {
                     // Update existing account
@@ -529,8 +548,8 @@ class AccountRepositoryImpl @Inject constructor(
                 // Using transaction to ensure atomicity
                     db.accountDao().deleteAccountWithRelationsByPlayerTag(tag)
                     db.playerDao().deletePlayerByTag(tag)
-
                     db.cacheDao().deleteCache(tag)
+                    db.accountDao().deletePlayerHistory(tag)
 
                 return@withContext Result.Success(Unit)
             } catch (e: SQLiteDiskIOException) {
