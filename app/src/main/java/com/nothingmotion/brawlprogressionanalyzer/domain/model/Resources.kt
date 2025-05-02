@@ -1,7 +1,7 @@
 package com.nothingmotion.brawlprogressionanalyzer.domain.model
 
 
-sealed class Resource(
+open class Resource(
    @Transient open val name: String,
    @Transient open val amount: Int,
 )
@@ -74,7 +74,7 @@ data class BrawlerResource(
 
     val rarity: RarityData
 ) : Resource(name,amount)
-sealed class AbilityResource(
+open class AbilityResource(
     override val name: String,
     override val amount: Int
 ) : Resource(name,amount)
