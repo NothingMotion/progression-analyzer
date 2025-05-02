@@ -9,23 +9,29 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TableRow
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.android.material.card.MaterialCardView
 import com.nothingmotion.brawlprogressionanalyzer.R
 import com.nothingmotion.brawlprogressionanalyzer.databinding.FragmentFutureProgressBinding
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.RarityData
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.StarrDropRewards
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.UpgradeTable
 import com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionView
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.text.NumberFormat
 
@@ -40,6 +46,9 @@ class FutureProgressFragment : Fragment() {
     // Add the adapter as a property of the fragment
     private val brawlerAdapter = BrawlerUnlockAdapter()
     private val brawlerUpgradeAdapter = BrawlerUpgradeAdapter()
+
+    // Progress loading indicator
+    private var isLoadingMore = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,95 +67,185 @@ class FutureProgressFragment : Fragment() {
         setupPlayerTypeSelection()
         setupRecyclerView()
         setupUpgradableRecyclerView()
+        setupProgressOverlay()
 
         // Get account ID from arguments and load account data
         arguments?.getString("accountId")?.let { accountId ->
             Timber.tag("FutureProgressFragment").d(accountId)
             viewModel.getAccount(accountId)
         }
-        lifecycleScope.launch {
-            withContext(Dispatchers.IO){
-                viewModel.loadData()
-            }
-        }
+        
         // Observe state updates
         observeViewModel()
+    }
+
+    private fun setupProgressOverlay() {
+        binding.progressOverlay.apply {
+            isVisible = false
+            setOnClickListener { /* Consume clicks to prevent interaction */ }
+        }
     }
 
     private fun observeViewModel() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.state.collectLatest { state ->
-                    // Update UI components with new state
-                    updateUI(state)
+                // Observe account state
+                launch {
+                    viewModel.state
+                        .map { it.accountState }
+                        .distinctUntilChanged()
+                        .collectLatest { accountState ->
+                            accountState?.let { updateAccountUI(it) }
+                        }
+                }
+                
+                // Observe tables state
+                launch {
+                    viewModel.state
+                        .map { it.tablesState }
+                        .distinctUntilChanged()
+                        .collectLatest { tablesState ->
+                            Timber.tag("FutureProgressFragment").d("Collecting tablesState: $tablesState")
+                            tablesState?.let { updateTablesUI(it) }
+                        }
+                }
+                
+                // Observe calculated state
+                launch {
+                    viewModel.state
+                        .map { it.calculatedState }
+                        .distinctUntilChanged()
+                        .collectLatest { calculatedState ->
+                            calculatedState?.let { updateCalculatedUI(it) }
+                        }
+                }
+                
+                // Observe projected state
+                launch {
+                    viewModel.state
+                        .map { it.projectedState }
+                        .distinctUntilChanged()
+                        .collectLatest { projectedState ->
+                            projectedState?.let { updateProjectedUI(it) }
+                        }
+                }
+                
+                // Observe brawlers state
+                launch {
+                    viewModel.state
+                        .map { it.brawlersState }
+                        .distinctUntilChanged()
+                        .collectLatest { brawlersState ->
+                            brawlersState?.let { updateBrawlersUI(it) }
+                        }
+                }
+                
+                // Observe next steps advice
+                launch {
+                    viewModel.state
+                        .map { it.nextStepsAdvice }
+                        .distinctUntilChanged()
+                        .collectLatest { nextStepsAdvice ->
+                            nextStepsAdvice?.let { updateAdviceUI(it) }
+                        }
                 }
             }
         }
     }
 
-    private fun updateUI(state: FutureProgressState) {
-        // Update resources needed section
-        with(binding) {
-            // Total Power Points needed
-            powerpointsValue.text = numberFormat.format(state.neededPowerPoints)
+    private fun updateAccountUI(accountState: AccountState) {
+        // Only update UI elements related to account data
+        accountState.account?.let { account ->
+            // Show account info
+            binding.progressOverlay.isVisible = false
+        } ?: run {
+            // Show loading or error state for account
+            binding.progressOverlay.isVisible = true
+        }
+    }
 
-            // Total Coins needed
-            coinsValue.text = numberFormat.format(state.neededCoins)
-
-            // Total Credits needed (placeholder for now)
-            creditsValue.text = numberFormat.format(1000000000)
-
-            // Currently maxed out brawlers
-            currentlyMaxedOut.text = "(${state.maxedBrawlers}/${state.totalBrawlers})"
-            
-            // Update future resources based on current state
-            powerpointsPerMonthValue.text = numberFormat.format(state.projectedPowerPoints)
-            coinsPerMonthValue.text = numberFormat.format(state.projectedCoins)
-            creditsPerMonthValue.text = numberFormat.format(state.projectedCredits)
-            
-            // Update months to max text
-            powerpointsMonthsToMax.text = "It will take approximately ${state.monthsToMaxPowerPoints} months to collect enough Power Points"
-            coinsMonthsToMax.text = "It will take approximately ${state.monthsToMaxCoins} months to collect enough Coins"
-            
-            // Update starr drops info
-            totalDropsText.text = "Total: ${state.totalDrops} (${state.passDropsCount} Pass Drops)"
-            
-            // Set next rewards timeframe text
-            nextRewards.text = "You will earn these rewards in the next ${4} month(s)"
-            
-            // Update the personalized advice section
-            if (state.nextStepsAdvice.isNotEmpty()) {
-                whatsNextAdvice.text = state.nextStepsAdvice
-            } else {
-                // Show example advice if real advice is not available yet
-                whatsNextAdvice.text = viewModel.getExampleAdvice()
+    private fun updateTablesUI(tablesState: TablesState) {
+        // Update UI components related to tables data
+        tablesState.upgradeTable?.let { upgradeTable ->
+            if (!upgradeTable.levels.isNullOrEmpty()) {
+                populateUpgradeTable(upgradeTable)
             }
         }
-
-        // Update upgrade table if available
-        if (state.upgradeTable != null && !state.upgradeTable.levels.isNullOrEmpty()) {
-            populateUpgradeTable(state.upgradeTable)
-        }
-
-        // Update brawler table if available
-        if (state.brawlerTable.isNotEmpty()) {
-            populateBrawlerTable(state.brawlerTable)
-        }
-
-        // Update starr drop rewards if available
-        if (state.starrDropRewards.isNotEmpty()) {
-            setupStarrDropRewards(state.starrDropRewards)
+        
+        tablesState.brawlerTable.let { brawlerTable ->
+            if (brawlerTable.isNotEmpty()) {
+                populateBrawlerTable(brawlerTable)
+            }
         }
         
-        // Update unlockable brawlers section if available
-        if (state.unlockableBrawlers.isNotEmpty() || state.lockedBrawlers.isNotEmpty()) {
-            populateUnlockableBrawlers(state.unlockableBrawlers, state.projectedCredits)
+        tablesState.starrDropRewards.let { starrDropRewards ->
+            if (starrDropRewards.isNotEmpty()) {
+                setupStarrDropRewards(starrDropRewards)
+            }
         }
+    }
 
+    private fun updateCalculatedUI(calculatedState: CalculatedState) {
+        with(binding) {
+            // Total Power Points needed
+            powerpointsValue.text = numberFormat.format(calculatedState.neededPowerPoints)
 
-        // Update upgradable brawlers section if available
-        if (state.upgradableBrawlers.isNotEmpty()) {
-            populateUpgradableBrawlers(state.upgradableBrawlers)
+            // Total Coins needed
+            coinsValue.text = numberFormat.format(calculatedState.neededCoins)
+
+            // Currently maxed out brawlers
+            currentlyMaxedOut.text = "(${calculatedState.maxedBrawlers}/${calculatedState.totalBrawlers})"
+        }
+    }
+
+    private fun updateProjectedUI(projectedState: ProjectedState) {
+        with(binding) {
+            // Update future resources based on current state
+            powerpointsPerMonthValue.text = numberFormat.format(projectedState.projectedPowerPoints)
+            coinsPerMonthValue.text = numberFormat.format(projectedState.projectedCoins)
+            creditsPerMonthValue.text = numberFormat.format(projectedState.projectedCredits)
+            
+            // Update months to max text
+            powerpointsMonthsToMax.text = "It will take approximately ${projectedState.monthsToMaxPowerPoints} months to collect enough Power Points"
+            coinsMonthsToMax.text = "It will take approximately ${projectedState.monthsToMaxCoins} months to collect enough Coins"
+            
+            // Update starr drops info
+            totalDropsText.text = "Total: ${projectedState.totalDrops} (${projectedState.passDropsCount} Pass Drops)"
+        }
+    }
+
+    private fun updateBrawlersUI(brawlersState: BrawlersState) {
+        // Only show if we have data
+        val projectedCredits = viewModel.state.value.projectedState?.projectedCredits ?: 0
+        
+        // Update unlockable brawlers section
+        if (brawlersState.unlockableBrawlers.isNotEmpty() || brawlersState.lockedBrawlers.isNotEmpty()) {
+            populateUnlockableBrawlers(
+                brawlersState.unlockableBrawlers, 
+                projectedCredits, 
+                brawlersState.totalUnlockableBrawlers
+            )
+            
+            // Show/hide load more button and progress based on state
+            binding.loadMoreProgress.isVisible = isLoadingMore
+            binding.loadMoreButton.isVisible = brawlersState.hasMoreBrawlers && !isLoadingMore
+        }
+        
+        // Update upgradable brawlers section
+        if (brawlersState.upgradableBrawlers.isNotEmpty()) {
+            populateUpgradableBrawlers(brawlersState.upgradableBrawlers)
+        } else {
+            binding.upgradableBrawlersContainer.visibility = View.GONE
+        }
+    }
+
+    private fun updateAdviceUI(nextStepsAdvice: NextStepsAdvice) {
+        // Update the personalized advice section
+        if (nextStepsAdvice.nextStepsAdvice.isNotEmpty()) {
+            binding.whatsNextAdvice.text = nextStepsAdvice.nextStepsAdvice
+        } else {
+            // Show example advice if real advice is not available yet
+            binding.whatsNextAdvice.text = viewModel.getExampleAdvice()
         }
     }
 
@@ -168,6 +267,7 @@ class FutureProgressFragment : Fragment() {
                     else -> 1
                 }
                 viewModel.setTimeframe(months)
+                viewModel.state.value.tablesState?.starrDropRewards?.let { setupStarrDropRewards(it) }
             }
         }
     }
@@ -192,13 +292,13 @@ class FutureProgressFragment : Fragment() {
         recyclerView.isNestedScrollingEnabled = true
         
         // Optimize animation - disable item change animations that might cause lag
-        (recyclerView.itemAnimator as? androidx.recyclerview.widget.SimpleItemAnimator)?.apply {
+        (recyclerView.itemAnimator as? SimpleItemAnimator)?.apply {
             supportsChangeAnimations = false
             changeDuration = 0
         }
         
         // Configure layout manager
-        val layoutManager = androidx.recyclerview.widget.GridLayoutManager(requireContext(), 2)
+        val layoutManager = GridLayoutManager(requireContext(), 2)
         layoutManager.initialPrefetchItemCount = 6 // Prefetch items for smoother scrolling
         recyclerView.layoutManager = layoutManager
         
@@ -214,19 +314,48 @@ class FutureProgressFragment : Fragment() {
             override fun onScrolled(recyclerView: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 
-                val layoutManager = recyclerView.layoutManager as? androidx.recyclerview.widget.GridLayoutManager ?: return
+                // Don't trigger if already loading
+                if (isLoadingMore) return
+                
+                val layoutManager = recyclerView.layoutManager as? GridLayoutManager ?: return
                 val visibleItemCount = layoutManager.childCount
                 val totalItemCount = layoutManager.itemCount
                 val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
                 
                 // If we're near the end of the list and have more items to load
+                val brawlersState = viewModel.state.value.brawlersState
                 if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 4
                     && firstVisibleItemPosition >= 0
-                    && viewModel.state.value.hasMoreBrawlers) {
-                    viewModel.loadMoreBrawlers()
+                    && brawlersState?.hasMoreBrawlers == true) {
+                    loadMoreBrawlers()
                 }
             }
         })
+        
+        // Set up load more button
+        binding.loadMoreButton.setOnClickListener {
+            loadMoreBrawlers()
+        }
+    }
+
+    private fun loadMoreBrawlers() {
+        val brawlersState = viewModel.state.value.brawlersState
+        if (brawlersState?.hasMoreBrawlers != true || isLoadingMore) return
+        
+        // Set loading state
+        isLoadingMore = true
+        binding.loadMoreProgress.isVisible = true
+        binding.loadMoreButton.isVisible = false
+        
+        // Load more brawlers
+        viewModel.loadMoreBrawlers()
+        
+        // Reset loading state after a short delay (for UX)
+        view?.postDelayed({
+            isLoadingMore = false
+            binding.loadMoreProgress.isVisible = false
+            binding.loadMoreButton.isVisible = viewModel.state.value.brawlersState?.hasMoreBrawlers == true
+        }, 500)
     }
 
     private fun setupUpgradableRecyclerView() {
@@ -239,13 +368,13 @@ class FutureProgressFragment : Fragment() {
         recyclerView.isNestedScrollingEnabled = true
         
         // Optimize animation - disable item change animations that might cause lag
-        (recyclerView.itemAnimator as? androidx.recyclerview.widget.SimpleItemAnimator)?.apply {
+        (recyclerView.itemAnimator as? SimpleItemAnimator)?.apply {
             supportsChangeAnimations = false
             changeDuration = 0
         }
         
         // Configure layout manager
-        val layoutManager = androidx.recyclerview.widget.GridLayoutManager(requireContext(), 2)
+        val layoutManager = GridLayoutManager(requireContext(), 2)
         layoutManager.initialPrefetchItemCount = 6 // Prefetch items for smoother scrolling
         recyclerView.layoutManager = layoutManager
         
@@ -263,19 +392,9 @@ class FutureProgressFragment : Fragment() {
                 showUpgradeDetailsDialog(brawler)
             }
         })
-        
-        // Add scroll listener for lazy loading (if needed in the future)
-        recyclerView.addOnScrollListener(object : androidx.recyclerview.widget.RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: androidx.recyclerview.widget.RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                
-                // For now, we don't need to add lazy loading here as the upgradable list is typically small
-                // But the infrastructure is in place if needed in the future
-            }
-        })
     }
 
-    private fun populateUpgradeTable(upgradeTable: com.nothingmotion.brawlprogressionanalyzer.domain.model.UpgradeTable) {
+    private fun populateUpgradeTable(upgradeTable: UpgradeTable) {
         val tableLayout = binding.upgradeTable
         tableLayout.removeAllViews()
 
@@ -341,15 +460,17 @@ class FutureProgressFragment : Fragment() {
         }
     }
 
-    private fun setupStarrDropRewards(starrDropTable: List<com.nothingmotion.brawlprogressionanalyzer.domain.model.StarrDropRewards>) {
+    private fun setupStarrDropRewards(starrDropTable: List<StarrDropRewards>) {
         // Find the parent container where all accordions will be added
         val parentContainer = binding.starrdropsContainer
         parentContainer.removeAllViews()
 
+        // Get the current timeframe from state
+        val selectedTimeframeMonths = viewModel.getTimeframe() ?: 1
+
         // Create and add an accordion view for each rarity type
         for (table in starrDropTable) {
             val rarity = table.rarity
-            val selectedTimeframeMonths = 1
             val months = selectedTimeframeMonths * 30
             val passDrops = (29 * selectedTimeframeMonths)
             val dailyDrops = (3 * months)
@@ -451,31 +572,29 @@ class FutureProgressFragment : Fragment() {
         }
     }
 
-    private fun populateUnlockableBrawlers(unlockableBrawlers: List<UnlockableBrawler>, totalCredits: Int) {
+    private fun populateUnlockableBrawlers(
+        unlockableBrawlers: List<UnlockableBrawler>, 
+        totalCredits: Int,
+        totalBrawlersCount: Int
+    ) {
         // Update summary text with total count information
-        val totalBrawlersCount = viewModel.state.value.totalUnlockableBrawlers.takeIf { it > 0 } 
-            ?: unlockableBrawlers.size
-        
         binding.brawlersSummaryText.text = buildString {
             append("With ${numberFormat.format(totalCredits)} credits, you can unlock $totalBrawlersCount brawlers")
             if (unlockableBrawlers.size < totalBrawlersCount) {
                 append(" (showing ${unlockableBrawlers.size})")
             }
         }
-        
-        // Show loading indicator if needed
-//        binding.loadMoreProgress.visibility = if (viewModel.state.value.hasMoreBrawlers) View.VISIBLE else View.GONE
+
+        // Create immutable copy to avoid modification issues during animation
+        val brawlersList = unlockableBrawlers.toList()
         
         // Submit the new list to the adapter - use optimized submitList with callback
-        val recyclerAdapter = binding.brawlersRecyclerView.adapter as? BrawlerUnlockAdapter ?: return
-        
-        // Using lifecycleScope to ensure submission is done in a controlled environment
         viewLifecycleOwner.lifecycleScope.launch {
-            recyclerAdapter.submitList(unlockableBrawlers) {
+            brawlerAdapter.submitList(brawlersList) {
                 // This callback runs when the list diffing is complete and new list is committed
                 binding.brawlersRecyclerView.post {
                     // Only scroll to top on initial load, not when loading more
-                    if (unlockableBrawlers.size <= 20) {
+                    if (brawlersList.size <= 20) {
                         binding.brawlersRecyclerView.scrollToPosition(0)
                     }
                 }
@@ -495,15 +614,15 @@ class FutureProgressFragment : Fragment() {
             }
         }
         
-        // For logging/debugging
-        Timber.tag("FutureProgressFragment").d("populateUpgradableBrawlers: $upgradableBrawlers")
-        
         // Set visibility of the container based on whether we have upgradable brawlers
         binding.upgradableBrawlersContainer.visibility = if (upgradableBrawlers.isNotEmpty()) View.VISIBLE else View.GONE
         
+        // Create immutable copy to avoid modification issues during animation
+        val upgradesList = upgradableBrawlers.toList()
+        
         // Submit the new list to the adapter with callback for smooth updates
         viewLifecycleOwner.lifecycleScope.launch {
-            brawlerUpgradeAdapter.submitList(upgradableBrawlers) {
+            brawlerUpgradeAdapter.submitList(upgradesList) {
                 // This callback runs when the list diffing is complete and new list is committed
                 binding.upgradableBrawlersRecyclerView.post {
                     // Scroll to top when new data is loaded
@@ -555,7 +674,7 @@ class FutureProgressFragment : Fragment() {
      */
     private fun showUpgradeDetailsDialog(brawler: UpgradableBrawler) {
         // Get the cost information from the upgrade table
-        val upgradeTable = viewModel.state.value.upgradeTable ?: return
+        val upgradeTable = viewModel.state.value.tablesState?.upgradeTable ?: return
         
         // Calculate resources needed for this specific upgrade
         var totalPowerPoints = 0
