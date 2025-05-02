@@ -59,8 +59,8 @@ interface AccountDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlayerHistories(playerHistories: List<PlayerHistoryEntity>): List<Long>
     
-    @Query("DELETE FROM player_history WHERE account_id = :accountId AND player_tag = :playerTag")
-    suspend fun deletePlayerHistory(accountId: Int, playerTag: String): Int
+    @Query("DELETE FROM player_history WHERE player_tag = :playerTag")
+suspend fun deletePlayerHistory(playerTag: String): Int
     
     /**
      * Progress History operations
