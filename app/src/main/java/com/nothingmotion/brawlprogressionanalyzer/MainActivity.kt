@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var preferencesManager: PreferencesManager
 
 
-    val notmotViewModel: NotMotViewModel by viewModels()
+    private val notmotViewModel: NotMotViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
 
         val splashScreen = installSplashScreen()
