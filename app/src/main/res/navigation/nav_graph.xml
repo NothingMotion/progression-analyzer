@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/navigation_accounts">
 
@@ -33,6 +34,12 @@
             app:popExitAnim="@anim/slide_out_right"
             app:popUpTo="@id/navigation_accounts"
             app:popUpToInclusive="false" />
+        <action
+            android:id="@+id/action_accounts_to_wiki"
+            app:destination="@id/wikiFragment" />
+        <action
+            android:id="@+id/action_accounts_to_aboutus"
+            app:destination="@id/aboutUsFragment" />
     </fragment>
 
     <fragment
@@ -71,6 +78,9 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_account_detail_to_aboutus"
+            app:destination="@id/aboutUsFragment" />
     </fragment>
 
     <fragment
@@ -80,10 +90,35 @@
         <argument
             android:name="accountId"
             app:argType="string" />
+        <action
+            android:id="@+id/action_navigation_future_progress_to_navigation_account_detail"
+            app:destination="@id/navigation_account_detail" />
+        <action
+            android:id="@+id/action_navigation_future_progress_to_navigation_accounts"
+            app:destination="@id/navigation_accounts" />
     </fragment>
     <fragment
         android:id="@+id/accordionViewUsageExampleFragment"
         android:name="com.nothingmotion.brawlprogressionanalyzer.ui.components.AccordionViewUsageExampleFragment"
         android:label="AccordionViewUsageExampleFragment" />
+    <action android:id="@+id/action_global_to_navigation_settings" app:destination="@id/navigation_settings" />
+    <fragment
+        android:id="@+id/wikiFragment"
+        android:name="com.nothingmotion.brawlprogressionanalyzer.ui.WikiFragment"
+        android:label="fragment_wiki"
+        tools:layout="@layout/fragment_wiki" >
+        <action
+            android:id="@+id/action_wikiFragment_to_navigation_accounts"
+            app:destination="@id/navigation_accounts" />
+    </fragment>
+    <fragment
+        android:id="@+id/aboutUsFragment"
+        android:name="com.nothingmotion.brawlprogressionanalyzer.ui.AboutUsFragment"
+        android:label="fragment_about_us"
+        tools:layout="@layout/fragment_about_us" >
+        <action
+            android:id="@+id/action_aboutus_to_accounts"
+            app:destination="@id/navigation_accounts" />
+    </fragment>
 
 </navigation> 
