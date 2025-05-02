@@ -44,34 +44,14 @@ data class AccountEntity(
  */
 @Entity(
     tableName = "player_history",
-    primaryKeys = ["account_id", "player_tag"],
-    foreignKeys = [
-        ForeignKey(
-            entity = AccountEntity::class,
-            parentColumns = ["id"],
-            childColumns = ["account_id"],
-            onDelete = ForeignKey.CASCADE,
-            onUpdate = ForeignKey.CASCADE
-        ),
-        ForeignKey(
-            entity = PlayerEntity::class,
-            parentColumns = ["tag"],
-            childColumns = ["player_tag"],
-            onDelete = ForeignKey.CASCADE,
-            onUpdate = ForeignKey.CASCADE
-        )
-    ],
-    indices = [
-        Index(value = ["account_id"]),
-        Index(value = ["player_tag"])
-    ]
+
+
 )
 data class PlayerHistoryEntity(
-    @ColumnInfo(name = "account_id")
-    val accountId: Int,
-    
-    @ColumnInfo(name = "player_tag")
-    val playerTag: String
+    @PrimaryKey(autoGenerate = true) val id: Int,
+    @ColumnInfo(name="player_tag") val playerTag: String,
+    @Embedded
+    val playerEntity: PlayerEntity
 )
 
 enum class ProgressType {
@@ -94,12 +74,12 @@ data class AccountWithRelations(
 
     @Relation(
         entity = PlayerEntity::class,
-        parentColumn = "id",
+        parentColumn = "player_tag",
         entityColumn = "tag",
         associateBy = Junction(
             value = PlayerHistoryEntity::class,
-            parentColumn = "account_id",
-            entityColumn = "player_tag"
+            parentColumn = "player_tag",
+            entityColumn = "tag"
         )
     )
     val historyPlayers: List<PlayerEntity>,
