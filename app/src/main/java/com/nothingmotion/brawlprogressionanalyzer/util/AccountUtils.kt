@@ -216,7 +216,7 @@ class AccountUtils {
          */
         fun getHistoryDateLabels(account: Account): List<String> {
             val historyData = account.history.orEmpty().sortedBy { it.createdAt.time }
-            val dateFormat = SimpleDateFormat("MMM yy", Locale.getDefault())
+            val dateFormat = SimpleDateFormat("MMM yy dd", Locale.getDefault())
             val labels = mutableListOf<String>()
             
             // Add historical data points
