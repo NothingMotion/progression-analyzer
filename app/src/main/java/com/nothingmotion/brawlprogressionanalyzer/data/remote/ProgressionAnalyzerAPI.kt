@@ -8,6 +8,7 @@ import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIHistoryRe
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIToken
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIUpdate
 import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIUpgradeTable
+import com.nothingmotion.brawlprogressionanalyzer.data.remote.model.APIPassRewards
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.PassRewards
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.StarrDropRewards
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Track
@@ -61,13 +62,13 @@ interface ProgressionAnalyzerAPI {
     ////////////////////
 
     @GET("rewards/pass/free")
-    suspend fun getPassFreeRewards(@Header("Authorization") authHeader: String) : PassRewards
+    suspend fun getPassFreeRewards(@Header("Authorization") authHeader: String): APIPassRewards
 
     @GET("rewards/pass/premium")
-    suspend fun getPassPremiumRewards(@Header("Authorization") authHeader: String) : PassRewards
+    suspend fun getPassPremiumRewards(@Header("Authorization") authHeader: String): APIPassRewards
 
     @GET("rewards/pass/plus")
-    suspend fun getPassPlusRewards(@Header("Authorization") authHeader: String) : PassRewards
+    suspend fun getPassPlusRewards(@Header("Authorization") authHeader: String): APIPassRewards
 
     @GET("rewards/starrdrop")
     suspend fun getStarrDropRewards(@Header("Authorization") authHeader: String) : List<StarrDropRewards>
