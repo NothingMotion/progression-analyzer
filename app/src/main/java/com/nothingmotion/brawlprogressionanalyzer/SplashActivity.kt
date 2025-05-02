@@ -43,7 +43,7 @@ class SplashActivity : AppCompatActivity() {
         }
         
         // Animate the splash icon
-        findViewById<ImageView>(R.id.splash_icon)?.let { splashIcon ->
+        findViewById<ImageView>(R.id.nothing)?.let { splashIcon ->
             val fadeIn = AnimationUtils.loadAnimation(this, android.R.anim.fade_in)
             splashIcon.startAnimation(fadeIn)
         }
