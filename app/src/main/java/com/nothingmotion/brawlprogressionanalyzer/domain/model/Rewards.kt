@@ -1,12 +1,12 @@
 package com.nothingmotion.brawlprogressionanalyzer.domain.model
 
 
-sealed class Rewards (
+open class Rewards (
    @Transient open val id : Int,
    @Transient open val name: String,
 )
 
-sealed class PassRewards (
+open class PassRewards (
     override val id: Int,
     override val name: String = "PassReward",
     open val resources: List<Resource>
