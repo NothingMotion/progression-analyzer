@@ -61,9 +61,11 @@ import com.nothingmotion.brawlprogressionanalyzer.R
 import com.nothingmotion.brawlprogressionanalyzer.data.PreferencesManager
 import com.nothingmotion.brawlprogressionanalyzer.databinding.FragmentAccountDetailBinding
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Account
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.Brawler
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.DataError
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Language
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Progress
+import com.nothingmotion.brawlprogressionanalyzer.domain.model.RarityData
 import com.nothingmotion.brawlprogressionanalyzer.domain.model.Result
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlNinjaRepository
 import com.nothingmotion.brawlprogressionanalyzer.domain.repository.BrawlerRepository
@@ -368,27 +370,43 @@ class AccountDetailFragment : Fragment() {
                             .setAction("OK") { }
                             .show()
                     } else {
-                        state.account?.let {
-//                            binding.loadingAccountsGroup.visibility = View.GONE
-                            binding.errorStateGroup.visibility = View.GONE
+                        Timber.tag("AccountDetailFragment").d("Calling account")
 
-                            if (binding.loadingAccountsGroup.isVisible)
-                                binding.loadingAccountsGroup.apply {
-                                    applyAnimation(this, false, Runnable {
-
-                                        binding.appBar.apply { applyAnimation(this, true) }
-                                        binding.accountDetailsGroup.apply {
-                                            applyAnimation(
-                                                this,
-                                                true
-                                            )
-                                        }
-                                    })
-                                }
-                            binding.fabFutureProgress.visibility = View.VISIBLE
-                            account = it
-                            updateUI(it)
+                        if (state.filteredBrawlerRarity != null && ::account.isInitialized) {
+                            Timber.tag("AccountDetailFragment").d("Calling filteredBrawlerRarity")
+                            setupRaritiesContent(state.filteredBrawlerRarity)
+                            for (rarityPair in state.filteredBrawlerRarity) {
+                                val rarity = rarityPair.first
+                                val brawlers = rarityPair.second
+                                Timber.tag("AccountDetailFragment")
+                                    .d("rarity: ${rarity.name}, brawlers: ${brawlers.map { it.name }}")
+                            }
                         }
+
+                            state.account?.let {
+//                            account?.let{account->if(account==it)return@collectLatest}
+//                            binding.loadingAccountsGroup.visibility = View.GONE
+                                binding.errorStateGroup.visibility = View.GONE
+
+                                if (binding.loadingAccountsGroup.isVisible)
+                                    binding.loadingAccountsGroup.apply {
+                                        applyAnimation(this, false, Runnable {
+
+                                            binding.appBar.apply { applyAnimation(this, true) }
+                                            binding.accountDetailsGroup.apply {
+                                                applyAnimation(
+                                                    this,
+                                                    true
+                                                )
+                                            }
+                                        })
+                                    }
+                                binding.fabFutureProgress.visibility = View.VISIBLE
+                                account = it
+                                updateUI(it)
+                            }
+
+
                     }
                 }
             }
@@ -490,6 +508,7 @@ class AccountDetailFragment : Fragment() {
 
             // Ensure no results view is hidden on initial load
             noBrawlersFound.visibility = View.GONE
+
 
             // Progression history charts
             setupProgressionCharts(account)
@@ -1232,6 +1251,23 @@ class AccountDetailFragment : Fragment() {
         }
     }
 
+
+    private fun setupRaritiesContent(data: List<Pair<RarityData,List<Brawler>>>){
+        val commons = data.find{ it.first == RarityData.COMMON }?.second?.size ?: 0
+        val rare = data.find{it.first == RarityData.RARE}?.second?.size ?: 0
+
+        val superRare = data.find { it.first == RarityData.SUPER_RARE }?.second?.size ?: 0
+        val epic = data.find { it.first == RarityData.EPIC }?.second?.size ?: 0
+        val mythic = data.find{ it.first == RarityData.MYTHIC }?.second?.size ?: 0
+        val legendary = data.find{it.first==RarityData.LEGENDARY}?.second?.size ?: 0
+
+        binding.commonCount.text = commons.toString()
+        binding.rareCount.text = rare.toString()
+        binding.superRareCount.text = superRare.toString()
+        binding.epicCount.text = epic.toString()
+        binding.mythicCount.text = mythic.toString()
+        binding.legendaryCount.text = legendary.toString()
+    }
     private fun setupRaritiesAccordion() {
         val raritiesHeader = binding.raritiesHeader
         val raritiesContent = binding.raritiesContent
