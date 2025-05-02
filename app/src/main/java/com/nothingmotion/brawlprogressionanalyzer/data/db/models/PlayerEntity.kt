@@ -19,7 +19,7 @@ import java.util.Date
 )
 data class PlayerEntity(
     @PrimaryKey
-    val tag: String,
+    var tag: String,
     
     val name: String,
     val trophies: Int,
