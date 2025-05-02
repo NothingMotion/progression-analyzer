@@ -134,10 +134,12 @@ class AccountsFragment : Fragment() {
     private fun handleWikiClick() {
         // Open wiki in browser (example URL)
         val wikiUrl = "https://brawlstars.fandom.com/wiki/Brawl_Stars_Wiki"
+        findNavController().navigate(R.id.action_accounts_to_wiki)
 //        openUrl(wikiUrl)
     }
     
     private fun handleAboutUsClick() {
+        findNavController().navigate(R.id.action_accounts_to_aboutus)
         // Open about us page in browser (example URL)
         val aboutUsUrl = "https://github.com/yourorganization/brawlprogressionanalyzer"
 //        openUrl(aboutUsUrl)
@@ -159,7 +161,7 @@ class AccountsFragment : Fragment() {
     private fun handleSettingsClick() {
         // Navigate to settings screen
         val navOptions= NavOptions.Builder().setPopUpTo(R.id.navigation_accounts,true).build()
-        findNavController().navigate(R.id.action_accounts_to_settings,null,navOptions)
+        findNavController().navigate(R.id.action_global_to_navigation_settings,null,navOptions)
     }
 
     private fun setupRecyclerView() {
